@@ -5,15 +5,16 @@ ROOTLDFLAGS  := $(shell root-config --ldflags)
 
 # Linux with egcs, gcc 2.9x, gcc 3.x (>= RedHat 5.2)
 CXX           = g++ 
-CXXFLAGS      = -O -Wall  -fPIC -DROOT_INTERFACE -I.
+CXXFLAGS      = -O -Wall  -fPIC -DROOT_INTERFACE -I. -g 
 LD            = g++ 
-LDFLAGS       = -O -Wall -fPIC $(ROOTLDFLAGS)
+LDFLAGS       = -O -Wall -fPIC $(ROOTLDFLAGS) -g 
 SOFLAGS       = -shared
 
 CXXFLAGS     += $(ROOTCFLAGS)
 LIBS          = $(ROOTLIBS) $(SYSLIBS)
 GLIBS         = $(ROOTGLIBS) $(SYSLIBS)
 
+SOURCES	= Frame.C
 OBJS    = Frame.o CMOSDict.o
 HEADERS = Frame.h
 
@@ -26,10 +27,16 @@ prova.o: prova.C ${HEADERS}
 Frame.o: Frame.C
 		${CXX} $(CXXFLAGS) -c Frame.C
 
+CMOSDict.o: CMOSDict.cxx
+		${CXX} $(CXXFLAGS) -c CMOSDict.cxx
 
 
-CMOSDict.cpp: ${HEADERS} CMOSLinkDef.h
-		${ROOTSYS}/bin/rootcint -f CMOSDict.cpp -c -p ${HEADERS}
+CMOSDict.cxx: ${HEADERS} CMOSLinkDef.h
+		${ROOTSYS}/bin/rootcint -f $@ -c  $(CXXFLAGS) -p $^
+
+libCMOS.so: CMOSDict.cxx ${OBJS}
+#		${CXX} -shared -o$@ ${LDFLAGS} $(CXXFLAGS) -I$(ROOTSYS)/include $^
+		g++ -shared -o$@ `root-config --ldflags` $(CXXFLAGS) -I$(ROOTSYS)/include $^
 
 clean:
-		rm -f *.x *.a *.o *.so *.pcm *.d CMOSDict.cpp
+		rm -f *.x *.a *.o *.so *.pcm *.d CMOSDict.cxx
