@@ -15,21 +15,28 @@ class Frame : public TObject
 {
  public:
   Frame();
-  Frame(const size_t nRow, const size_t nCol);
+  Frame(const size_t nCol, const size_t nRow, const int Id=-99);
   Frame(const Frame &lval);
   virtual ~Frame();
   
   inline  size_t GetNRow() const {return fNRow;};
   inline  size_t GetNCol() const {return fNCol;};
   
+  inline void SetId(const int Id){fId=Id;};
+  inline  int GetId() const {return fId;};
+  
   double operator()(const size_t i,const size_t j);
-   double operator()(const size_t i,const size_t j) const;
+  double operator()(const size_t i,const size_t j) const;
   inline double At(const size_t i,const size_t j){return operator()(i,j);};
+
+  int ReadFile(const std::string filename);
 
   void Multiply(const Frame &LFrame);
   void Multiply(const double val);
   void Add(const Frame &LFrame);
   void Add(const double val);
+
+  void Resize(const size_t nCol, const size_t nRow);
 
   Frame operator+(const Frame &LFrame) const;
   Frame operator+(const double val) const;
@@ -50,6 +57,7 @@ class Frame : public TObject
 
  private:
   size_t fNRow, fNCol;
+  int fId;
   //  int fData[DIM];
   std::vector<double> fData;
 

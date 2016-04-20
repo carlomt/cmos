@@ -1,19 +1,24 @@
 #include "Frame.h"
 #include "MyException.h"
 
+#include<fstream>
+
+
 ClassImp(Frame);
 
 Frame::Frame()
 :TObject(),
   fNRow(0),   
-  fNCol(0)
+ fNCol(0),
+ fId(0)
 {
 }
 
-Frame::Frame(const size_t nRow, const size_t nCol)
+Frame::Frame(const size_t nCol, const size_t nRow, const int Id)
   :TObject(),
    fNRow(nRow),   
-   fNCol(nCol)
+   fNCol(nCol),
+   fId(Id)
 {
   //  fData = new int[fNRow*fNCol];
   //  fData = new int[DIM];
@@ -28,7 +33,8 @@ Frame::Frame(const size_t nRow, const size_t nCol)
 Frame::Frame(const Frame &lval)
   :TObject(),
    fNRow(lval.GetNRow()),   
-   fNCol(lval.GetNCol())
+   fNCol(lval.GetNCol()),
+   fId(lval.GetId())
 {
   fData.resize(fNRow*fNCol);
   memcpy(&fData.at(0), &lval.fData.at(0), lval.fData.size());
@@ -38,7 +44,7 @@ Frame::~Frame(){};
 
 double Frame::operator()(const size_t i,const size_t j)
 {
-  if(i<fNRow && j<fNCol)
+  if(i<fNCol && j<fNRow)
     {
       size_t k=i+j*fNRow;
       return fData[k];
@@ -46,15 +52,50 @@ double Frame::operator()(const size_t i,const size_t j)
   else
     {
       //      std::cerr<<"ERROR Frame::operator()"<<std::endl;
-      throwException("Frame::operator()");
+      std::ostringstream msg;
+      msg<<"Frame::operator() NRow: "<<fNRow<<" NCol: "<<fNCol<<" requested: "<<i<<" "<<j;
+      throwException(msg.str().c_str());
       return -99;
     }
+}
+
+int Frame::ReadFile(const std::string filename)
+{
+  std::ifstream reader;
+  reader.open(filename,std::ios_base::in);
+  if(!reader.is_open())
+    {
+      std::ostringstream msg;
+      msg<<"Frame::ReadFile input file: "<<filename;
+      throwException(msg.str().c_str());
+    }
+  int counter=0;
+  for(size_t j=0; j<fNRow; j++)
+    {
+      for(size_t i=0; i<fNCol; i++)
+	{
+	  double tmp=-99;
+	  if(reader.eof())
+	     {
+	       std::ostringstream msg;
+	       msg<<"Frame::ReadFile input file  "<<filename;
+	       msg<<"shorter than expected ("<<fNRow*fNCol<<")";
+	       msg<<counter<<" values have been red";
+	       throwException(msg.str().c_str());
+	     }
+	  reader >> tmp;
+	  Set(i,j,tmp);
+	  counter++;
+	}
+    }
+  reader.close();
+  return counter;
 }
 
 //const
  double Frame::operator()(const size_t i,const size_t j) const
 {
-  if(i<fNRow && j<fNCol)
+  if(i<fNCol && j<fNRow)
     {
       size_t k=i+j*fNRow;
       return fData[k];
@@ -68,7 +109,7 @@ double Frame::operator()(const size_t i,const size_t j)
 
 void Frame::Set(const size_t i, const size_t j, const double val)
 {  
-  if(i<fNRow && j<fNCol)
+  if(i<fNCol && j<fNRow)
     {
       size_t k=i+j*fNRow;
       fData[k]=val;
@@ -89,10 +130,11 @@ void Frame::Clear(Option_t *option)
 TH2F* Frame::GetTH2F(const char *name, const char *title)
 {
   TH2F* res=new TH2F(name,title,fNCol,0,fNCol, fNRow,0,fNRow);
-  for(size_t i=0; i<fNCol; i++)
+  for(size_t j=0; j<fNRow; j++)
     {
-      for(size_t j=0;j<fNRow; j++)
+      for(size_t i=0;i<fNCol; i++)
 	{
+	  std::cout<<i<<" "<<j<<std::endl;
 	  res->SetBinContent(i+1,j+1, operator()(i,j));
 	}
     }
@@ -121,9 +163,9 @@ void Frame::Multiply(const Frame &lval)
       std::cout<<"this sizes "<<fNRow<<" "<<fNCol<<std::endl;
       std::cout<<"L sizes "<<lval.GetNRow()<<" "<<lval.GetNCol()<<std::endl;
     }
-  for(size_t i=0;i<fNRow;i++)
+  for(size_t j=0; j<fNRow; j++)
     {
-      for(size_t j=0;j<fNCol;j++)
+      for(size_t i=0; i<fNCol; i++)
 	{
 	  //	  this->At(i,j)*lval(i,j);
 	  Set(i,j, operator()(i,j)*lval(i,j));
@@ -133,9 +175,9 @@ void Frame::Multiply(const Frame &lval)
 
 void Frame::Multiply(const double val)
 {
-  for(size_t i=0;i<fNRow;i++)
+  for(size_t j=0; j<fNRow; j++)
     {
-      for(size_t j=0;j<fNCol;j++)
+      for(size_t i=0; i<fNCol; i++)
 	{
 	  //	  this->At(i,j)*val;
 	  Set(i,j, operator()(i,j)*val);
@@ -151,9 +193,9 @@ void Frame::Add(const Frame &lval)
       std::cout<<"this sizes "<<fNRow<<" "<<fNCol<<std::endl;
       std::cout<<"L sizes "<<lval.GetNRow()<<" "<<lval.GetNCol()<<std::endl;
     }
-  for(size_t i=0;i<fNRow;i++)
+  for(size_t j=0; j<fNRow; j++)
     {
-      for(size_t j=0;j<fNCol;j++)
+      for(size_t i=0; i<fNCol; i++)
 	{
 	  //	  At(i,j)+lval(i,j);
 	  Set(i,j, operator()(i,j)+lval(i,j));
@@ -163,14 +205,21 @@ void Frame::Add(const Frame &lval)
 
 void Frame::Add(const double val)
 {
- for(size_t i=0;i<fNRow;i++)
+ for(size_t j=0; j<fNRow; j++)
     {
-      for(size_t j=0;j<fNCol;j++)
+      for(size_t i=0; i<fNCol; i++)
 	{
 	  //	  this->At(i,j)+val;
 	  Set(i,j, operator()(i,j)+val);
 	}
     }
+}
+
+void Frame::Resize(const size_t nCol, const size_t nRow)
+{
+  fNRow=nRow;
+  fNCol=nCol;
+  fData.resize(fNRow*fNCol);
 }
 
 Frame Frame::operator+(const Frame &LFrame) const
@@ -204,9 +253,9 @@ Frame  Frame::operator+(const double val) const
 
 std::ostream& operator<< (std::ostream &out, Frame &CFrame)
 {
-  for(size_t i=0; i<CFrame.GetNRow(); i++)
+  for(size_t j=0; j<CFrame.GetNRow(); j++)
     {
-      for(size_t j=0;j<CFrame.GetNCol(); j++)
+      for(size_t i=0; i<CFrame.GetNCol(); i++)
 	{
 	  out << CFrame(i,j) << " ";
 	}

@@ -5,9 +5,9 @@ ROOTLDFLAGS  := $(shell root-config --ldflags)
 
 # Linux with egcs, gcc 2.9x, gcc 3.x (>= RedHat 5.2)
 CXX           = g++ 
-CXXFLAGS      = -O -Wall  -fPIC -DROOT_INTERFACE -I. -g 
+CXXFLAGS      = -O -Wall  -fPIC -DROOT_INTERFACE -I.  -g
 LD            = g++ 
-LDFLAGS       = -O -Wall -fPIC $(ROOTLDFLAGS) -g 
+LDFLAGS       = -O -Wall -fPIC $(ROOTLDFLAGS)  -g
 SOFLAGS       = -shared
 
 CXXFLAGS     += $(ROOTCFLAGS)

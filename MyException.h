@@ -7,7 +7,7 @@
 #include <string>
 
 #include <execinfo.h>
-
+#include <stdlib.h>
 
 class MyException : public std::runtime_error 
 {

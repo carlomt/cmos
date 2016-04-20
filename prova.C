@@ -10,35 +10,42 @@ int main()
 {
   TFile f("prova.root","RECREATE");
   TTree t("prova","una prova");
-  Frame *frame = new Frame(4,4);
+  Frame *frame = new Frame(640,480);
   t.Branch("frame",&frame);
   
+  frame->ReadFile("../cmos_test/MT9V011_new_90Sr_G01_TI200ms_Thre10_spessore5_9mm_00001.txt");
 
-  for(int k=1;k<5;k++)
-    {
-      frame->Dump();
-      for(int i=0;i<4;i++)
-	{
-	  for(int j=0;j<4;j++)
-	    {
-	      // cout<<"Set("<<i<<","<<j<<")"<<endl;
-	      // cout.flush();
-	      frame->Set(i,j,k);
-	    }
-	}
-      frame->At(10,10);
-      // cout<<"Filling"<<endl;
-      // cout.flush();
-      t.Fill();
-      // cout<<"GetTH2F"<<endl;
-      // cout.flush();
-      TH2F* h=frame->GetTH2F( Form("h-%d",k),"prova h");
-      h->Write();
-      frame->Clear();
-    }
+  cout<<"File"<<endl;
+  cout.flush();
+
+  frame->Dump();
+
+  // for(int k=1;k<5;k++)
+  //   {
+
+  //     for(int i=0;i<4;i++)
+  // 	{
+  // 	  for(int j=0;j<4;j++)
+  // 	    {
+  // 	      // cout<<"Set("<<i<<","<<j<<")"<<endl;
+  // 	      // cout.flush();
+  // 	      frame->Set(i,j,k);
+  // 	    }
+  // 	}
+  //     frame->At(10,10);
+  //     // cout<<"Filling"<<endl;
+  //     // cout.flush();
+  t.Fill();
+  // cout<<"GetTH2F"<<endl;
+  // cout.flush();
+  int k=1;
+  TH2F* h=frame->GetTH2F( Form("h-%d",k),"prova h");
+  //  h->Write();
+  //  frame->Clear();
+  //}
   f.Write();
   t.Print();
-
+  
   f.Close();
   return 1;
 }
