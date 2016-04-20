@@ -14,9 +14,9 @@ CXXFLAGS     += $(ROOTCFLAGS)
 LIBS          = $(ROOTLIBS) $(SYSLIBS)
 GLIBS         = $(ROOTGLIBS) $(SYSLIBS)
 
-SOURCES	= Frame.C
-OBJS    = Frame.o CMOSDict.o
-HEADERS = Frame.h
+SOURCES	= Frame.C Seed.C SeedList.C
+OBJS    = Frame.o Seed.o SeedList.o CMOSDict.o
+HEADERS = Frame.h Seed.h SeedList.h
 
 default: prova.o ${OBJS} ${HEADERS}
 		$(LD) $(LDFLAGS) $(LIBS) $(GLIBS) prova.o ${OBJS} -o prova.x 	
@@ -26,6 +26,12 @@ prova.o: prova.C ${HEADERS}
 
 Frame.o: Frame.C
 		${CXX} $(CXXFLAGS) -c Frame.C
+
+Seed.o: Seed.C
+		${CXX} $(CXXFLAGS) -c Seed.C
+
+SeedList.o: SeedList.C
+		${CXX} $(CXXFLAGS) -c SeedList.C
 
 CMOSDict.o: CMOSDict.cxx
 		${CXX} $(CXXFLAGS) -c CMOSDict.cxx

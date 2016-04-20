@@ -1,5 +1,8 @@
 #include <iostream>
 #include "Frame.h"
+#include "Seed.h"
+#include "SeedList.h"
+
 #include "TTree.h"
 #include "TFile.h"
 
@@ -11,14 +14,21 @@ int main()
   TFile f("prova.root","RECREATE");
   TTree t("prova","una prova");
   Frame *frame = new Frame(640,480);
+  //  std::vector<Seed> 
+  SeedList *seeds = new SeedList();
   t.Branch("frame",&frame);
+  t.Branch("seeds",&seeds);
   
   frame->ReadFile("../cmos_test/MT9V011_new_90Sr_G01_TI200ms_Thre10_spessore5_9mm_00001.txt");
 
-  cout<<"File"<<endl;
-  cout.flush();
+  //  *seeds=
+  SeedList pp=frame->FindSeeds(60);
+  cout<<"seeds.size(): "<<pp.Size()<<endl;
+  *seeds=pp;
+  // cout<<"File"<<endl;
+  // cout.flush();
 
-  frame->Dump();
+  //  frame->Dump();
 
   // for(int k=1;k<5;k++)
   //   {
@@ -44,7 +54,7 @@ int main()
   //  frame->Clear();
   //}
   f.Write();
-  t.Print();
+  //  t.Print();
   
   f.Close();
   return 1;

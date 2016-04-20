@@ -1,7 +1,7 @@
 #include "Frame.h"
 #include "MyException.h"
 
-#include<fstream>
+#include <fstream>
 
 
 ClassImp(Frame);
@@ -134,7 +134,7 @@ TH2F* Frame::GetTH2F(const char *name, const char *title)
     {
       for(size_t i=0;i<fNCol; i++)
 	{
-	  std::cout<<i<<" "<<j<<std::endl;
+	  //	  std::cout<<i<<" "<<j<<std::endl;
 	  res->SetBinContent(i+1,j+1, operator()(i,j));
 	}
     }
@@ -249,6 +249,51 @@ Frame  Frame::operator+(const double val) const
 //   Frame  Frame::operator/(const Frame &LFrame);
 //   Frame  Frame::operator/(const double val);
 
+
+SeedList Frame::FindSeeds(const double thres, const size_t fiducialSideDim) const
+{
+  const size_t seedSide=7;
+  SeedList res(fId);
+
+  for(size_t j=fiducialSideDim; j<(fNRow-fiducialSideDim); j++)
+    {
+      for(size_t i=fiducialSideDim; i<(fNCol-fiducialSideDim); i++)
+	{
+	  bool addThis=true;
+	  if(this->At(i,j)>thres)
+	    {
+	      double thisCandidate=this->At(i,j);
+	      //check neighbours
+	      for(size_t jj=(j-1); jj<(j+1); jj++)
+		{
+		  for(size_t ii=(i-1); ii<(i+1); ii++)
+		    {
+		      if(thisCandidate < this->At(ii,jj))
+			{
+			  addThis=false;
+			}
+		    }
+		}//end check neghbours
+	      if(addThis)
+		{
+		  //		  #ifdef DEBUG
+		  std::cout<<std::endl<<"Adding a seed"<<std::endl;
+		  //		  #endif
+		  Seed tmp(i,j,fId,seedSide*seedSide);
+		  for(size_t jj=(j-seedSide/2); jj<(j+seedSide/2); jj++)
+		    {
+		      for(size_t ii=(i-seedSide/2); ii<(i+seedSide/2); ii++)
+			{
+			  tmp.AddPixel(this->At(ii,jj));
+			}
+		    }
+		  res.Add(tmp);
+		}
+	    }
+	}
+    }
+  return res;
+}
 
 
 std::ostream& operator<< (std::ostream &out, Frame &CFrame)

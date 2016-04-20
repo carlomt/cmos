@@ -8,6 +8,9 @@
 #include "TObject.h"
 #include "TH2F.h"
 
+#include "Seed.h"
+#include "SeedList.h"
+
 //#define DIM 307200 //640*480
 
 
@@ -28,6 +31,7 @@ class Frame : public TObject
   double operator()(const size_t i,const size_t j);
   double operator()(const size_t i,const size_t j) const;
   inline double At(const size_t i,const size_t j){return operator()(i,j);};
+  inline double At(const size_t i,const size_t j) const {return operator()(i,j);};
 
   int ReadFile(const std::string filename);
 
@@ -54,6 +58,8 @@ class Frame : public TObject
   TH2F* GetTH2F(std::string name, std::string title);
   
   void Set(const size_t i, const size_t j, const double val=0);
+
+  SeedList FindSeeds(const double thres, const size_t fiducialSideDim=3) const;
 
  private:
   size_t fNRow, fNCol;
