@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+
 #include "Frame.h"
 #include "Seed.h"
 #include "SeedList.h"
@@ -8,27 +10,33 @@
 
 using std::cout;
 using std::endl;
+using std::ifstream;
 
-int main()
+int main(int argc, char *argv[])
 {
   TFile f("prova.root","RECREATE");
   TTree t("prova","una prova");
   Frame *frame = new Frame(640,480);
   //  std::vector<Seed> 
   SeedList *seeds = new SeedList();
-  t.Branch("frame",&frame);
-  t.Branch("seeds",&seeds);
-  
-  frame->ReadFile("../cmos_test/MT9V011_new_90Sr_G01_TI200ms_Thre10_spessore5_9mm_00001.txt");
+  t.Branch("frame",&frame);  
+  frame->ReadFile("test/MT9V011_new_90Sr_G01_TI200ms_noThre_00000.txt");
+
+  Frame *bkg = new Frame(640,480);
+  bkg->ReadFile("test/MT9V011_G01_TI200ms_Thre0_0_buio.txt");
+
+  bkg->Multiply(-1);
+  frame->Add(*bkg);
 
   //  *seeds=
-  SeedList pp=frame->FindSeeds(10);
+  SeedList pp=frame->FindSeeds(2);
   cout<<"seeds.size(): "<<pp.Size()<<endl;
 
-  Seed thisSeed=pp(0);
-  double adc=thisSeed(-1,-1);
 
-  *seeds=pp;
+  // Seed thisSeed=pp(0);
+  // double adc=thisSeed(-1,-1);
+
+  // *seeds=pp;
   // cout<<"File"<<endl;
   // cout.flush();
 

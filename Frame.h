@@ -36,8 +36,10 @@ class Frame : public TObject
   int ReadFile(const std::string filename);
 
   void Multiply(const Frame &LFrame);
+  inline void Multiply(const Frame *LFrame){return Multiply(*LFrame);};
   void Multiply(const double val);
   void Add(const Frame &LFrame);
+  inline void Add(const Frame *LFrame){return Add(*LFrame);};
   void Add(const double val);
 
   void Resize(const size_t nCol, const size_t nRow);
@@ -57,6 +59,9 @@ class Frame : public TObject
   TH2F* GetTH2F(const char *name, const char *title);
   TH2F* GetTH2F(std::string name, std::string title);
   
+  TH1F* GetTH1F(const char *name, const char *title);
+  TH1F* GetTH1F(std::string name, std::string title);
+
   void Set(const size_t i, const size_t j, const double val=0);
 
   SeedList FindSeeds(const double thres, const size_t fiducialSideDim=3,  const size_t seedSide=7, const size_t localMaximumCheckSide=3) const;
