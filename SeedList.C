@@ -12,22 +12,22 @@ SeedList::~SeedList(){}
 
 void SeedList::Add(const Seed &s)
 {
- //		  #ifdef DEBUG
+#ifdef DEBUG
  std::cout<<"SeedList::Add"<<std::endl;
-  // #endif
+#endif
  for(std::vector<Seed>::iterator it=fData.begin(); it<fData.end(); it++)
    {
      if(s> *it)
        {
-	 //		  #ifdef DEBUG
+#ifdef DEBUG
 	 std::cout<<"Inserting a seed"<<std::endl<<std::endl;
-	 // #endif
+#endif
 	 fData.insert(it,s);
 	 return;
        }
    }
-//		  #ifdef DEBUG
+#ifdef DEBUG
  std::cout<<"Inserting the first seed"<<std::endl<<std::endl;
- // #endif
+#endif
  fData.push_back(s);
 }

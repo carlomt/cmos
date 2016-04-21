@@ -125,6 +125,7 @@ void Frame::Set(const size_t i, const size_t j, const double val)
 void Frame::Clear(Option_t *option)
 {
   fData.clear();
+  fId=-99;
 }
 
 TH2F* Frame::GetTH2F(const char *name, const char *title)
@@ -250,23 +251,23 @@ Frame  Frame::operator+(const double val) const
 //   Frame  Frame::operator/(const double val);
 
 
-SeedList Frame::FindSeeds(const double thres, const size_t fiducialSideDim) const
+SeedList Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  const size_t seedSide, const size_t localMaximumCheckSide) const
 {
-  const size_t seedSide=7;
   SeedList res(fId);
 
   for(size_t j=fiducialSideDim; j<(fNRow-fiducialSideDim); j++)
     {
       for(size_t i=fiducialSideDim; i<(fNCol-fiducialSideDim); i++)
 	{
-	  bool addThis=true;
 	  if(this->At(i,j)>thres)
 	    {
+	      bool addThis=true;
 	      double thisCandidate=this->At(i,j);
 	      //check neighbours
-	      for(size_t jj=(j-1); jj<(j+1); jj++)
+	      const size_t lim=(localMaximumCheckSide-1)/2;
+	      for(size_t jj=(j-lim); jj<(j+lim); jj++)
 		{
-		  for(size_t ii=(i-1); ii<(i+1); ii++)
+		  for(size_t ii=(i-lim); ii<(i+lim); ii++)
 		    {
 		      if(thisCandidate < this->At(ii,jj))
 			{
@@ -276,9 +277,9 @@ SeedList Frame::FindSeeds(const double thres, const size_t fiducialSideDim) cons
 		}//end check neghbours
 	      if(addThis)
 		{
-		  //		  #ifdef DEBUG
+#ifdef DEBUG
 		  std::cout<<std::endl<<"Adding a seed"<<std::endl;
-		  //		  #endif
+#endif
 		  Seed tmp(i,j,fId,seedSide*seedSide);
 		  for(size_t jj=(j-seedSide/2); jj<(j+seedSide/2); jj++)
 		    {

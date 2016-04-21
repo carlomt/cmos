@@ -23,8 +23,12 @@ Seed operator()(size_t i) const {return fData[i];};
 
 void Add(const Seed &s);
 
+inline void SetIdFrame(const int idFrame){fIdFrame=idFrame;};
+
 inline size_t GetSize() const {return fData.size();};
 inline size_t Size() const {return fData.size();};
+
+virtual void Clear(Option_t *option="") {fData.clear(); fIdFrame=-99;};
 
 private:
 int fIdFrame;

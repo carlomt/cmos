@@ -22,8 +22,12 @@ int main()
   frame->ReadFile("../cmos_test/MT9V011_new_90Sr_G01_TI200ms_Thre10_spessore5_9mm_00001.txt");
 
   //  *seeds=
-  SeedList pp=frame->FindSeeds(60);
+  SeedList pp=frame->FindSeeds(10);
   cout<<"seeds.size(): "<<pp.Size()<<endl;
+
+  Seed thisSeed=pp(0);
+  double adc=thisSeed(-1,-1);
+
   *seeds=pp;
   // cout<<"File"<<endl;
   // cout.flush();
