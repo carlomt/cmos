@@ -12,7 +12,7 @@ class Seed : public TObject
  public:
   Seed();
   Seed(const size_t Col, const size_t Row, const std::vector<double> &val, const int idFrame=-99);
-  Seed(const size_t Col, const size_t Row, const int idFrame=-99, const size_t size=49);
+  Seed(const size_t Col, const size_t Row, const int idFrame=-99, const int sideSize=7);
   virtual ~Seed();
 
 double operator()(const int posX, const int posY); // position with respect to the relative maximum i.e. 0,0 is the center 
@@ -29,13 +29,19 @@ void Set(const size_t Col, const size_t Row, const std::vector<double> &val, con
 void Set(const size_t Col, const size_t Row, const int idFrame=-99);
 
 void AddPixel(const double val);//add a pixel to the seed, it starts from upper left
+ 
+ inline int GetIdFrame() const {return fIdFrame;};
+ inline size_t GetRow() const {return fRow;};
+ inline size_t GetCol() const {return fCol;};
+ // inline size_t GetSideSize() const {return fSideSize;};
+ inline int GetSideSize() const {return fSideSize;};
 
-inline int GetIdFrame() const {return fIdFrame;};
-inline size_t GetRow() const {return fRow;};
-inline size_t GetCol() const {return fCol;};
+ inline int GetPixelMin() const {return -fSideSize/2;};
+ inline int GetPixelMax() const {return fSideSize/2+1;};
 
 private:
-size_t fRow, fCol;
+ size_t fRow, fCol;
+int  fSideSize;
 std::vector<double> fData;
 int fIdFrame;
 size_t fLastAddedPixel;

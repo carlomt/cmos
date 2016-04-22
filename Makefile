@@ -3,6 +3,8 @@ ROOTLIBS     := $(shell root-config --libs)
 ROOTGLIBS    := $(shell root-config --glibs)
 ROOTLDFLAGS  := $(shell root-config --ldflags)
 
+DEBUG=OFF
+
 # Linux with egcs, gcc 2.9x, gcc 3.x (>= RedHat 5.2)
 CXX           = g++ 
 CXXFLAGS      = -O -Wall  -fPIC -DROOT_INTERFACE -I.  -g
@@ -14,6 +16,10 @@ CXXFLAGS     += $(ROOTCFLAGS)
 LIBS          = $(ROOTLIBS) $(SYSLIBS)
 GLIBS         = $(ROOTGLIBS) $(SYSLIBS)
 
+ifeq ($(DEBUG),ON)
+CXXFLAGS	+= -DDEBUG
+endif
+
 SOURCES	= Frame.C Seed.C SeedList.C
 OBJS    = Frame.o Seed.o SeedList.o CMOSDict.o
 HEADERS = Frame.h Seed.h SeedList.h
@@ -24,17 +30,11 @@ default: prova.o ${OBJS} ${HEADERS}
 prova.o: prova.C ${HEADERS}    
 		 ${CXX} ${CXXFLAGS} -c prova.C
 
-Frame.o: Frame.C
-		${CXX} $(CXXFLAGS) -c Frame.C
+%.o: %.C 
+		${CXX} ${CXXFLAGS} -c  $<
 
-Seed.o: Seed.C
-		${CXX} $(CXXFLAGS) -c Seed.C
-
-SeedList.o: SeedList.C
-		${CXX} $(CXXFLAGS) -c SeedList.C
-
-CMOSDict.o: CMOSDict.cxx
-		${CXX} $(CXXFLAGS) -c CMOSDict.cxx
+%.o: %.cxx
+		${CXX} $(CXXFLAGS) -c $<
 
 
 CMOSDict.cxx: ${HEADERS} CMOSLinkDef.h

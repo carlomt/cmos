@@ -13,7 +13,7 @@ SeedList::~SeedList(){}
 void SeedList::Add(const Seed &s)
 {
 #ifdef DEBUG
- std::cout<<"SeedList::Add"<<std::endl;
+  std::cout<<"SeedList::Add "<<s(0,0) <<std::endl;
 #endif
  for(std::vector<Seed>::iterator it=fData.begin(); it<fData.end(); it++)
    {

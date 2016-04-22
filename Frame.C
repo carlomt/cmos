@@ -97,7 +97,7 @@ int Frame::ReadFile(const std::string filename)
 {
   if(i<fNCol && j<fNRow)
     {
-      size_t k=i+j*fNRow;
+      size_t k=i+j*fNCol;
       return fData[k];
     }
   else
@@ -194,34 +194,26 @@ void Frame::Add(const Frame &lval)
       std::cout<<"this sizes "<<fNRow<<" "<<fNCol<<std::endl;
       std::cout<<"L sizes "<<lval.GetNRow()<<" "<<lval.GetNCol()<<std::endl;
     }
-  for(size_t j=0; j<fNRow; j++)
+  for(size_t i=0; i<fData.size(); i++)
     {
-      for(size_t i=0; i<fNCol; i++)
-	{
-	  //	  At(i,j)+lval(i,j);
-	  Set(i,j, operator()(i,j)+lval(i,j));
-	}
+      fData[i]+=lval.fData[i];
     }
 }
 
 void Frame::Add(const double val)
 {
- for(size_t j=0; j<fNRow; j++)
+  for(size_t i=0; i<fData.size(); i++)
     {
-      for(size_t i=0; i<fNCol; i++)
-	{
-	  //	  this->At(i,j)+val;
-	  Set(i,j, operator()(i,j)+val);
-	}
+      fData[i]+=val;
     }
 }
 
 void Frame::Subtract(const Frame &LFrame)
 {
-for(size_t i=0; i<fData.size(); i++)
-  {
-fData[i]-=LFrame.fData[i];
-}
+  for(size_t i=0; i<fData.size(); i++)
+    {
+      fData[i]-=LFrame.fData[i];
+    }
 }
 
 
@@ -286,20 +278,28 @@ SeedList Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  con
 		}//end check neghbours
 	      if(addThis)
 		{
+		  Seed tmp(i,j,fId,seedSide);
+		  size_t step=(seedSide-1)/2;
 #ifdef DEBUG
-		  std::cout<<std::endl<<"Adding a seed"<<std::endl;
+		  std::cout<<std::endl<<"Adding a seed "<<thisCandidate <<std::endl;
+		  std::cout<<"step: "<<step<<std::endl;
 #endif
-		  Seed tmp(i,j,fId,seedSide*seedSide);
-		  for(size_t jj=(j-seedSide/2); jj<(j+seedSide/2); jj++)
+
+		  for(size_t jj=(j-step); jj<=(j+step); jj++)
 		    {
-		      for(size_t ii=(i-seedSide/2); ii<(i+seedSide/2); ii++)
+		      for(size_t ii=(i-step); ii<=(i+step); ii++)
 			{
-			  tmp.AddPixel(this->At(ii,jj));
+			  double ttt=At(ii,jj);
+			  #ifdef DEBUG
+			  std::cout<<" adding the value "<<ttt<<std::endl;
+#endif
+			  tmp.AddPixel(ttt);
 			}
-		    }
-		  res.Add(tmp);
-		}
-	    }
+			}
+			  
+			  res.Add(tmp);
+			}
+			}
 	}
     }
   return res;

@@ -1,4 +1,6 @@
 #include "Seed.h"
+#include "MyException.h"
+
 #include <cmath>
 
 ClassImp(Seed);
@@ -7,6 +9,7 @@ Seed::Seed()
   :TObject(),
    fRow(0),
    fCol(0),
+   fSideSize(0),
    fIdFrame(-99),
    fLastAddedPixel(0)
 {
@@ -18,6 +21,7 @@ Seed::Seed(const size_t Col, const size_t Row, const std::vector<double> &val, c
   :TObject(),
    fRow(Row),
    fCol(Col),
+   fSideSize(val.size()),
    fIdFrame(idFrame),
    fLastAddedPixel(0)
 {
@@ -26,27 +30,68 @@ Seed::Seed(const size_t Col, const size_t Row, const std::vector<double> &val, c
 
 
 
-Seed::Seed(const size_t Col, const size_t Row, const int idFrame, const size_t size)
+Seed::Seed(const size_t Col, const size_t Row, const int idFrame, const int size)
   :TObject(),
    fRow(Row),
    fCol(Col),
+   fSideSize(size),
    fIdFrame(idFrame),
    fLastAddedPixel(0)
 {
-  fData.resize(size);
+  fData.resize(size*size);
 }
 
-double Seed::operator()(const int posX, const int posY)
+double Seed::operator()(const int i, const int j)
 {
-  size_t m=sqrt(fData.size()-1)/2;
-  size_t k=posX+m + (posY+m)*m;
+  //  size_t m=sqrt(fData.size()-1)/2;
+  int m=(fSideSize-1)/2;
+  int x=i+m;
+  int y=j+m;
+  int k=x + y*fSideSize;
+#ifdef DEBUG
+  std::cout<<" Seed::operator() "<<i<<" "<<j<<" "<<k<<" "<<fData[k]<<std::endl;
+  std::cout<<" x "<<x<<" y "<<y<<std::endl;
+  std::cout<<" fSideSize: "<<fSideSize<<" m "<<m<<std::endl;
+#endif
+  if(i<GetPixelMin() || i>GetPixelMax())
+    {
+      std::ostringstream msg;
+      msg<<"Seed::operator() Min: "<<GetPixelMin()<<" Max: "<<GetPixelMax()<<" i: "<<i;
+      throwException(msg.str().c_str());
+    }
+  if(j<GetPixelMin() || j>GetPixelMax())
+    {
+      std::ostringstream msg;
+      msg<<"Seed::operator() Min: "<<GetPixelMin()<<" Max: "<<GetPixelMax()<<" j: "<<j;
+      throwException(msg.str().c_str());
+    }
   return fData[k];
 }
 
-double Seed::operator()(const int posX, const int posY) const
+double Seed::operator()(const int i, const int j) const
 {
-  size_t m=sqrt(fData.size()-1)/2;
-  size_t k=posX+m + (posY+m)*m;
+  //  size_t m=sqrt(fData.size()-1)/2;
+  int m=(fSideSize-1)/2;
+  int x=i+m;
+  int y=j+m;
+  int k=x + y*fSideSize;
+#ifdef DEBUG
+  std::cout<<" Seed::operator() "<<i<<" "<<j<<" "<<k<<" "<<fData[k]<<std::endl;
+  std::cout<<" x "<<x<<" y "<<y<<std::endl;
+  std::cout<<" fSideSize: "<<fSideSize<<" m "<<m<<std::endl;
+#endif
+  if(i<GetPixelMin() || i>GetPixelMax())
+    {
+  std::ostringstream msg;
+  msg<<"Seed::operator() Min: "<<GetPixelMin()<<" Max: "<<GetPixelMax()<<" i: "<<i;
+  throwException(msg.str().c_str());
+}
+  if(j<GetPixelMin() || j>GetPixelMax())
+    {
+      std::ostringstream msg;
+      msg<<"Seed::operator() Min: "<<GetPixelMin()<<" Max: "<<GetPixelMax()<<" j: "<<j;
+      throwException(msg.str().c_str());
+    }
   return fData[k];
 }
 
@@ -88,17 +133,19 @@ void Seed::Set(const size_t Col, const size_t Row, const int idFrame)
 
 void Seed::AddPixel(const double val)
 {
+#ifdef DEBUG
+  std::cout<<" Seed::AddPixel "<<fLastAddedPixel<<" "<<val<<std::endl;
+#endif
   fData[fLastAddedPixel]=val;
   fLastAddedPixel++;
 }
 
 std::ostream& operator<< (std::ostream &out, Seed &CSeed)
 {
-  size_t m=sqrt(CSeed.fData.size());
-  for(size_t j=0; j<m; j++)
+  for(int j=CSeed.GetPixelMin(); j<CSeed.GetPixelMax(); j++)
     {
-      for(size_t i=0; i<m; i++)
-	{
+  for(int i=CSeed.GetPixelMin(); i<CSeed.GetPixelMax(); i++)
+    {
 	  out << CSeed(i,j) << " ";
 	}
       out << std::endl;
