@@ -8,17 +8,32 @@
 #include "TTree.h"
 #include "TFile.h"
 
+#include "Rtypes.h"
+
+#include <sstream>
+
+#include <iomanip>
+
 using std::cout;
 using std::endl;
 using std::ifstream;
+using std::string;
 
 int main()
 {
+  for(int i=0;i<10;i++)
+    {
+      std::ostringstream fnamer;
+      fnamer<<"MT9V011_new_nosource_G01_TI200ms_Thre0_spessore8x270um_"<< std::setfill('0') << std::setw(5)<<i;
+      string filename=fnamer.str();
+      cout<<filename<<endl;
+    }
+
   Frame fr(640,480);
   fr.ReadFile("test/MT9V011_new_nosource_G01_TI200ms_Thre0_spessore8x270um_00000.txt");
   Frame bkg(640,480);
   bkg.ReadFile("test/MT9V011_G01_TI200ms_Thre0_0_buio.txt");
-
+  
   //Seed se(0,0,1,7);
 
   fr.Subtract(bkg);
@@ -27,11 +42,11 @@ int main()
   SeedList sl=fr.FindSeeds(2);
   cout<<"seeds.size(): "<<sl.Size()<<endl;
 
-  for(size_t i=0; i<sl.Size(); i++)
-    {
-      Seed ts=sl(i);
-      cout<<"list "<<ts.GetCol()<<"\t"<<ts.GetRow()<<"\t"<<ts(0,0)<<endl;
-    }
+  // for(size_t i=0; i<sl.Size(); i++)
+  //   {
+  //     Seed ts=sl(i);
+  //     cout<<"list "<<ts.GetCol()<<"\t"<<ts.GetRow()<<"\t"<<ts(0,0)<<endl;
+  //   }
 
 
   //  cout<<fr<<endl;

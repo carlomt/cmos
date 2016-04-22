@@ -2,6 +2,7 @@
 #include "MyException.h"
 
 #include <cmath>
+#include <sstream>
 
 ClassImp(Seed);
 
