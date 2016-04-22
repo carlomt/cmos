@@ -23,6 +23,9 @@ int main()
 {
   for(int i=0;i<10;i++)
     {
+      //questo for solo per farti vedere come prendere diversi file
+      //in caso prendi il codice sotto lo metti nel for e dentro ReadFile mettri filename
+      //la lettura del buio lasciala fuori del for (tanto mi pare sia la stessa per tutti i run)
       std::ostringstream fnamer;
       fnamer<<"MT9V011_new_nosource_G01_TI200ms_Thre0_spessore8x270um_"<< std::setfill('0') << std::setw(5)<<i;
       string filename=fnamer.str();
@@ -42,6 +45,9 @@ int main()
   SeedList sl=fr.FindSeeds(2);
   cout<<"seeds.size(): "<<sl.Size()<<endl;
 
+  //per scrivere su schermo l'elenco dei seed
+  //comunque questo e' solo per confrontarlo con la vecchia analisi
+  //settimana prossima vediamo come fare l'analisi ma senza scrivere e leggere da txt
   // for(size_t i=0; i<sl.Size(); i++)
   //   {
   //     Seed ts=sl(i);
