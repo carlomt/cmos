@@ -36,6 +36,8 @@ prova.o: prova.C ${HEADERS}
 %.o: %.cxx
 		${CXX} $(CXXFLAGS) -c $<
 
+%.x: %.cpp ${OBJS} ${HEADERS}
+		${CXX} $(CXXFLAGS)  $(LDFLAGS)  $(LIBS) $(GLIBS) ${OBJS}  -D__OFNAME__='"$@"' $< -o $@
 
 CMOSDict.cxx: ${HEADERS} CMOSLinkDef.h
 		${ROOTSYS}/bin/rootcint -f $@ -c  $(CXXFLAGS) -p $^
