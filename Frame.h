@@ -18,7 +18,7 @@ class Frame : public TObject
 {
  public:
   Frame();
-  Frame(const size_t nCol, const size_t nRow, const int Id=-99);
+  Frame(const size_t nRow, const size_t nCol, const int Id=-99);
   Frame(const Frame &lval);
   virtual ~Frame();
   
@@ -44,7 +44,7 @@ class Frame : public TObject
 
   void Subtract(const Frame &LFrame);
 
-  void Resize(const size_t nCol, const size_t nRow);
+  void Resize(const size_t nRow, const size_t nCol);
 
   Frame operator+(const Frame &LFrame) const;
   Frame operator+(const double val) const;

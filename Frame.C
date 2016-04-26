@@ -7,14 +7,14 @@
 ClassImp(Frame);
 
 Frame::Frame()
-:TObject(),
+ :TObject(),
   fNRow(0),   
- fNCol(0),
- fId(0)
+  fNCol(0),
+  fId(0)
 {
 }
 
-Frame::Frame(const size_t nCol, const size_t nRow, const int Id)
+Frame::Frame(const size_t nRow, const size_t nCol, const int Id)
   :TObject(),
    fNRow(nRow),   
    fNCol(nCol),
@@ -46,7 +46,7 @@ double Frame::operator()(const size_t i,const size_t j)
 {
   if(i<fNCol && j<fNRow)
     {
-      size_t k=i+j*fNRow;
+      size_t k=i+j*fNCol;
       return fData[k];
     }
   else
@@ -111,7 +111,7 @@ void Frame::Set(const size_t i, const size_t j, const double val)
 {  
   if(i<fNCol && j<fNRow)
     {
-      size_t k=i+j*fNRow;
+      size_t k=i+j*fNCol;
       fData[k]=val;
     }
   else
@@ -217,7 +217,7 @@ void Frame::Subtract(const Frame &LFrame)
 }
 
 
-void Frame::Resize(const size_t nCol, const size_t nRow)
+void Frame::Resize(const size_t nRow, const size_t nCol)
 {
   fNRow=nRow;
   fNCol=nCol;
@@ -260,15 +260,15 @@ SeedList Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  con
     {
       for(size_t i=fiducialSideDim; i<(fNCol-fiducialSideDim); i++)
 	{
-	  if(this->At(i,j)>thres)
+	  if(this->At(i,j) > thres)
 	    {
 	      bool addThis=true;
-	      double thisCandidate=this->At(i,j);
+	      double thisCandidate = this->At(i,j);
 	      //check neighbours
 	      const size_t lim=(localMaximumCheckSide-1)/2;
-	      for(size_t jj=(j-lim); jj<(j+lim); jj++)
+	      for(size_t jj=(j-lim); jj<=(j+lim); jj++)
 		{
-		  for(size_t ii=(i-lim); ii<(i+lim); ii++)
+		  for(size_t ii=(i-lim); ii<=(i+lim); ii++)
 		    {
 		      if(thisCandidate < this->At(ii,jj))
 			{
@@ -284,22 +284,22 @@ SeedList Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  con
 		  std::cout<<std::endl<<"Adding a seed "<<thisCandidate <<std::endl;
 		  std::cout<<"step: "<<step<<std::endl;
 #endif
-
+		  
 		  for(size_t jj=(j-step); jj<=(j+step); jj++)
 		    {
 		      for(size_t ii=(i-step); ii<=(i+step); ii++)
 			{
 			  double ttt=At(ii,jj);
-			  #ifdef DEBUG
+#ifdef DEBUG
 			  std::cout<<" adding the value "<<ttt<<std::endl;
 #endif
 			  tmp.AddPixel(ttt);
 			}
-			}
-			  
-			  res.Add(tmp);
-			}
-			}
+		    }
+		  
+		  res.Add(tmp);
+		}
+	    }
 	}
     }
   return res;
