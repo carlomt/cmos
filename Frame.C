@@ -252,9 +252,9 @@ Frame  Frame::operator+(const double val) const
 //   Frame  Frame::operator/(const double val);
 
 
-SeedList Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  const size_t seedSide, const size_t localMaximumCheckSide) const
+SeedList* Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  const size_t seedSide, const size_t localMaximumCheckSide) const
 {
-  SeedList res(fId);
+  SeedList* res=new SeedList(fId);
 
   for(size_t j=fiducialSideDim; j<(fNRow-fiducialSideDim); j++)
     {
@@ -297,7 +297,7 @@ SeedList Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  con
 			}
 		    }
 		  
-		  res.Add(tmp);
+		  res->Add(tmp);
 		}
 	    }
 	}
