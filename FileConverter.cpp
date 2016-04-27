@@ -6,10 +6,6 @@
 #include <math.h>
 #include <sstream>
 
-#include <time.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-
 #include "TROOT.h"
 #include <TApplication.h>
 #include "TSystem.h"
@@ -31,6 +27,7 @@
 #include "SeedList.h"
 
 #include "myStoi.h"
+#include "getFileCreationTime.h"
 
 using namespace std;
 
@@ -38,7 +35,6 @@ int FileConverter(string filename,int mesglevel,int version,string outfname);
 int FileConverter(vector<string> filenames,int mesglevel,int version,string outfname);
 void UnreadColumnsChecker(istringstream &iss, int counter);
 void print_help(string fname="executable");
-string getFileCreationTime(string path);
 string CheckOutputExtension(const string fname);
 
 int main(int argc, char *argv[])
@@ -81,10 +77,6 @@ int main(int argc, char *argv[])
 	    else if(option.compare("-verbose")==0)
 	      {
 		mesglevel=1; 
-	      }
-	    else if(option.compare("-v")==0)
-	      {
-		version=atoi(argv[++i]);
 	      }
 	    else if(option.compare("-o")==0)
 	      {
@@ -193,11 +185,6 @@ void print_help(string fname)
   cout<<"Usage  : "<<fname<<" (option) <evtfile>"<<endl;
   cout<<"Option : -verbose  (show debug output)"<<endl;
   cout<<"Option : -o  (set output filename, by default is the name of the first input)"<<endl;
-  cout<<"Option : -v  (version of the file 38: "<<endl
-      <<"\t 1) for the old simulation;"<<endl
-      <<"\t 2) for the output with mass and momentum of primaries;"<<endl
-      <<"\t 3) reads also the primaries energy entering the probe; "<<endl
-      <<"\t 4) with flag for the creation region)"<<endl;
   cout<<"Option : -help     (show this help)"<<endl;
   //    printf("       : -log (Log filename)\n"); 
   cout<<endl;
@@ -222,11 +209,6 @@ void UnreadColumnsChecker(istringstream &iss, int counter)
     }
 }
 
-string getFileCreationTime(string path) {
-    struct stat attr;
-    stat(path.c_str(), &attr);
-    return ctime(&attr.st_mtime);
-}
 
 
 string CheckOutputExtension(const string fname)

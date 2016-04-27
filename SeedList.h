@@ -18,6 +18,9 @@ virtual ~SeedList();
 Seed operator[](size_t i){return fData[i];};
 Seed operator[](size_t i) const {return fData[i];};
 
+ inline Seed At(size_t i){return fData[i];};
+ inline Seed At(size_t i) const {return fData[i];};
+ 
 Seed operator()(size_t i){return fData[i];};
 Seed operator()(size_t i) const {return fData[i];};
 

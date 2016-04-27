@@ -35,7 +35,7 @@ int main()
     }
   */
   Frame fr(480,640);
-  fr.ReadFile("/Users/Amedeo/Desktop/CMOS/MT9V011_newprograms/Data/MT9V011_new_nosource_G01_TI200ms_Thre0_spessore8x270um_1000/MT9V011_new_nosource_G01_TI200ms_Thre0_spessore8x270um_00000.txt");
+  fr.ReadFile("/Users/Amedeo/Desktop/CMOS/MT9V011_newprograms/Data/MT9V011_new_90Sr_G01_TI200ms_noThre_7000_8000/MT9V011_new_90Sr_G01_TI200ms_noThre_07101.txt");
   Frame bkg(480,640);
   bkg.ReadFile("/Users/Amedeo/Desktop/CMOS/MT9V011_newprograms/MT9V011_G01_TI200ms_Thre0_0_buio.txt");
   
@@ -44,15 +44,15 @@ int main()
   fr.Subtract(bkg);
   
   //  SeedList sl=fr.FindSeeds(3.36,3,3);
-  SeedList sl=fr.FindSeeds(2);
-  cout<<"seeds.size(): "<<sl.Size()<<endl;
+  SeedList* sl=fr.FindSeeds(2);
+  cout<<"seeds.size(): "<<sl->Size()<<endl;
 
   //per scrivere su schermo l'elenco dei seed
   //comunque questo e' solo per confrontarlo con la vecchia analisi
   //settimana prossima vediamo come fare l'analisi ma senza scrivere e leggere da txt
-  for(size_t i=0; i<sl.Size(); i++)
+  for(size_t i=0; i<sl->Size(); i++)
     {
-      Seed ts=sl(i);
+      Seed ts=sl->At(i);
       cout<<" evento 0 scritto il seed "<<i<<" row "<< ts.GetRow() <<" col "<<ts.GetCol();
       cout << std::fixed << std::setprecision(2) << std::setfill('0');
       cout<<" "<<ts(0,0)<<endl;

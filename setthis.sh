@@ -23,6 +23,7 @@ DIRREL="$( dirname "$SOURCE" )"
 DIRFCV=$(abspath $DIRREL)
 
 alias FileConverter='$DIRFCV/FileConverter.x'
+alias Riduzione='$DIRFCV/Riduzione.x'
 
 function _mycomplete_FileConverter_()
 {
@@ -36,10 +37,30 @@ function _mycomplete_FileConverter_()
 
     # completing an option
     if [[ "$word" == -* ]]; then
-	COMPREPLY=( $( compgen -W "-help -verbose -v -o" -- $word ) )
+	COMPREPLY=( $( compgen -W "-help -verbose -o" -- $word ) )
     fi
 }
 
 complete -d -X '.[^./]*' -F _mycomplete_FileConverter_ FileConverter
 
 echo "created the alias 'FileConverter' with autocompletion"
+
+function _mycomplete_Riduzione_()
+{
+    local cmd="${1##*/}"
+    local word=${COMP_WORDS[COMP_CWORD]}
+    local prev=${COMP_WORDS[COMP_CWORD-1]}
+    local line=${COMP_LINE}
+    local xpat='!*.root'
+
+    COMPREPLY=($(compgen -f -X "$xpat" -- "${word}"))
+
+    # completing an option
+    if [[ "$word" == -* ]]; then
+	COMPREPLY=( $( compgen -W "-help -t -seedSize -checkLocalMaximumSide -edge -o" -- $word ) )
+    fi
+}
+
+complete -d -X '.[^./]*' -F _mycomplete_Riduzione_ Riduzione
+
+echo "created the alias 'Riduzione' with autocompletion"

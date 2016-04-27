@@ -8,7 +8,7 @@
 #include "TTree.h"
 #include "TFile.h"
 
-
+#include "getFileCreationTime.h"
 
 using std::cout;
 using std::endl;
@@ -16,6 +16,7 @@ using std::ifstream;
 using std::string;
 
 void print_help(string fname="executable");
+string getFileCreationTime(string path);
 int Riduzione(string fname,double thres, size_t fiducialSideDim=3,  const size_t seedSide=7, const size_t localMaximumCheckSide=3, string outfname="reduced.root");
 
 int main(int argc, char *argv[])
@@ -36,6 +37,8 @@ int main(int argc, char *argv[])
   size_t fiducialEdge=3;
   size_t localMaximumCheckSide=3;
   string outfname="reduced.root";
+  string inputfname="";
+
   
   if(argc==1)
     {
@@ -60,7 +63,7 @@ int main(int argc, char *argv[])
 	      }
 	    else if(option.compare("-seedSize")==0)
 	      {
-		thres=atoi(argv[++i]);
+		seedSide=atoi(argv[++i]);
 	      }
 	     else if(option.compare("-checkLocalMaximumSide")==0)
 	      {
@@ -82,11 +85,11 @@ int main(int argc, char *argv[])
 	  }
 	else
 	  {
-	    filenames.push_back(argv[i]);
-	    cout<<"adding file: "<<argv[i]<<" to the input file list."<<endl;
+	    inputfname=string(argv[i]);
+	    cout<<"reducing file: "<<argv[i]<<" ."<<endl;
 	  }
     }
-  return  Riduzione( fname, thres,  fiducialSideDim,  seedSide,  localMaximumCheckSide,  outfname);
+  return  Riduzione( inputfname, thres,  fiducialEdge,  seedSide,  localMaximumCheckSide,  outfname);
 }
 
 
@@ -113,7 +116,7 @@ int Riduzione(string fname,double thres, size_t fiducialSideDim,  const size_t s
        if (ientry < 0) break;
        nb = CMOSDataTree->GetEntry(jentry);   nbytes += nb;
        
-       seed_list = frame->FindSeeds(thres,fiducialSideDim,seedSize,localMaximumCheckSide);
+       seed_list = frame->FindSeeds(thres,fiducialSideDim,seedSide,localMaximumCheckSide);
        
        cout<<"frame id "<<frame->GetId()<<endl;
        ReducedDataTree->Fill();
@@ -130,14 +133,12 @@ void print_help(string fname)
 {
   cout<<"Source: "<<__FILE__<<endl;
   cout<<endl;
-  cout<<"Usage  : "<<fname<<" (option) <evtfile>"<<endl;
-  cout<<"Option : -verbose  (show debug output)"<<endl;
-  cout<<"Option : -o  (set output filename, by default is the name of the first input)"<<endl;
-  cout<<"Option : -v  (version of the file 38: "<<endl
-      <<"\t 1) for the old simulation;"<<endl
-      <<"\t 2) for the output with mass and momentum of primaries;"<<endl
-      <<"\t 3) reads also the primaries energy entering the probe; "<<endl
-      <<"\t 4) with flag for the creation region)"<<endl;
+  cout<<"Usage  : "<<fname<<" (option) inputfile"<<endl;
+  cout<<"Option : -o  (set output filename, default: reduced.root)"<<endl;
+  cout<<"Option : -t  (set threshold, default: 2.0)"<<endl;
+  cout<<"Option : -seedSize  (set the seeds side dimensions, default: 7)"<<endl;
+  cout<<"Option : -checkLocalMaximumSide  (set the submatrix used to check local max, default: 3)"<<endl;
+  cout<<"Option : -edge  (set the fiducial edge, default: 3)"<<endl;
   cout<<"Option : -help     (show this help)"<<endl;
   //    printf("       : -log (Log filename)\n"); 
   cout<<endl;
