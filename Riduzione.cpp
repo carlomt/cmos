@@ -8,7 +8,7 @@
 #include "TTree.h"
 #include "TFile.h"
 
-#include "getFileCreationTime.h"
+//#include "getFileCreationTime.h"
 
 using std::cout;
 using std::endl;
@@ -16,7 +16,6 @@ using std::ifstream;
 using std::string;
 
 void print_help(string fname="executable");
-string getFileCreationTime(string path);
 int Riduzione(string fname,double thres, size_t fiducialSideDim=3,  const size_t seedSide=7, const size_t localMaximumCheckSide=3, string outfname="reduced.root");
 
 int main(int argc, char *argv[])
@@ -28,9 +27,9 @@ int main(int argc, char *argv[])
   string execname=argv[0];
   // execname.pop_back();
   // string sourcename=execname+"C";
-  std::string sourcename=execname.substr(0,execname.size()-1)+"C";
-  cout<<"from source file: "<<sourcename<<endl;
-  cout<<"edited last time at: "<<getFileCreationTime(sourcename)<<endl;
+  // std::string sourcename=execname.substr(0,execname.size()-1)+"C";
+  // cout<<"from source file: "<<sourcename<<endl;
+  // cout<<"edited last time at: "<<getFileCreationTime(sourcename)<<endl;
 
   double thres=2.0;
   size_t seedSide=7;
@@ -60,6 +59,9 @@ int main(int argc, char *argv[])
 	    else if(option.compare("-t")==0)
 	      {
 		thres=atof(argv[++i]);
+#ifdef DEBUG
+		cout<<"thres: "<<thres<<endl;
+#endif
 	      }
 	    else if(option.compare("-seedSize")==0)
 	      {
@@ -86,7 +88,8 @@ int main(int argc, char *argv[])
 	else
 	  {
 	    inputfname=string(argv[i]);
-	    cout<<"reducing file: "<<argv[i]<<" ."<<endl;
+	    //cout<<"reducing file: "<<argv[i]<<" ."<<endl;
+		    
 	  }
     }
   return  Riduzione( inputfname, thres,  fiducialEdge,  seedSide,  localMaximumCheckSide,  outfname);
@@ -95,36 +98,69 @@ int main(int argc, char *argv[])
 
 int Riduzione(string fname,double thres, size_t fiducialSideDim,  const size_t seedSide, const size_t localMaximumCheckSide, string outfname)
 {
-  TFile *f=new TFile(fname.c_str(),"READ");
-  TTree *CMOSDataTree;
-  f->GetObject("CMOSDataTree",CMOSDataTree);
+  cout<<"reducing file: "<<fname<<" ."<<endl;
+  
+  TFile f(fname.c_str(),"READ");
+  TTree *CMOSDataTree = (TTree*) f.Get("CMOSDataTree");
+  //  f->GetObject("CMOSDataTree",CMOSDataTree);
 
-  Frame *frame;
+  #ifdef DEBUG
+  cout<<"Debug: f->GetObject(\"CMOSDataTree\",CMOSDataTree);"<<endl;
+  #endif
+  
+  Frame *frame = NULL;
   CMOSDataTree->SetBranchAddress("frame",&frame);
 
-  TTree *ReducedDataTree=new TTree("CMOSReducedData","CMOS exp reduced data");
-  SeedList* seed_list=new SeedList();
-  ReducedDataTree->Branch("seed_list",&seed_list);
+  #ifdef DEBUG
+  cout<<"Debug: CMOSDataTree->SetBranchAddress(\"frame\",&frame);"<<endl;
+  #endif
   
-  Long64_t nentries = CMOSDataTree->GetEntriesFast();
+  // TTree *ReducedDataTree=new TTree("CMOSReducedData","CMOS exp reduced data");
+  SeedList *seed_list;
+  // ReducedDataTree->Branch("seed_list",&seed_list);
+  
+  //  Long64_t nentries = CMOSDataTree->GetEntriesFast();
+  Long64_t nentries = CMOSDataTree->GetEntries();
 
+#ifdef DEBUG
+  cout<<"Debug: CMOSDataTree->GetEntriesFast(): "<<nentries <<endl;
+#endif
+  
    Long64_t nbytes = 0, nb = 0;
    for (Long64_t jentry=0; jentry<nentries;jentry++)
      {
-       seed_list->Clear();
-       Long64_t ientry = CMOSDataTree->LoadTree(jentry);
-       if (ientry < 0) break;
+       // delete frame;
+       // frame = NULL;
+#ifdef DEBUG
+       cout<<"Debug:  starting loop"<<endl;
+       cout.flush();
+#endif       
+       //       Long64_t ientry = CMOSDataTree->LoadTree(jentry);
+//  #ifdef DEBUG
+//        cout<<"Debug:   CMOSDataTree->LoadTree(jentry): "<<ientry <<endl;
+//        cout.flush();
+// #endif
+//       if (ientry < 0) break;
        nb = CMOSDataTree->GetEntry(jentry);   nbytes += nb;
-       
-       seed_list = frame->FindSeeds(thres,fiducialSideDim,seedSide,localMaximumCheckSide);
-       
+#ifdef DEBUG
+       cout<<"Debug:  CMOSDataTree->GetEntry(jentry): "<<nb <<endl;
+       cout.flush();
+#endif
+  
        cout<<"frame id "<<frame->GetId()<<endl;
-       ReducedDataTree->Fill();
+       cout<<"frame row "<<frame->GetNRow()<<endl;
+       SeedList *prova= frame->FindSeeds(60);
+       
+       //       seed_list = frame->FindSeeds(thres,fiducialSideDim,seedSide,localMaximumCheckSide);
+       // cout<<"seed list size: "<<seed_list->Size()<<endl;
+       // // ReducedDataTree->Fill();
+       // seed_list->Clear();
+
      }
-   TFile* outfile=new TFile(fname.c_str(),"RECREATE");
-   ReducedDataTree->Write();
-   outfile->Write();
-   outfile->Close();
+   // TFile* outfile=new TFile(fname.c_str(),"RECREATE");
+   // ReducedDataTree->Write();
+   // outfile->Write();
+   // outfile->Close();
    return(1);
 }
 

@@ -254,16 +254,34 @@ Frame  Frame::operator+(const double val) const
 
 SeedList* Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  const size_t seedSide, const size_t localMaximumCheckSide) const
 {
+#ifdef DEBUG
+  std::cout<<" Frame::FindSeeds "<<std::endl;
+  std::cout<<" Frame ID: "<<fId<<std::endl;
+  std::cout.flush();
+#endif
   SeedList* res=new SeedList(fId);
-
+#ifdef DEBUG
+  std::cout<<" res malloc "<<std::endl;
+  std::cout.flush();
+#endif
+  
   for(size_t j=fiducialSideDim; j<(fNRow-fiducialSideDim); j++)
     {
       for(size_t i=fiducialSideDim; i<(fNCol-fiducialSideDim); i++)
 	{
-	  if(this->At(i,j) > thres)
+#ifdef DEBUG
+	  std::cout<<" Frame::FindSeeds i "<<i<<" j "<<j<<std::endl;
+	  std::cout<<" fNCol "<<fNCol<< " fNRow "<<fNRow<<std::endl;
+	  std::cout.flush();
+#endif
+	  if( At(i,j) > thres )
 	    {
 	      bool addThis=true;
 	      double thisCandidate = this->At(i,j);
+#ifdef DEBUG
+	      std::cout<<" Frame::FindSeeds thisCandidate: "<<thisCandidate<<std::endl;
+	      std::cout.flush();
+#endif
 	      //check neighbours
 	      const size_t lim=(localMaximumCheckSide-1)/2;
 	      for(size_t jj=(j-lim); jj<=(j+lim); jj++)
@@ -283,6 +301,7 @@ SeedList* Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  co
 #ifdef DEBUG
 		  std::cout<<std::endl<<"Adding a seed "<<thisCandidate <<std::endl;
 		  std::cout<<"step: "<<step<<std::endl;
+		  std::cout.flush();
 #endif
 		  
 		  for(size_t jj=(j-step); jj<=(j+step); jj++)
@@ -292,16 +311,25 @@ SeedList* Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  co
 			  double ttt=At(ii,jj);
 #ifdef DEBUG
 			  std::cout<<" adding the value "<<ttt<<std::endl;
+			  std::cout.flush();
 #endif
 			  tmp.AddPixel(ttt);
 			}
 		    }
 		  
 		  res->Add(tmp);
-		}
-	    }
-	}
-    }
+		}	
+	    }//end if At(i,j) > thres
+	  #ifdef DEBUG
+	      std::cout<<" Frame::FindSeeds this value: "<<this->At(i,j)<<std::endl;
+	      std::cout.flush();
+#endif
+	}//end for i
+    }//end for j
+#ifdef DEBUG
+  std::cout<<" Frame::FindSeeds returning: "<<res->Size()<<std::endl;
+  std::cout.flush();
+#endif
   return res;
 }
 
