@@ -61,8 +61,8 @@ class Frame : public TObject
   TH2F* GetTH2F(const char *name, const char *title);
   TH2F* GetTH2F(std::string name, std::string title);
   
-  TH1F* GetTH1F(const char *name, const char *title);
-  TH1F* GetTH1F(std::string name, std::string title);
+  /* TH1F* GetTH1F(const char *name, const char *title); */
+  /* TH1F* GetTH1F(std::string name, std::string title); */
 
   void Set(const size_t i, const size_t j, const double val=0);
 

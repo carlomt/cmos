@@ -27,7 +27,7 @@
 #include "SeedList.h"
 
 #include "myStoi.h"
-#include "getFileCreationTime.h"
+//#include "getFileCreationTime.h"
 
 using namespace std;
 
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
   // string sourcename=execname+"C";
   std::string sourcename=execname.substr(0,execname.size()-1)+"C";
   cout<<"from source file: "<<sourcename<<endl;
-  cout<<"edited last time at: "<<getFileCreationTime(sourcename)<<endl;
+  //cout<<"edited last time at: "<<getFileCreationTime(sourcename)<<endl;
   
   int success=-1;
   int result=1;

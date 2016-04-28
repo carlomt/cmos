@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
 
 #include "Frame.h"
 #include "Seed.h"
@@ -14,6 +15,8 @@ using std::cout;
 using std::endl;
 using std::ifstream;
 using std::string;
+using std::atoi;
+using std::atof;
 
 void print_help(string fname="executable");
 int Riduzione(string fname,double thres, size_t fiducialSideDim=3,  const size_t seedSide=7, const size_t localMaximumCheckSide=3, string outfname="reduced.root");
@@ -108,14 +111,14 @@ int Riduzione(string fname,double thres, size_t fiducialSideDim,  const size_t s
   cout<<"Debug: f->GetObject(\"CMOSDataTree\",CMOSDataTree);"<<endl;
   #endif
   
-  Frame *frame = NULL;
+  Frame *frame = new Frame(480,640);
   CMOSDataTree->SetBranchAddress("frame",&frame);
 
   #ifdef DEBUG
   cout<<"Debug: CMOSDataTree->SetBranchAddress(\"frame\",&frame);"<<endl;
   #endif
   
-  // TTree *ReducedDataTree=new TTree("CMOSReducedData","CMOS exp reduced data");
+  TTree *ReducedDataTree=new TTree("CMOSReducedData","CMOS exp reduced data");
   SeedList *seed_list;
   // ReducedDataTree->Branch("seed_list",&seed_list);
   
@@ -149,12 +152,12 @@ int Riduzione(string fname,double thres, size_t fiducialSideDim,  const size_t s
   
        cout<<"frame id "<<frame->GetId()<<endl;
        cout<<"frame row "<<frame->GetNRow()<<endl;
-       SeedList *prova= frame->FindSeeds(60);
+       //       SeedList prova= frame->FindSeeds(60);
        
-       //       seed_list = frame->FindSeeds(thres,fiducialSideDim,seedSide,localMaximumCheckSide);
-       // cout<<"seed list size: "<<seed_list->Size()<<endl;
-       // // ReducedDataTree->Fill();
-       // seed_list->Clear();
+       seed_list = frame->FindSeeds(thres,fiducialSideDim,seedSide,localMaximumCheckSide);
+       cout<<"seed list size: "<<seed_list->Size()<<endl;
+       //       ReducedDataTree->Fill();
+       seed_list->Clear();
 
      }
    // TFile* outfile=new TFile(fname.c_str(),"RECREATE");
