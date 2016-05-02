@@ -57,7 +57,7 @@ function _mycomplete_Riduzione_()
 
     # completing an option
     if [[ "$word" == -* ]]; then
-	COMPREPLY=( $( compgen -W "-help -t -seedSize -checkLocalMaximumSide -edge -o" -- $word ) )
+	COMPREPLY=( $( compgen -W "-help -t -seedSize -checkLocalMaximumSide -edge -ped -o" -- $word ) )
     fi
 }
 

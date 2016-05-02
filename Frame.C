@@ -62,7 +62,7 @@ double Frame::operator()(const size_t i,const size_t j)
 int Frame::ReadFile(const std::string filename)
 {
   std::ifstream reader;
-  reader.open(filename,std::ios_base::in);
+  reader.open(filename.c_str(),std::ios_base::in);
   if(!reader.is_open())
     {
       std::ostringstream msg;
@@ -260,6 +260,7 @@ SeedList* Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  co
   std::cout.flush();
 #endif
   SeedList* res=new SeedList(fId);
+  //SeedList res(fId);
 #ifdef DEBUG
   std::cout<<" res malloc "<<std::endl;
   std::cout.flush();
@@ -318,6 +319,7 @@ SeedList* Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  co
 		    }
 		  
 		  res->Add(tmp);
+		  //res.Add(tmp);
 		}	
 	    }//end if At(i,j) > thres
 	  #ifdef DEBUG
@@ -328,6 +330,7 @@ SeedList* Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  co
     }//end for j
 #ifdef DEBUG
   std::cout<<" Frame::FindSeeds returning: "<<res->Size()<<std::endl;
+  //std::cout<<" Frame::FindSeeds returning: "<<res.Size()<<std::endl;
   std::cout.flush();
 #endif
   return res;

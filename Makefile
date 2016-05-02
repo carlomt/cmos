@@ -24,11 +24,11 @@ SOURCES	= Frame.C Seed.C SeedList.C
 OBJS    = Frame.o Seed.o SeedList.o CMOSDict.o
 HEADERS = Frame.h Seed.h SeedList.h
 
-default: prova.o ${OBJS} ${HEADERS}
-		$(LD) $(LDFLAGS) $(LIBS) $(GLIBS) prova.o ${OBJS} -o prova.x 	
+default: prova2.o ${OBJS} ${HEADERS}
+		$(LD) $(LDFLAGS) $(LIBS) $(GLIBS) prova2.o ${OBJS} -o prova.x 	
 
-prova.o: prova.C ${HEADERS}    
-		 ${CXX} ${CXXFLAGS} -c prova.C
+prova2.o: prova2.C ${HEADERS}    
+		 ${CXX} ${CXXFLAGS} -c prova2.C
 
 %.o: %.C 
 		${CXX} ${CXXFLAGS} -c  $<
@@ -42,9 +42,10 @@ prova.o: prova.C ${HEADERS}
 CMOSDict.cxx: ${HEADERS} CMOSLinkDef.h
 		${ROOTSYS}/bin/rootcint -f $@ -c  $(CXXFLAGS) -p $^
 
-libCMOS.so: CMOSDict.cxx ${OBJS}
-#		${CXX} -shared -o$@ ${LDFLAGS} $(CXXFLAGS) -I$(ROOTSYS)/include $^
-		g++ -shared -o$@ `root-config --ldflags` $(CXXFLAGS) -I$(ROOTSYS)/include $^
+libCMOS.so: ${OBJS}
+#		${LD} -shared -o$@ ${LDFLAGS} $(CXXFLAGS) -I$(ROOTSYS)/include $^
+#		g++ -shared -o$@ `root-config --ldflags` $(CXXFLAGS) -I$(ROOTSYS)/include $^
+		${LD} ${SOFLAGS} ${LDFLAGS} $(LIBS) $(GLIBS) ${OBJS}  -o $@ 
 
 clean:
 		rm -f *.x *.a *.o *.so *.pcm *.d CMOSDict.cxx

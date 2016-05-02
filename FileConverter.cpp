@@ -27,7 +27,7 @@
 #include "SeedList.h"
 
 #include "myStoi.h"
-#include "getFileCreationTime.h"
+//#include "getFileCreationTime.h"
 
 using namespace std;
 
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
   // string sourcename=execname+"C";
   std::string sourcename=execname.substr(0,execname.size()-1)+"C";
   cout<<"from source file: "<<sourcename<<endl;
-  cout<<"edited last time at: "<<getFileCreationTime(sourcename)<<endl;
+  //cout<<"edited last time at: "<<getFileCreationTime(sourcename)<<endl;
   
   int success=-1;
   int result=1;
@@ -120,7 +120,7 @@ int FileConverter(vector<string> filenames, int mesglevel,int version,string out
   const string outfname=CheckOutputExtension(outfnameI);
   cout<<"output file name: "<<outfname<<endl;
   
-  TFile *hfile;
+  TFile *hfile = new TFile(outfname.c_str(),"RECREATE","Example");
   
   TTree *DataTree = new TTree("CMOSDataTree","CMOS exp data");
   Frame *frame = new Frame(480,640);
@@ -129,8 +129,6 @@ int FileConverter(vector<string> filenames, int mesglevel,int version,string out
   
   for(size_t iFile=0; iFile<filenames.size(); iFile++)
     {
-      frame->Clear();
-      
       const string originalfilename=filenames[iFile];
       cout<<"Converting file: "<<originalfilename<<endl;
       string filename=filenames[iFile];
@@ -141,7 +139,7 @@ int FileConverter(vector<string> filenames, int mesglevel,int version,string out
       while ((pos = s.find(delimiter)) != std::string::npos) 
 	{
 	  token = s.substr(0, pos);
-	  //	  std::cout << token << std::endl;
+	  std::cout << token << std::endl;
 	  s.erase(0, pos + delimiter.length());
 	}
       cout<<"s: "<<s<<endl;
@@ -155,23 +153,59 @@ int FileConverter(vector<string> filenames, int mesglevel,int version,string out
 	{
 	  cout<<"WARNING: this program is made to read txt files"<<endl;
 	}
+#ifdef DEBUG
+      cout<<"Debug: prima di frame->ReadFile(originalfilename);"<<endl;
+      cout.flush();
+#endif
       frame->ReadFile(originalfilename);
-      if(iFile==0)
-	{
-	  hfile = new TFile(outfname.c_str(),"RECREATE","Example");
-	}
-      if(!hfile->IsOpen())
-	{
-	  cout<<"Unable to open output file "<<outfname<<endl;
-	  return(-1);
-	}
-
+#ifdef DEBUG
+      cout<<"Debug: dopo di frame->ReadFile(originalfilename);"<<endl;
+      cout.flush();
+#endif
+      // if(iFile==0)
+      // 	{
+      // 	  hfile = new TFile(outfname.c_str(),"RECREATE","Example");
+      // 	}
+      // if(!hfile->IsOpen())
+      // 	{
+      // 	  cout<<"Unable to open output file "<<outfname<<endl;
+      // 	  return(-1);
+      // 	}
+#ifdef DEBUG
+      cout<<"Filling"<<endl;
+#endif
       DataTree->Fill();
+#ifdef DEBUG
+      cout<<"Clearing"<<endl;
+#endif
+      frame->Clear();
+      
     }//end loop on file names
-  
+#ifdef DEBUG
+  cout<<"Printing DataTree"<<endl;
+  cout.flush();
+#endif
+  DataTree->Print();
+#ifdef DEBUG
+  cout<<"Writing DataTree"<<endl;
+  cout.flush();
+#endif
   DataTree->Write();
+#ifdef DEBUG
+  cout<<"Writing hfile"<<endl;
+  cout.flush();
+#endif
   hfile->Write();
+#ifdef DEBUG
+  cout<<"Closing hfile"<<endl;
+  cout.flush();
+#endif
   hfile->Close();
+
+  //#ifdef DEBUG
+
+  //#endif
+
   return(1);
   
 }
