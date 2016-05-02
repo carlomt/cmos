@@ -20,10 +20,10 @@ function abspath() {
 THISDIR=`pwd`
 SOURCE="${BASH_SOURCE[0]}"
 DIRREL="$( dirname "$SOURCE" )"
-DIRFCV=$(abspath $DIRREL)
+CMOSCODEDIR=$(abspath $DIRREL)
 
-alias FileConverter='$DIRFCV/FileConverter.x'
-alias Riduzione='$DIRFCV/Riduzione.x'
+alias FileConverter='$CMOSCODEDIR/FileConverter.x'
+alias Riduzione='$CMOSCODEDIR/Riduzione.x'
 
 function _mycomplete_FileConverter_()
 {

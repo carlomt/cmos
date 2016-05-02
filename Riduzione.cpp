@@ -114,12 +114,14 @@ int main(int argc, char *argv[])
 int Riduzione(string fname,double thres, string pedfname, size_t fiducialSideDim,  const size_t seedSide, const size_t localMaximumCheckSide, string outfname)
 {
 
- // check to see if the event class is in the dictionary
+  // check to see if the event class is in the dictionary
   // if it is not load the definition in libEvent.so
-  if (!TClassTable::GetDict("Event")) 
-    {
-      gSystem->Load("libCMOS");
-    }
+  // if (!TClassTable::GetDict("Frame")) 
+  //   {
+  //     string library=string(CMOSCODEDIR)+"/libCMOS.so";
+  //     cout<<"Loading library "<<library<<endl;
+  //     gSystem->Load(library.c_str());
+  //   }
 
   TFile pedf( pedfname.c_str(),"READ");
   TTree *CMOSDataTreePed = (TTree*) pedf.Get("CMOSDataTree");
@@ -133,6 +135,10 @@ int Riduzione(string fname,double thres, string pedfname, size_t fiducialSideDim
   TBranch *bFramePed = CMOSDataTreePed->GetBranch("frame");
   bFramePed->SetAddress(&pedestal);
   CMOSDataTreePed->GetEntry(0);
+
+  bFramePed=NULL;
+  CMOSDataTreePed=NULL;
+  pedf.Close();
 
   cout<<"reducing file: "<<fname<<" ."<<endl;
   
@@ -173,6 +179,7 @@ int Riduzione(string fname,double thres, string pedfname, size_t fiducialSideDim
        // frame = NULL;
 #ifdef DEBUG
        cout<<"Debug:  starting loop"<<endl;
+       cout<<"jentry: "<<jentry<<endl;
        cout.flush();
 #endif       
        //       Long64_t ientry = CMOSDataTree->LoadTree(jentry);
@@ -184,9 +191,10 @@ int Riduzione(string fname,double thres, string pedfname, size_t fiducialSideDim
        nb = CMOSDataTree->GetEntry(jentry);   nbytes += nb;
 #ifdef DEBUG
        cout<<"Debug:  CMOSDataTree->GetEntry(jentry): "<<nb <<endl;
+       cout<<"jentry: "<<jentry<<endl;
        cout.flush();
        cout<<"frame id "<<frame->GetId()<<endl;
-       cout<<"frame row "<<frame->GetNRow()<<endl;
+       //       cout<<"frame row "<<frame->GetNRow()<<endl;
        //       SeedList prova= frame->FindSeeds(60);
        #endif
   
@@ -197,7 +205,7 @@ int Riduzione(string fname,double thres, string pedfname, size_t fiducialSideDim
        cout<<"seed list size: "<<seed_list.Size()<<endl;
        // ReducedDataTree->Fill();
        seed_list.Clear();
-
+       seed_listP = NULL;
      }
    TFile* outfile=new TFile(outfname.c_str(),"RECREATE");
    ReducedDataTree->Write();
