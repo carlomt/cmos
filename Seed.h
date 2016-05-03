@@ -16,6 +16,8 @@ class Seed : public TObject
   Seed(const size_t Col, const size_t Row, const int idFrame=-99, const int sideSize=7);
   virtual ~Seed();
 
+  virtual void Clear(Option_t *option="");
+
 double operator()(const int posX, const int posY); // position with respect to the relative maximum i.e. 0,0 is the center 
 double operator()(const int posX, const int posY) const;
 

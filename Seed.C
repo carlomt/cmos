@@ -42,6 +42,12 @@ Seed::Seed(const size_t Col, const size_t Row, const int idFrame, const int size
   fData.resize(size*size);
 }
 
+void Seed::Clear(Option_t *option)
+{
+  fData.clear();
+  fData.resize(fSideSize*fSideSize);
+}
+
 double Seed::operator()(const int i, const int j)
 {
   //  size_t m=sqrt(fData.size()-1)/2;
