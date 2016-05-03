@@ -139,7 +139,9 @@ int FileConverter(vector<string> filenames, int mesglevel,int version,string out
       while ((pos = s.find(delimiter)) != std::string::npos) 
 	{
 	  token = s.substr(0, pos);
+	  #ifdef DEBUG
 	  std::cout << token << std::endl;
+	  #endif
 	  s.erase(0, pos + delimiter.length());
 	}
       cout<<"s: "<<s<<endl;
@@ -157,7 +159,8 @@ int FileConverter(vector<string> filenames, int mesglevel,int version,string out
       cout<<"Debug: prima di frame->ReadFile(originalfilename);"<<endl;
       cout.flush();
 #endif
-      frame->ReadFile(originalfilename);
+      int counter=frame->ReadFile(originalfilename);
+      cout<<counter<<" values read"<<endl;
 #ifdef DEBUG
       cout<<"Debug: dopo di frame->ReadFile(originalfilename);"<<endl;
       cout.flush();
@@ -173,8 +176,20 @@ int FileConverter(vector<string> filenames, int mesglevel,int version,string out
       // 	}
 #ifdef DEBUG
       cout<<"Filling"<<endl;
+      for(size_t j=0; j<480; j++)
+	{
+	  for(size_t i=0; i<640; i++)
+	    {
+	      if(frame->At(i,j)>=157)
+		{
+		  cout<<"frame->At("<<i<<","<<j<<") "<<frame->At(i,j)<<endl;
+		}
+	    }
+	}
 #endif
+
       DataTree->Fill();
+
 #ifdef DEBUG
       cout<<"Clearing"<<endl;
 #endif

@@ -66,7 +66,7 @@ class Frame : public TObject
 
   void Set(const size_t i, const size_t j, const double val=0);
 
-  SeedList* FindSeeds(const double thres, const size_t fiducialSideDim=3,  const size_t seedSide=7, const size_t localMaximumCheckSide=3) const;
+  SeedList FindSeeds(const double thres, const size_t fiducialSideDim=3,  const size_t seedSide=7, const size_t localMaximumCheckSide=3) const;
 
  private:
   size_t fNRow, fNCol;

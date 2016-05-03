@@ -102,11 +102,6 @@ int main(int argc, char *argv[])
 		    
 	  }
     }
-  if(pedfname.compare("")==0)
-    {
-      std::cerr<<"ERRROR: The pedestal file is mandatory."<<endl;
-      exit(-1);
-    }
   return  Riduzione( inputfname, thres, pedfname, fiducialEdge,  seedSide,  localMaximumCheckSide,  outfname);
 }
 
@@ -122,24 +117,33 @@ int Riduzione(string fname,double thres, string pedfname, size_t fiducialSideDim
   //     cout<<"Loading library "<<library<<endl;
   //     gSystem->Load(library.c_str());
   //   }
-
-  TFile pedf( pedfname.c_str(),"READ");
-  TTree *CMOSDataTreePed = (TTree*) pedf.Get("CMOSDataTree");
-  CMOSDataTreePed->SetName("CMOSDataTreePed");
-  Long64_t nentriesPed = CMOSDataTreePed->GetEntries();
-  if(nentriesPed>1)
+  bool subtractPed=false;
+  Frame *pedestal = NULL;
+  if(pedfname.compare("")==0)
     {
-      std::cerr<<"WARNING: the pedestal file "<<pedfname<<" has more than one entry ("<<nentriesPed<<endl;
+      std::cerr<<"WARNING: The pedestal file is mandatory."<<endl;
+      //      exit(-1);
     }
-  Frame *pedestal = new Frame(480,640);
-  TBranch *bFramePed = CMOSDataTreePed->GetBranch("frame");
-  bFramePed->SetAddress(&pedestal);
-  CMOSDataTreePed->GetEntry(0);
+  else
+    {
+      TFile pedf( pedfname.c_str(),"READ");
+      TTree *CMOSDataTreePed = (TTree*) pedf.Get("CMOSDataTree");
+      CMOSDataTreePed->SetName("CMOSDataTreePed");
+      Long64_t nentriesPed = CMOSDataTreePed->GetEntries();
+      if(nentriesPed>1)
+	{
+	  std::cerr<<"WARNING: the pedestal file "<<pedfname<<" has more than one entry ("<<nentriesPed<<endl;
+	}
+      pedestal = new Frame(480,640);
+      TBranch *bFramePed = CMOSDataTreePed->GetBranch("frame");
+      bFramePed->SetAddress(&pedestal);
+      CMOSDataTreePed->GetEntry(0);
 
-  bFramePed=NULL;
-  CMOSDataTreePed=NULL;
-  pedf.Close();
-
+      bFramePed=NULL;
+      CMOSDataTreePed=NULL;
+      pedf.Close();
+      subtractPed=true;
+    }
   cout<<"reducing file: "<<fname<<" ."<<endl;
   
   TFile f(fname.c_str(),"READ");
@@ -163,7 +167,7 @@ int Riduzione(string fname,double thres, string pedfname, size_t fiducialSideDim
   TTree *ReducedDataTree=new TTree("CMOSReducedData","CMOS exp reduced data");
   SeedList seed_list;
   ReducedDataTree->Branch("seed_list",&seed_list);
-  SeedList *seed_listP=NULL;
+  //  SeedList *seed_listP;
 
   //  Long64_t nentries = CMOSDataTree->GetEntriesFast();
   Long64_t nentries = CMOSDataTree->GetEntries();
@@ -198,14 +202,16 @@ int Riduzione(string fname,double thres, string pedfname, size_t fiducialSideDim
        //       SeedList prova= frame->FindSeeds(60);
        #endif
   
-
-       frame->Subtract(*pedestal);
-       seed_listP = frame->FindSeeds(thres,fiducialSideDim,seedSide,localMaximumCheckSide);
-       seed_list = *seed_listP;
+       if(subtractPed)
+	 {
+	   frame->Subtract(*pedestal);
+	 }
+       seed_list = frame->FindSeeds(thres,fiducialSideDim,seedSide,localMaximumCheckSide);
+       //       seed_list = *seed_listP;
        cout<<"seed list size: "<<seed_list.Size()<<endl;
        // ReducedDataTree->Fill();
        seed_list.Clear();
-       seed_listP = NULL;
+       //       seed_listP = NULL;
      }
    TFile* outfile=new TFile(outfname.c_str(),"RECREATE");
    ReducedDataTree->Write();
@@ -222,7 +228,7 @@ void print_help(string fname)
   cout<<"Usage  : "<<fname<<" (option) inputfile"<<endl;
   cout<<"Option : -o  (set output filename, default: reduced.root)"<<endl;
   cout<<"Option : -t  (set threshold, default: 2.0)"<<endl;
-  cout<<"Option : -ped  (set the pedestal file MANDATORY)"<<endl;
+  cout<<"Option : -ped  (set the pedestal file)"<<endl;
   cout<<"Option : -seedSize  (set the seeds side dimensions, default: 7)"<<endl;
   cout<<"Option : -checkLocalMaximumSide  (set the submatrix used to check local max, default: 3)"<<endl;
   cout<<"Option : -edge  (set the fiducial edge, default: 3)"<<endl;

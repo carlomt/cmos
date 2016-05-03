@@ -1,5 +1,6 @@
 #include "Frame.h"
 #include "MyException.h"
+#include "MyDebugOut.h"
 
 #include <fstream>
 
@@ -24,7 +25,7 @@ Frame::Frame(const size_t nRow, const size_t nCol, const int Id)
   //  fData = new int[DIM];
 #ifdef DEBUG
   std::cout<<"constr "<<nRow<<" "<<nCol<<std::endl;
-  std::cout<<"constr "<<fNRow<<" "<<fNCol<<std::endl;
+  //  std::cout<<"constr "<<fNRow<<" "<<fNCol<<std::endl;
 #endif
 
   fData.resize(fNRow*fNCol);
@@ -88,6 +89,13 @@ int Frame::ReadFile(const std::string filename)
 	     }
 	  reader >> tmp;
 	  Set(i,j,tmp);
+	  if(tmp>=157)
+	    {
+	      MyDbgMsg msg;
+	      msg<<"Frame::ReadFile "<<i<<" "<<j<<"  in value: "<<tmp;
+	      msg<<"  out value: "<<At(i,j);
+	      MyDebugOut(msg);
+	    }
 	  counter++;
 	}
     }
@@ -128,6 +136,7 @@ void Frame::Set(const size_t i, const size_t j, const double val)
 void Frame::Clear(Option_t *option)
 {
   fData.clear();
+  fData.resize(fNRow*fNCol);
   fId=-99;
 }
 
@@ -255,15 +264,15 @@ Frame  Frame::operator+(const double val) const
 //   Frame  Frame::operator/(const double val);
 
 
-SeedList* Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  const size_t seedSide, const size_t localMaximumCheckSide) const
+SeedList Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  const size_t seedSide, const size_t localMaximumCheckSide) const
 {
 #ifdef DEBUG
   std::cout<<" Frame::FindSeeds "<<std::endl;
   std::cout<<" Frame ID: "<<fId<<std::endl;
   std::cout.flush();
 #endif
-  SeedList* res=new SeedList(fId);
-  //SeedList res(fId);
+  //  SeedList *res=new SeedList(fId);
+  SeedList res(fId);
 #ifdef DEBUG
   std::cout<<" res malloc "<<std::endl;
   std::cout.flush();
@@ -321,8 +330,7 @@ SeedList* Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  co
 			}
 		    }
 		  
-		  res->Add(tmp);
-		  //res.Add(tmp);
+		  res.Add(tmp);
 		}	
 	    }//end if At(i,j) > thres
 	  #ifdef DEBUG
@@ -332,8 +340,8 @@ SeedList* Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  co
 	}//end for i
     }//end for j
 #ifdef DEBUG
-  std::cout<<" Frame::FindSeeds returning: "<<res->Size()<<std::endl;
-  //std::cout<<" Frame::FindSeeds returning: "<<res.Size()<<std::endl;
+  //  std::cout<<" Frame::FindSeeds returning: "<<res->Size()<<std::endl;
+  std::cout<<" Frame::FindSeeds returning: "<<res.Size()<<std::endl;
   std::cout.flush();
 #endif
   return res;
