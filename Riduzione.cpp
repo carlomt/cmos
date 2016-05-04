@@ -27,7 +27,7 @@ int Riduzione(string fname,double thres, string pedfname, size_t fiducialSideDim
 int main(int argc, char *argv[])
 {
   cout<<argv[0]<< " 1.0"<<endl;
-  cout<<"Last edit:   Apr 27 2016."<<endl;
+  cout<<"Last edit:   May 4 2016."<<endl;
   cout<<"Compiled at: "<< __DATE__ <<", "<< __TIME__<<"."<<endl;
   
   string execname=argv[0];
@@ -209,7 +209,7 @@ int Riduzione(string fname,double thres, string pedfname, size_t fiducialSideDim
        seed_list = frame->FindSeeds(thres,fiducialSideDim,seedSide,localMaximumCheckSide);
        //       seed_list = *seed_listP;
        cout<<"seed list size: "<<seed_list.Size()<<endl;
-       // ReducedDataTree->Fill();
+       ReducedDataTree->Fill();
        seed_list.Clear();
        //       seed_listP = NULL;
      }
