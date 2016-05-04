@@ -35,6 +35,8 @@ public:
   TH1F *Delta_7x7_vs_5x5_norm_dist;
   TH2F *V_vs_npixel_cluster;
   TH1F *N_pixel_per_cluster;
+
+  ClassDef(Analisi,1);
 };
 
 #endif

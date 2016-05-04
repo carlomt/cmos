@@ -81,20 +81,23 @@ int Frame::ReadFile(const std::string filename)
 	  double tmp=-99;
 	  if(reader.eof())
 	     {
-	       std::ostringstream msg;
-	       msg<<"Frame::ReadFile input file  "<<filename;
-	       msg<<"shorter than expected ("<<fNRow*fNCol<<")";
-	       msg<<counter<<" values have been red";
-	       throwException(msg.str().c_str());
+	       std::ostringstream msg1;
+	       msg1<<"Frame::ReadFile input file  "<<filename;
+	       msg1<<"shorter than expected ("<<fNRow*fNCol<<")";
+	       msg1<<counter<<" values have been red";
+	       throwException(msg1.str().c_str());
 	     }
 	  reader >> tmp;
 	  Set(i,j,tmp);
 	  if(tmp>=157)
 	    {
-	      MyDbgMsg msg;
-	      msg<<"Frame::ReadFile "<<i<<" "<<j<<"  in value: "<<tmp;
-	      msg<<"  out value: "<<At(i,j);
-	      MyDebugOut(msg);
+	      std::ostringstream msg2;
+	      msg2<<"Frame::ReadFile "<<i<<" "<<j<<"  in value: "<<tmp;
+	      msg2<<"  out value: "<<At(i,j);
+#ifdef DEBUG
+	      std::cout<<msg2.str()<<std::endl;
+#endif
+
 	    }
 	  counter++;
 	}

@@ -14,6 +14,8 @@
 #pragma link C++ function operator<< (std::ostream &out, Seed &Seed);
 
 #pragma link C++ class SeedList+;
+
+#pragma link C++ class Analisi+;
 //#pragma link C++ function operator<< (std::ostream &out, Seed &Seed);
 
 //#pragma link C++ global gROOT;

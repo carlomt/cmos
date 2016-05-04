@@ -2,24 +2,37 @@
 #define MyDebugOut_HH
 
 #include <iostream>
+#include <sstream>
 
-#define MyDbgMsg  std::ostringstream
-
-void MyDebugOut(const std::ostringstream &msg) 
+//#define MyDbgMsg  std::ostringstream
+class MyDebugOut
 {
-#ifdef DEBUG  
-  std::cout<<msg.str()<<std::endl; 
-#endif
-  return;
-}
+ public:
+  MyDebugOut(const std::ostringstream &msg);
+  MyDebugOut(const std::string &msg);
+};
 
-void MyDebugOut(const std::string &msg) 
-{
-#ifdef DEBUG  
-  std::cout<<msg<<std::endl; 
-#endif
-  return;
-}
+/* class MyDebugOut: public std::ostream */
+/* { */
+/*   friend std::ostream& operator<<(std::ostream &out, const std::string var); */
+/*  private: */
+  
+/*   class StreamBuffer: public std::stringbuf */
+/*    { */
+/*    private: */
+/*      std::ostream &out; */
+/*      std::string prefix; */
+     
+/*    public: */
+/*      StreamBuffer(std::ostream& str, const std::string &p); */
+/*      virtual int sync(); */
+/*    }; */
+ 
+/*     StreamBuffer buffer; */
+    
+/*  public: */
+/*     Output(const std::string &prefix); */
+/* }; */
 
 
 #endif

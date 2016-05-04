@@ -1,5 +1,8 @@
 #include "Analisi.h"
 
+ClassImp(Analisi);
+
+
 Analisi::Analisi()
 {
   map_seed = new TH2F("mapofseed","seedmap",480.,0.,480.,640.,0.,640.);

@@ -21,8 +21,8 @@ CXXFLAGS	+= -DDEBUG
 endif
 
 SOURCES	= Frame.C Seed.C SeedList.C
-OBJS    = Frame.o Seed.o SeedList.o Analisi.o  CMOSDict.o
-HEADERS = Frame.h Seed.h SeedList.h Analisi.h  MyDebugOut.h
+OBJS    = Frame.o Seed.o SeedList.o Analisi.o MyDebugOut.o  CMOSDict.o
+HEADERS = Frame.h Seed.h SeedList.h Analisi.h MyDebugOut.h
 
 default: prova2.o ${OBJS} ${HEADERS}
 		$(LD) $(LDFLAGS) $(LIBS) $(GLIBS) prova2.o ${OBJS} -o prova.x 	
