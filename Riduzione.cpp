@@ -163,7 +163,8 @@ int Riduzione(string fname,double thres, string pedfname, size_t fiducialSideDim
   #ifdef DEBUG
   cout<<"Debug: CMOSDataTree->SetBranchAddress(\"frame\",&frame);"<<endl;
   #endif
-  
+
+  TFile* outfile=new TFile(outfname.c_str(),"RECREATE");
   TTree *ReducedDataTree=new TTree("CMOSReducedData","CMOS exp reduced data");
   SeedList seed_list;
   ReducedDataTree->Branch("seed_list",&seed_list);
@@ -213,7 +214,6 @@ int Riduzione(string fname,double thres, string pedfname, size_t fiducialSideDim
        seed_list.Clear();
        //       seed_listP = NULL;
      }
-   TFile* outfile=new TFile(outfname.c_str(),"RECREATE");
    ReducedDataTree->Write();
    outfile->Write();
    outfile->Close();

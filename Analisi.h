@@ -19,7 +19,7 @@ public:
   virtual ~Analisi();
   
   void WriteOnFile(const std::string fname);
-  int AnalisiData (SeedList &sl);
+  int AnalisiData (SeedList *sl);
   
   
  private:

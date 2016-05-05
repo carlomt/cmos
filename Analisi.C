@@ -57,15 +57,15 @@ void Analisi::WriteOnFile(const std::string fname)
 }
 
 
-int Analisi::AnalisiData (SeedList &sl)
+int Analisi::AnalisiData (SeedList *sl)
 { 
   int Row_seed = 0;
   int Col_seed = 0;
   double V_adja = 2.0;
   
-  for(size_t i=0; i<sl.Size(); i++)
+  for(size_t i=0; i<sl->Size(); i++)
     {
-      Seed ts = sl.At(i);
+      Seed ts = sl->At(i);
       Row_seed = ts.GetRow();
       Col_seed = ts.GetCol();
 
