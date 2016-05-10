@@ -266,6 +266,19 @@ Frame  Frame::operator+(const double val) const
 //   Frame  Frame::operator/(const Frame &LFrame);
 //   Frame  Frame::operator/(const double val);
 
+size_t Frame::RemovePixelBelowThres(const int thres, const double val)
+{
+  size_t counter=0;
+  for(size_t k=0; k<fData.size(); k++)
+    {
+      if(fData[k]<thres)
+	{
+	  counter++;
+	  fData[k]=val;
+	}
+    }
+  return counter;
+}
 
 SeedList Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  const size_t seedSide, const size_t localMaximumCheckSide) const
 {

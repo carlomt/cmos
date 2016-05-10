@@ -68,6 +68,8 @@ class Frame : public TObject
 
   SeedList FindSeeds(const double thres, const size_t fiducialSideDim=3,  const size_t seedSide=7, const size_t localMaximumCheckSide=3) const;
 
+  size_t RemovePixelBelowThres(const int thres=0, const double val=0);
+
  private:
   size_t fNRow, fNCol;
   int fId;
