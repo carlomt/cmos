@@ -231,6 +231,14 @@ void Frame::Subtract(const Frame &LFrame)
     }
 }
 
+void Frame::Divide(const Frame &LFrame)
+{
+  for(size_t i=0; i<fData.size(); i++)
+    {
+      fData[i]/=LFrame.fData[i];
+    }
+}
+
 
 void Frame::Resize(const size_t nRow, const size_t nCol)
 {

@@ -44,6 +44,8 @@ class Frame : public TObject
 
   void Subtract(const Frame &LFrame);
 
+  void Divide(const Frame &LFrame);
+
   void Resize(const size_t nRow, const size_t nCol);
 
   Frame operator+(const Frame &LFrame) const;

@@ -44,6 +44,7 @@ int main(int argc, char *argv[])
   string outfname="reduced.root";
   string inputfname="";
   string pedfname="";
+  // string noisefname="";
   
   if(argc==1)
     {
@@ -85,6 +86,12 @@ int main(int argc, char *argv[])
 	      {
 		pedfname=argv[++i];
 	      }
+	    /*
+	     else if(option.compare("-noise")==0)
+	      {
+		noisefname=argv[++i];
+	      }
+	    */
 	    else if(option.compare("-o")==0)
 	      {
 		outfname=argv[++i];
@@ -118,7 +125,9 @@ int Riduzione(string fname,double thres, string pedfname, size_t fiducialSideDim
   //     gSystem->Load(library.c_str());
   //   }
   bool subtractPed=false;
+  //  bool divideNoise=false;
   Frame *pedestal = NULL;
+  //  Frame *noise = NULL;
   if(pedfname.compare("")==0)
     {
       std::cerr<<"WARNING: The pedestal file is mandatory."<<endl;
@@ -144,6 +153,33 @@ int Riduzione(string fname,double thres, string pedfname, size_t fiducialSideDim
       pedf.Close();
       subtractPed=true;
     }
+  /*
+  if(noisefname.compare("")==0)
+    {
+      std::cerr<<"WARNING: The noise file is mandatory."<<endl;
+      //      exit(-1);
+    }
+  else
+    {
+      TFile noisef( noisefname.c_str(),"READ");
+      TTree *CMOSDataTreeNoise = (TTree*) noisef.Get("CMOSDataTree");
+      CMOSDataTreeNoise->SetName("CMOSDataTreeNoise");
+      Long64_t nentriesNoise = CMOSDataTreeNoise->GetEntries();
+      if(nentriesNoise>1)
+	{
+	  std::cerr<<"WARNING: the noise file "<<noisefname<<" has more than one entry ("<<nentriesNoise<<endl;
+	}
+      noise = new Frame(480,640);
+      TBranch *bFrameNoise = CMOSDataTreeNoise->GetBranch("frame");
+      bFrameNoise->SetAddress(&noise);
+      CMOSDataTreeNoise->GetEntry(0);
+
+      bFrameNoise=NULL;
+      CMOSDataTreeNoise=NULL;
+      noisef.Close();
+      divideNoise=true;
+    }
+  */
   cout<<"reducing file: "<<fname<<" ."<<endl;
   
   TFile f(fname.c_str(),"READ");
@@ -159,6 +195,9 @@ int Riduzione(string fname,double thres, string pedfname, size_t fiducialSideDim
 
   TBranch *bFrame = CMOSDataTree->GetBranch("frame");
   bFrame->SetAddress(&frame);
+
+  TBranch *nFrame = CMOSDataTree->GetBranch("frame");
+  nFrame->SetAddress(&frame);
 
   #ifdef DEBUG
   cout<<"Debug: CMOSDataTree->SetBranchAddress(\"frame\",&frame);"<<endl;
@@ -207,9 +246,17 @@ int Riduzione(string fname,double thres, string pedfname, size_t fiducialSideDim
 	 {
 	   frame->Subtract(*pedestal);
 	 }
+       /*
+       if(divideNoise)
+	 {
+	   frame->Divide(*noise);
+	   cout<<"DEBUG"<<endl;
+	 }
+       */
        seed_list = frame->FindSeeds(thres,fiducialSideDim,seedSide,localMaximumCheckSide);
        //       seed_list = *seed_listP;
-       cout<<"seed list size: "<<seed_list.Size()<<endl;
+       cout<<seed_list.Size()<<endl;
+	 //frame->GetId()<<" "<<"seed list size: "<<seed_list.Size()<<endl;
        ReducedDataTree->Fill();
        seed_list.Clear();
        //       seed_listP = NULL;
@@ -229,6 +276,7 @@ void print_help(string fname)
   cout<<"Option : -o  (set output filename, default: reduced.root)"<<endl;
   cout<<"Option : -t  (set threshold, default: 2.0)"<<endl;
   cout<<"Option : -ped  (set the pedestal file)"<<endl;
+  //  cout<<"Option : -noise  (set the noise file)"<<endl;
   cout<<"Option : -seedSize  (set the seeds side dimensions, default: 7)"<<endl;
   cout<<"Option : -checkLocalMaximumSide  (set the submatrix used to check local max, default: 3)"<<endl;
   cout<<"Option : -edge  (set the fiducial edge, default: 3)"<<endl;
