@@ -1,7 +1,9 @@
 #include "Analisi.h"
 
-using namespace std;
+//using namespace std;
 
+using std::endl;
+using std::cout;
 
 ClassImp(Analisi);
 
@@ -104,7 +106,7 @@ int Analisi::AnalisiData (SeedList *sl)
   
   int Row_seed = 0;
   int Col_seed = 0;
-  double V_adja = 4.0;
+  double V_adja = 4.0; //fSecondaryThr
   int cont = 0;
   
   for(size_t i=0; i<sl->Size(); i++)
@@ -116,7 +118,7 @@ int Analisi::AnalisiData (SeedList *sl)
       int N = 1;
   
 
-      map_seed->Fill(float(Row_seed),float(Col_seed));
+      map_seed->Fill((Row_seed),(Col_seed)); //perche cast?
       double R_center_vs_cluster;
       R_center_vs_cluster = sqrt(pow((240.-Row_seed),2) +pow((320.-Col_seed),2));
       R_center_vs_cluster_dist->Fill(R_center_vs_cluster);
@@ -135,13 +137,12 @@ int Analisi::AnalisiData (SeedList *sl)
       double RMS_2_1 = 0.;
       double RMS_ = 0.;
 
-        
       char logStr[10000];
       char logStr3[10000];
-      sprintf(logStr, "");
+      sprintf(logStr, ""); //?!?!
       
-      vector<ACPoint> preCluster = vector<ACPoint>{};
-      vector<ACPoint> cluster = vector<ACPoint>{};
+      vector<ACPoint> preCluster;// = vector<ACPoint>{};
+      vector<ACPoint> cluster//; = vector<ACPoint>{};
       cluster.push_back(ACPoint(0,0));
       
       for (int k = ts.GetPixelMin(); k < ts.GetPixelMax(); k++)
@@ -159,7 +160,8 @@ int Analisi::AnalisiData (SeedList *sl)
 	      if (isOverThreshold)
 		{
 		  sprintf(logStr, "%s[[%+04.0f]] ", logStr, tsValue);
-		} else
+		}
+	      else
 		{
 		  sprintf(logStr, "%s (%+04.0f)  ", logStr, tsValue);
 		}
@@ -198,7 +200,7 @@ int Analisi::AnalisiData (SeedList *sl)
 		  {
 		    
 		    sprintf(logStr, "%s\n(%d, %d) is near (%d, %d)", logStr, preClusterPoint.x, preClusterPoint.y, clusterPoint.x, clusterPoint.y);
-		    N++;
+		    N++;//numero pixel nel cluster
 		    found = true;
 		    cluster.push_back(preClusterPoint);
 		    preCluster.erase(preCluster.begin()+i);

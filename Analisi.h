@@ -30,7 +30,7 @@ public:
   void WriteOnFile(const std::string fname);
   int AnalisiData (SeedList *sl);
     
-  
+  inline void SetSecondaryThr(double thr){fSecondaryThr=thr;};
   
  private:
   TH2F *map_seed;
@@ -82,6 +82,8 @@ public:
   TH1F *V_vs_EPixMax;
   TH1F *V_vs_RMS;
   TH1F *EPixMax_vs_RMS;
+
+  double fSecondaryThr;
   
   ClassDef(Analisi,1);
 };
