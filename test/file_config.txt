@@ -1,0 +1,22 @@
+I valori settati sono
+Nome della cartella dove salvare = 	J:\Probe_beta\MT9V011_new_90Sr_G01_TI200ms_noThre\
+La base del nome del file =		.\MT9V011_new_90Sr_G01_TI200ms_noThre
+Numero frame da salvare = 		10000
+Livello del trigger 0 =			0
+Livello del trigger 1 = 		10
+Numero frame per bad pixel = 		1
+Soglia per indetificare bad pixel = 	50000
+Modalità del trigger (1)OR - (2)AND = 	1
+Dimensione media piedistallo = 		1
+Templete di init = 			Flat
+
+sensorName = A-0360 
+sensorType = 3 
+width = 640 
+height = 480 
+pixelBytes = 2 
+pixelBits = 10 
+bufferSize = 614912 
+imageType = Bayer 10 
+shipAddr = 186 
+num_regs = 61 
