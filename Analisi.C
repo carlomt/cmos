@@ -141,8 +141,8 @@ int Analisi::AnalisiData (SeedList *sl)
       char logStr3[10000];
       sprintf(logStr, ""); //?!?!
       
-      vector<ACPoint> preCluster;// = vector<ACPoint>{};
-      vector<ACPoint> cluster//; = vector<ACPoint>{};
+      std::vector<ACPoint> preCluster;// = vector<ACPoint>{};
+      std::vector<ACPoint> cluster;// = vector<ACPoint>{};
       cluster.push_back(ACPoint(0,0));
       
       for (int k = ts.GetPixelMin(); k < ts.GetPixelMax(); k++)
