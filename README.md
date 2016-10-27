@@ -1,5 +1,20 @@
 # cmos
 
+Per scaricare il codice andare nella cartella desiderata e lanciare il comando:
+
+`git clone git@github.com:carlomt/cmos.git`
+
+creera' una cartella
+`cmos`
+con dentro tutto il codice.
+
+Per aggiornare all'ultima versione usare il comando:
+
+`git pull`
+
+dentro quella cartella.
+
+
 Come convenzione i file con estensione cpp producono eseguibili, i file con estensione C sono le implementazioni delle classi.
 Tutti gli eseguibili si compilano con make e il nome dell'eseguibile (con .x alla fine)
 
