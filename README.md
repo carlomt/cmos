@@ -29,6 +29,8 @@ i dati raw (in txt) sono su
 
 `@bb8.roma1.infn.it:/home/cmos/data/`
 
+(directory in sola lettura)
+
 i root files conterranno istanze della classe Frame
 
 Riduzione.x permette di settare molte variabili della riduzione da riga di comando (-help mostra tali opzioni)
