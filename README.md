@@ -34,7 +34,7 @@ i root files conterranno istanze della classe Frame
 Riduzione.x permette di settare molte variabili della riduzione da riga di comando (-help mostra tali opzioni)
 produce un file root con un'istanza della classe SeedList che all'interno ha un array di seed (istanze della classe Seed)
 
-esempio.x e' il codice di Amedeo che prende in input il file prodotto dalla riduzione e produce tutti i plot
+esempio.x e' il codice di Amedeo che prende in input il file prodotto dalla riduzione e produce tutti i plot che vengono salvati in un file chiamato di default `analized.root`
 
 CMOSDict.cxx e' il dizionario delle classi per ROOT (se usato in modalita' interattiva) si crea con
 
@@ -49,4 +49,11 @@ anche questa libreria si produce con:
 `make libCMOS.so`
 
 P.S.: Il codice di Amedeo e' estremamente verboso e forse andrebbe sistemato e aggiunto a setthis.sh
+oltre che estremamente lento (almeno per bb8)
+
+Il mio consiglio e' convertire alcuni file di dati in root su bb8 e copiarli sul tuo portatile con
+
+`scp lgiuliano@bb8.roma1.infn.it:/pathdelfile/nomefile.root .`
+
+e poi girare riduzione e analisi sul tuo portatile (facendo attenzione di avere l'ultima versione)
 
