@@ -22,8 +22,8 @@ SOURCE="${BASH_SOURCE[0]}"
 DIRREL="$( dirname "$SOURCE" )"
 CMOSCODEDIR=$(abspath $DIRREL)
 
-alias FileConverter='$CMOSCODEDIR/FileConverter.x'
-alias Riduzione='$CMOSCODEDIR/Riduzione.x'
+
+
 
 function _mycomplete_FileConverter_()
 {
@@ -41,9 +41,17 @@ function _mycomplete_FileConverter_()
     fi
 }
 
-complete -d -X '.[^./]*' -F _mycomplete_FileConverter_ FileConverter
-
-echo "created the alias 'FileConverter' with autocompletion"
+if [ -f ./FileConverter.x ]; then  
+    alias FileConverter='$CMOSCODEDIR/FileConverter.x'
+    complete -d -X '.[^./]*' -F _mycomplete_FileConverter_ FileConverter
+    echo "created the alias 'FileConverter' with autocompletion"
+else
+    echo "WARNING: FileConverter.x does not exist, didi you compiled?"
+    echo "try: make FileConverter.x"
+fi
+if [[ FileConverter.cpp -nt FileConverter.x ]]; then
+  echo "WARNING: FileConverter.cpp has been modified after FileConverter.x has been produced. Maybe you should recompile?"
+fi
 
 function _mycomplete_Riduzione_()
 {
@@ -61,6 +69,15 @@ function _mycomplete_Riduzione_()
     fi
 }
 
-complete -d -X '.[^./]*' -F _mycomplete_Riduzione_ Riduzione
+if [ -f ./Riduzione.x ]; then  
+    alias Riduzione='$CMOSCODEDIR/Riduzione.x'
+    complete -d -X '.[^./]*' -F _mycomplete_Riduzione_ Riduzione
+    echo "created the alias 'Riduzione' with autocompletion"
+else
+    echo "WARNING: Riduzione.x does not exist, didi you compiled?"
+    echo "try: make Riduzione.x"
+fi
+if [[ Riduzione.cpp -nt Riduzione.x ]]; then
+  echo "WARNING: Riduzione.cpp has been modified after Riduzione.x has been produced. Maybe you should recompile?"
+fi
 
-echo "created the alias 'Riduzione' with autocompletion"
