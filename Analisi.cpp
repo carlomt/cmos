@@ -28,7 +28,7 @@ int Analisi (SeedList &sl , string outfname)
   TFile f ("/Users/Amedeo/repos/cmos/Analisi.root","recreate");
   TH2F *map_seed = new TH2F("mapofseed","seedmap",480.,0.,480.,640.,0.,640.);
   TH2F *map_seed_2 = new TH2F("mapofseed2","seedmap2",480.,0.,480.,640.,0.,640.);
-  TH3F *trid_map_seed = new TH3F("3D map of seed","",480,2.,480.,640,2.,640.,150,2.,150.);
+  TH2F *trid_map_seed = new TH2F("3D map of seed","",480,2.,480.,640,2.,640.,150,2.,150.);
   TH1F *V_single = new TH1F("Sigle pixel signal DV","",8000,-50.,950.);
   TH1F *V_clu_Asy = new TH1F("Cluster asymmetric signal","",8000, -50., 5050.);
   TH1F *V_clu_3x3_dist = new TH1F("Cluster signal 3x3","",8000,-50.,5050.);
