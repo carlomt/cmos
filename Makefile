@@ -1,7 +1,7 @@
 ROOTCFLAGS   := $(shell root-config --cflags)
+ROOTLDFLAGS  := $(shell root-config --ldflags)
 ROOTLIBS     := $(shell root-config --libs)
 ROOTGLIBS    := $(shell root-config --glibs)
-ROOTLDFLAGS  := $(shell root-config --ldflags)
 
 DEBUG=OFF
 
@@ -9,7 +9,7 @@ DEBUG=OFF
 CXX           = g++ 
 CXXFLAGS      = -O -Wall  -fPIC -DROOT_INTERFACE -I.  -g 
 LD            = g++ 
-LDFLAGS       = -O -Wall -fPIC $(ROOTLDFLAGS)  -g 
+LDFLAGS       = -O -Wall -fPIC $(ROOTLDFLAGS) -g 
 SOFLAGS       = -shared
 
 CXXFLAGS     += $(ROOTCFLAGS)
@@ -24,8 +24,9 @@ SOURCES	= Frame.C Seed.C SeedList.C
 OBJS    = Frame.o Seed.o SeedList.o Analisi.o MyDebugOut.o  CMOSDict.o
 HEADERS = Frame.h Seed.h SeedList.h Analisi.h MyDebugOut.h
 
-default: prova2.o ${OBJS} ${HEADERS}
-		$(LD) $(LDFLAGS) $(LIBS) $(GLIBS) prova2.o ${OBJS} -o prova.x 	
+default: all
+
+all: CMOSDict.cxx libCMOS.so FileConverter.x Analisi.x esempio.x
 
 prova2.o: prova2.C ${HEADERS}    
 		 ${CXX} ${CXXFLAGS} -c prova2.C
@@ -37,7 +38,7 @@ prova2.o: prova2.C ${HEADERS}
 		${CXX} $(CXXFLAGS) -c $<
 
 %.x: %.cpp ${OBJS} ${HEADERS}
-		${CXX} $(CXXFLAGS) $(LDFLAGS) $(LIBS) $(GLIBS) ${OBJS}  -D__OFNAME__='"$@"' $< -o $@
+		${CXX} $(CXXFLAGS) $(LDFLAGS) -D__OFNAME__='"$@"' $< -o $@ ${OBJS} $(GLIBS) 
 
 CMOSDict.cxx: ${HEADERS} CMOSLinkDef.h
 		${ROOTSYS}/bin/rootcint -f $@ -c  $(CXXFLAGS) -p $^
@@ -45,7 +46,7 @@ CMOSDict.cxx: ${HEADERS} CMOSLinkDef.h
 libCMOS.so: ${OBJS}
 #		${LD} -shared -o$@ ${LDFLAGS} $(CXXFLAGS) -I$(ROOTSYS)/include $^
 #		g++ -shared -o$@ `root-config --ldflags` $(CXXFLAGS) -I$(ROOTSYS)/include $^
-		${LD} ${SOFLAGS} ${LDFLAGS} $(LIBS) $(GLIBS) ${OBJS}  -o $@ 
+		${LD} ${SOFLAGS} ${LDFLAGS} -o $@ ${OBJS} $(GLIBS) 
 
 clean:
 		rm -f *.x *.a *.o *.so *.pcm *.d CMOSDict.cxx
