@@ -26,7 +26,7 @@ HEADERS = Frame.h Seed.h SeedList.h Analisi.h MyDebugOut.h
 
 default: all
 
-all: CMOSDict.cxx libCMOS.so FileConverter.x Analisi.x esempio.x
+all: CMOSDict.cxx libCMOS.so FileConverter.x Riduzione.x esempio.x
 
 prova2.o: prova2.C ${HEADERS}    
 		 ${CXX} ${CXXFLAGS} -c prova2.C
