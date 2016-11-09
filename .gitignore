@@ -30,3 +30,8 @@
 *.x.dSYM/
 *~
 *.root
+
+*.x
+CMOSDict.cxx
+\#*#
+*.pcm
