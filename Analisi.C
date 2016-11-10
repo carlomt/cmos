@@ -189,11 +189,11 @@ int Analisi::AnalisiData (SeedList *sl)
       do {
 	found = false;
         
-	for (int i = 0; i < preCluster.size(); i++)
+	for (size_t i = 0; i < preCluster.size(); i++)
 	  {
 	    
 	    ACPoint preClusterPoint = preCluster.at(i); //dammi il punto all'i-sima posizione della lista di precluster
-	    for (int j = 0; j < cluster.size(); j++)
+	    for (size_t j = 0; j < cluster.size(); j++)
 	      {  
 		ACPoint clusterPoint = cluster.at(j);
 		if (std::abs(preClusterPoint.x-clusterPoint.x) <= TOLERANCE_PIXELS && std::abs(preClusterPoint.y-clusterPoint.y) <= TOLERANCE_PIXELS)
@@ -224,7 +224,7 @@ int Analisi::AnalisiData (SeedList *sl)
       
       ///////////////////////Calcolo Cluster Asimmetrico/////////////////////////
       
-      for (int i = 0; i < cluster.size(); i++)
+      for (size_t i = 0; i < cluster.size(); i++)
 	{
 	  ACPoint currentPoint = cluster.at(i);
 	  //	  sprintf(logStr2, "%s (%d, %d) -", logStr2, currentPoint.x, currentPoint.y);
@@ -236,7 +236,7 @@ int Analisi::AnalisiData (SeedList *sl)
       
      //////////////////////Calcolo RMS Cluster Asimmetrico/////////////////////
       
-      for (int i = 0; i < cluster.size(); i++)
+      for (size_t i = 0; i < cluster.size(); i++)
 	{
 	  ACPoint currentPoint = cluster.at(i);
 	  float tsValue = ts(currentPoint.x,currentPoint.y);
