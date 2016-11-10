@@ -139,7 +139,7 @@ int Analisi::AnalisiData (SeedList *sl)
 
       char logStr[10000];
       char logStr3[10000];
-      sprintf(logStr, ""); //?!?!
+      //      sprintf(logStr, ""); //?!?!
       
       std::vector<ACPoint> preCluster;// = vector<ACPoint>{};
       std::vector<ACPoint> cluster;// = vector<ACPoint>{};
@@ -157,14 +157,14 @@ int Analisi::AnalisiData (SeedList *sl)
 	      
 	      bool isOverThreshold = tsValue > V_adja; //cerco tutti i pixel maggiori della soglia secondaria
 	      
-	      if (isOverThreshold)
-		{
-		  sprintf(logStr, "%s[[%+04.0f]] ", logStr, tsValue);
-		}
-	      else
-		{
-		  sprintf(logStr, "%s (%+04.0f)  ", logStr, tsValue);
-		}
+	      // if (isOverThreshold)
+	      // 	{
+	      // 	  sprintf(logStr, "%s[[%+04.0f]] ", logStr, tsValue);
+	      // 	}
+	      // else
+	      // 	{
+	      // 	  sprintf(logStr, "%s (%+04.0f)  ", logStr, tsValue);
+	      // 	}
 	      
 	      
 	      if (k == 0 && l == 0)
@@ -179,10 +179,10 @@ int Analisi::AnalisiData (SeedList *sl)
 		  
 		}
 	    }
-	  sprintf(logStr, "%s\n", logStr);
+	  //	  sprintf(logStr, "%s\n", logStr);
 	}
       
-      sprintf(logStr, "%s\n\n", logStr);
+      //      sprintf(logStr, "%s\n\n", logStr);
       
       bool found; // found = esiste almeno un pixel nei precluster adiacente ad uno di quelli nel cluster?
       
@@ -199,7 +199,7 @@ int Analisi::AnalisiData (SeedList *sl)
 		if (std::abs(preClusterPoint.x-clusterPoint.x) <= TOLERANCE_PIXELS && std::abs(preClusterPoint.y-clusterPoint.y) <= TOLERANCE_PIXELS)
 		  {
 		    
-		    sprintf(logStr, "%s\n(%d, %d) is near (%d, %d)", logStr, preClusterPoint.x, preClusterPoint.y, clusterPoint.x, clusterPoint.y);
+		    //		    sprintf(logStr, "%s\n(%d, %d) is near (%d, %d)", logStr, preClusterPoint.x, preClusterPoint.y, clusterPoint.x, clusterPoint.y);
 		    N++;//numero pixel nel cluster
 		    found = true;
 		    cluster.push_back(preClusterPoint);
@@ -215,24 +215,24 @@ int Analisi::AnalisiData (SeedList *sl)
 	  }
 	
       } while (found);
-      sprintf(logStr, "%s\n\n", logStr);
+      //      sprintf(logStr, "%s\n\n", logStr);
       
       
-      cout << logStr;
+      //      cout << logStr;
       char logStr2[10000];
-      sprintf(logStr2, "Result: ");
+      //      sprintf(logStr2, "Result: ");
       
       ///////////////////////Calcolo Cluster Asimmetrico/////////////////////////
       
       for (int i = 0; i < cluster.size(); i++)
 	{
 	  ACPoint currentPoint = cluster.at(i);
-	  sprintf(logStr2, "%s (%d, %d) -", logStr2, currentPoint.x, currentPoint.y);
+	  //	  sprintf(logStr2, "%s (%d, %d) -", logStr2, currentPoint.x, currentPoint.y);
 	  V_clu_A += ts(currentPoint.x, currentPoint.y);
         }
       V_clu_fract_n = (V_clu_A)/cluster.size();
-      sprintf(logStr2, "%s\n\n\n\n\n\n", logStr2);
-      cout << logStr2;
+      //      sprintf(logStr2, "%s\n\n\n\n\n\n", logStr2);
+      //      cout << logStr2;
       
      //////////////////////Calcolo RMS Cluster Asimmetrico/////////////////////
       
@@ -240,7 +240,7 @@ int Analisi::AnalisiData (SeedList *sl)
 	{
 	  ACPoint currentPoint = cluster.at(i);
 	  float tsValue = ts(currentPoint.x,currentPoint.y);
-	  sprintf(logStr3, "%s[[%f]]\n ",logStr3,tsValue);
+	  //	  sprintf(logStr3, "%s[[%f]]\n ",logStr3,tsValue);
       	  RMS_2_1+= (pow((tsValue - V_clu_fract_n),2));
 	  RMS_2= (RMS_2_1) /(cluster.size()-1);
 	}
@@ -251,7 +251,7 @@ int Analisi::AnalisiData (SeedList *sl)
 	{
 	  //cout << logStr;
 	  //cout << logStr2;
-	  cout<<logStr3;
+	  //	  cout<<logStr3;
 	  cout<<"V_clu ="<<V_clu_A<<endl;
 	  cout<<"Npix ="<<cluster.size()<<endl;
 	  cout<<"V_clu_fractN ="<<V_clu_fract_n<<endl;
