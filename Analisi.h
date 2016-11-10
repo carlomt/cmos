@@ -18,15 +18,6 @@ public:
   Analisi();
   virtual ~Analisi();
     
-    struct ACPoint {
-        ACPoint(int _x, int _y) {
-            x = _x;
-            y = _y;
-        };
-        int x = 0;
-        int y = 0;
-    };
-  
   void WriteOnFile(const std::string fname);
   int AnalisiData (SeedList *sl);
     
@@ -88,6 +79,21 @@ public:
   ClassDef(Analisi,1);
 };
 
+
+class ACPoint
+{
+ public:
+  ACPoint(int _x=0, int _y=0) {
+    x = _x;
+    y = _y;
+  };
+  int x;
+  int y;
+};
+  
+
+
 #endif
 
  
+
