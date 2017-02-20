@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
   cout<<"Compiled at: "<< __DATE__ <<", "<< __TIME__<<"."<<endl;
 
   string execname=argv[0];
-  string inputfname="";
+  vector<std::string> filenames;  
   string outfname="analized.root";
   
   if(argc==1)
@@ -64,15 +64,23 @@ int main(int argc, char *argv[])
 	  }
 	else
 	  {
-	    inputfname=argv[i];
+	    filenames.push_back(argv[i]);
 	    //cout<<"reducing file: "<<argv[i]<<" ."<<endl;
 	    
 	  }
     }
   SeedList *seed_list=new SeedList();
   const string fname(inputfname);
-  TFile f(fname.c_str(),"READ");
-  TTree *ReducedDataTree=(TTree*) f.Get("CMOSReducedData");
+  // TFile f(fname.c_str(),"READ");
+  TChain* ReducedDataTree=new TChain("CMOSReducedData");
+  for(size_t i =0;i<filenames.size();i++)
+    {
+      int check_add=0;  
+      std::string filename=filenames[i];
+      check_add = ReducedDataTree->AddFile(filename.c_str());
+      cout<<"adding "<<filename<<" to analysis "<<check_add<<" chain size: "<<ReducedDataTree->GetNtrees()<<endl; 
+    }
+  // TTree *ReducedDataTree=(TTree*) f.Get("CMOSReducedData");
   TBranch *bSeedList = ReducedDataTree->GetBranch("seed_list");
   bSeedList->SetAddress(&seed_list);
 
