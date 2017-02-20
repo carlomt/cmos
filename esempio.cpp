@@ -10,6 +10,7 @@
 #include "TSystem.h"
 #include "TTree.h"
 #include "TFile.h"
+#include "TChain.h"
 #include "TClassTable.h"
 #include "Analisi.h"
 
@@ -32,7 +33,7 @@ int main(int argc, char *argv[])
   cout<<"Compiled at: "<< __DATE__ <<", "<< __TIME__<<"."<<endl;
 
   string execname=argv[0];
-  vector<std::string> filenames;  
+  std::vector<std::string> filenames;  
   string outfname="analized.root";
   
   if(argc==1)
@@ -70,7 +71,7 @@ int main(int argc, char *argv[])
 	  }
     }
   SeedList *seed_list=new SeedList();
-  const string fname(inputfname);
+  //  const string fname(inputfname);
   // TFile f(fname.c_str(),"READ");
   TChain* ReducedDataTree=new TChain("CMOSReducedData");
   for(size_t i =0;i<filenames.size();i++)
