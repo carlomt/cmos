@@ -62,12 +62,21 @@ double Frame::operator()(const size_t i,const size_t j)
 
 int Frame::ReadFile(const std::string filename,  const bool isBinary)
 {
+  if(fNRow==0 || fNCol==0)
+    {
+      std::ostringstream msg;
+      msg<<"Frame::ReadFile the number of row or col is 0, did you initialized them?";
+      throwException(msg.str().c_str());
+    }
 #ifdef DEBUG
   std::cout<<" Frame::ReadFile reading "<<filename<<std::endl;
 #endif
   std::ifstream reader;
   if(isBinary)
     {
+#ifdef DEBUG
+      std::cout<<" Frame::ReadFile binary file "<<std::endl;
+#endif
       reader.open(filename.c_str(),std::ios::binary);
     }
   else
