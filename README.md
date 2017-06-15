@@ -51,9 +51,13 @@ anche questa libreria si produce con:
 `make libCMOS.so`
 
 poi si possono usare tutte le classi in interattivo, ad esempio:
+
 `root [0] .L libCMOS.so`
+
 `root [1] Frame prova(480,640)`
+
 `root [2] prova.ReadFile("capture0001.raw",true)`
+
 `root [3] prova.Draw("colz")`
 
 P.S.: Il codice di Amedeo e' estremamente verboso e forse andrebbe sistemato e aggiunto a setthis.sh
@@ -67,6 +71,8 @@ e poi girare riduzione e analisi sul tuo portatile (facendo attenzione di avere 
 
 
 Per attivare gli output di debug ricompilare con la flag apposita:
+
 `make clean`
+
 `make libCMOS.so DEBUG=ON`
 
