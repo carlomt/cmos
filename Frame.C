@@ -60,13 +60,21 @@ double Frame::operator()(const size_t i,const size_t j)
     }
 }
 
-int Frame::ReadFile(const std::string filename)
+int Frame::ReadFile(const std::string filename,  const bool isBinary)
 {
 #ifdef DEBUG
   std::cout<<" Frame::ReadFile reading "<<filename<<std::endl;
 #endif
   std::ifstream reader;
-  reader.open(filename.c_str(),std::ios_base::in);
+  if(isBinary)
+    {
+      reader.open(filename.c_str(),std::ios::binary);
+    }
+  else
+    {
+      reader.open(filename.c_str(),std::ios_base::in);
+    }
+
   if(!reader.is_open())
     {
       std::ostringstream msg;

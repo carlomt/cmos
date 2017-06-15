@@ -33,7 +33,7 @@ class Frame : public TObject
   inline double At(const size_t i,const size_t j){return operator()(i,j);};
   inline double At(const size_t i,const size_t j) const {return operator()(i,j);};
 
-  int ReadFile(const std::string filename);
+  int ReadFile(const std::string filename, const bool isBinary=false);
 
   void Multiply(const Frame &LFrame);
   inline void Multiply(const Frame *LFrame){return Multiply(*LFrame);};

@@ -31,9 +31,10 @@ function _mycomplete_FileConverter_()
     local word=${COMP_WORDS[COMP_CWORD]}
     local prev=${COMP_WORDS[COMP_CWORD-1]}
     local line=${COMP_LINE}
-    local xpat='!*.txt'
+    # local xpat='!*.raw'
+    local xpat='!*.raw'
 
-    COMPREPLY=($(compgen -f -X "$xpat" -- "${word}"))
+    COMPREPLY=($(compgen -f -X '!*.@(txt|raw)' -- "${word}"))
 
     # completing an option
     if [[ "$word" == -* ]]; then

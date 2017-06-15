@@ -39,8 +39,8 @@ string CheckOutputExtension(const string fname);
 
 int main(int argc, char *argv[])
 {
-  cout<<argv[0]<< " 1.0"<<endl;
-  cout<<"Last edit:   Apr 26 2016."<<endl;
+  cout<<argv[0]<< " 1.1"<<endl;
+  cout<<"Last edit:   Jun 15 2017."<<endl;
   cout<<"Compiled at: "<< __DATE__ <<", "<< __TIME__<<"."<<endl;
   
   string execname=argv[0];
@@ -151,15 +151,23 @@ int FileConverter(vector<string> filenames, int mesglevel,int version,string out
       frame->SetId(myStoi(frameids));
       string filename_ext = filename.erase(0, filename.find("."));
       
-      if(filename_ext.compare(".txt")!=0 )
+      if(filename_ext.compare(".txt")!=0 && filename_ext.compare(".raw")!=0)
 	{
-	  cout<<"WARNING: this program is made to read txt files"<<endl;
+	  cout<<"WARNING: this program is made to read txt or binary raw files."<<endl;
 	}
 #ifdef DEBUG
       cout<<"Debug: prima di frame->ReadFile(originalfilename);"<<endl;
       cout.flush();
 #endif
-      int counter=frame->ReadFile(originalfilename);
+      int counter=0;
+      if(filename_ext.compare(".txt")==0)
+	{
+	  counter = frame->ReadFile(originalfilename);
+	}
+      else 
+	{
+	  counter = frame->ReadFile(originalfilename, true);
+	}
       cout<<counter<<" values read"<<endl;
 #ifdef DEBUG
       cout<<"Debug: dopo di frame->ReadFile(originalfilename);"<<endl;
