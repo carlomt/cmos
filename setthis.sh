@@ -32,7 +32,6 @@ function _mycomplete_FileConverter_()
     local prev=${COMP_WORDS[COMP_CWORD-1]}
     local line=${COMP_LINE}
     # local xpat='!*.raw'
-    local xpat='!*.raw'
 
     COMPREPLY=($(compgen -f -X '!*.@(txt|raw)' -- "${word}"))
 
