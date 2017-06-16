@@ -77,7 +77,7 @@ int Frame::ReadFile(const std::string filename,  const bool isBinary)
 #ifdef DEBUG
       std::cout<<" Frame::ReadFile binary file "<<std::endl;
 #endif
-      reader.open(filename.c_str(),std::ios::binary);
+      reader.open(filename.c_str(), std::ios_base::in | std::ios::binary);
     }
   else
     {
@@ -104,7 +104,18 @@ int Frame::ReadFile(const std::string filename,  const bool isBinary)
 	       msg1<<counter<<" values have been red";
 	       throwException(msg1.str().c_str());
 	     }
-	  reader >> tmp;
+	  if(isBinary)
+	    {
+	      //bisogna essere sicuri che i dati nel binario siano interi senza segno a 16 bit
+	      //altrimenti int16_t con il segno o a 32 o 64 bit
+	      uint16_t a;
+	      reader.read(reinterpret_cast<char *>(&a), sizeof(a));
+	      tmp = a;
+	    }
+	  else
+	    {
+	      reader >> tmp;
+	    }
 	  Set(i,j,tmp);
 	  if(tmp>=157)
 	    {
