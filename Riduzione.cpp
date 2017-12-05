@@ -12,6 +12,8 @@
 #include "TFile.h"
 #include "TClassTable.h"
 
+#include "string_parser.h"
+
 //#include "getFileCreationTime.h"
 
 using std::cout;
@@ -22,12 +24,12 @@ using std::atoi;
 using std::atof;
 
 void print_help(string fname="executable");
-int Riduzione(string fname,double thres, string pedfname, size_t fiducialSideDim=3,  const size_t seedSide=7, const size_t localMaximumCheckSide=3, string outfname="reduced.root");
+int Riduzione(string fname,double thres, string pedfname, size_t fiducialSideDim=3,  const size_t seedSide=7, const size_t localMaximumCheckSide=3, string outfname="reduced.root",  int FrameNCol=480, int FrameNRow=640);
 
 int main(int argc, char *argv[])
 {
   cout<<argv[0]<< " 1.0"<<endl;
-  cout<<"Last edit:   May 4 2016."<<endl;
+  cout<<"Last edit:   Dec 5 2017."<<endl;
   cout<<"Compiled at: "<< __DATE__ <<", "<< __TIME__<<"."<<endl;
   
   string execname=argv[0];
@@ -44,6 +46,7 @@ int main(int argc, char *argv[])
   string outfname="reduced.root";
   string inputfname="";
   string pedfname="";
+  int FrameNCol = 480, FrameNRow = 640;
   // string noisefname="";
   
   if(argc==1)
@@ -96,6 +99,18 @@ int main(int argc, char *argv[])
 	      {
 		outfname=argv[++i];
 	      }
+	    else if(option.compare("-frameSize")==0)
+	      {
+		std::vector<std::string> sizes = string_parser(argv[++i],"x");
+		if(sizes.size()!=2)
+		  {
+		    std::cout<<"Error: the frame size has to have two numbers and has to be passed as 640x480."<<std::endl;
+		    exit(-1);
+		  }
+		FrameNRow = stoi(sizes[0]);
+		FrameNCol = stoi(sizes[1]);
+		std::cout<<"Setting the Frame size as: "<<FrameNRow<<"x"<<FrameNCol<<std::endl;
+	      }
 	    else
 	      {
 		cout<<"option not recognized: "<<argv[i];
@@ -109,11 +124,11 @@ int main(int argc, char *argv[])
 		    
 	  }
     }
-  return  Riduzione( inputfname, thres, pedfname, fiducialEdge,  seedSide,  localMaximumCheckSide,  outfname);
+  return  Riduzione( inputfname, thres, pedfname, fiducialEdge,  seedSide,  localMaximumCheckSide,  outfname, FrameNCol, FrameNRow);
 }
 
 
-int Riduzione(string fname,double thres, string pedfname, size_t fiducialSideDim,  const size_t seedSide, const size_t localMaximumCheckSide, string outfname)
+int Riduzione(string fname,double thres, string pedfname, size_t fiducialSideDim,  const size_t seedSide, const size_t localMaximumCheckSide, string outfname, int FrameNCol, int FrameNRow)
 {
 
   // check to see if the event class is in the dictionary
@@ -143,7 +158,7 @@ int Riduzione(string fname,double thres, string pedfname, size_t fiducialSideDim
 	{
 	  std::cerr<<"WARNING: the pedestal file "<<pedfname<<" has more than one entry ("<<nentriesPed<<endl;
 	}
-      pedestal = new Frame(480,640);
+      pedestal = new Frame(FrameNCol, FrameNRow);
       TBranch *bFramePed = CMOSDataTreePed->GetBranch("frame");
       bFramePed->SetAddress(&pedestal);
       CMOSDataTreePed->GetEntry(0);
@@ -190,7 +205,7 @@ int Riduzione(string fname,double thres, string pedfname, size_t fiducialSideDim
   cout<<"Debug: f->GetObject(\"CMOSDataTree\",CMOSDataTree);"<<endl;
   #endif
   
-  Frame *frame = new Frame(480,640);
+  Frame *frame = new Frame(FrameNCol, FrameNRow);
   //  CMOSDataTree->SetBranchAddress("frame",&frame);
 
   TBranch *bFrame = CMOSDataTree->GetBranch("frame");
@@ -280,6 +295,7 @@ void print_help(string fname)
   cout<<"Option : -seedSize  (set the seeds side dimensions, default: 7)"<<endl;
   cout<<"Option : -checkLocalMaximumSide  (set the submatrix used to check local max, default: 3)"<<endl;
   cout<<"Option : -edge  (set the fiducial edge, default: 3)"<<endl;
+  cout<<"Option : -frameSize (set the frame sizes, default: 640x480)"<<endl;
   cout<<"Option : -help     (show this help)"<<endl;
   //    printf("       : -log (Log filename)\n"); 
   cout<<endl;
