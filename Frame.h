@@ -3,6 +3,9 @@
 
 #include <vector>
 #include <iostream>
+#include <TROOT.h>
+#include <TFile.h>
+#include <TTree.h>
 
 #include "Rtypes.h"
 #include "TObject.h"
@@ -67,6 +70,7 @@ class Frame : public TObject
   /* TH1F* GetTH1F(std::string name, std::string title); */
 
   void Set(const size_t i, const size_t j, const double val=0);
+  void SetAdd(const size_t i, const size_t j, const double val=0); //Added by collamaf
 
   SeedList FindSeeds(const double thres, const size_t fiducialSideDim=3,  const size_t seedSide=7, const size_t localMaximumCheckSide=3) const;
 
@@ -76,7 +80,7 @@ class Frame : public TObject
   size_t fNRow, fNCol;
   int fId;
   //  int fData[DIM];
-  std::vector<double> fData;
+	std::vector<double> fData;
 
  public:
 
