@@ -28,7 +28,7 @@
 
 #include "myStoi.h"
 //#include "getFileCreationTime.h"
-
+//#define DEBUG
 using namespace std;
 
 int FileConverter(string filename,int mesglevel,int version,string outfname);
@@ -39,8 +39,8 @@ string CheckOutputExtension(const string fname);
 
 int main(int argc, char *argv[])
 {
-  cout<<argv[0]<< " 1.1"<<endl;
-  cout<<"Last edit:   Jun 15 2017."<<endl;
+  cout<<argv[0]<< " 1.0"<<endl;
+  cout<<"Last edit:   Dec 06 2017, post unification"<<endl;
   cout<<"Compiled at: "<< __DATE__ <<", "<< __TIME__<<"."<<endl;
   
   string execname=argv[0];
@@ -152,8 +152,9 @@ int FileConverter(vector<string> filenames, int mesglevel,int version,string out
       string filename_ext = filename.erase(0, filename.find("."));
       
       if(filename_ext.compare(".txt")!=0 && filename_ext.compare(".raw")!=0)
+
 	{
-	  cout<<"WARNING: this program is made to read txt or binary raw files."<<endl;
+	  cout<<"WARNING: this program is made to read txt or binary files"<<endl;
 	}
 #ifdef DEBUG
       cout<<"Debug: prima di frame->ReadFile(originalfilename);"<<endl;
@@ -182,19 +183,7 @@ int FileConverter(vector<string> filenames, int mesglevel,int version,string out
       // 	  cout<<"Unable to open output file "<<outfname<<endl;
       // 	  return(-1);
       // 	}
-#ifdef DEBUG
-      cout<<"Filling"<<endl;
-      for(size_t j=0; j<480; j++)
-	{
-	  for(size_t i=0; i<640; i++)
-	    {
-	      if(frame->At(i,j)>=157)
-		{
-		  cout<<"frame->At("<<i<<","<<j<<") "<<frame->At(i,j)<<endl;
-		}
-	    }
-	}
-#endif
+
 
       DataTree->Fill();
 
