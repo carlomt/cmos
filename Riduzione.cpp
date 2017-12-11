@@ -236,18 +236,18 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 #endif
     
     double media=0;
-	double pixel[FrameNCol][FrameNRow];
-	int ww,qq;
-	//Dynamic arrays cannot be initialized in declaration
-	for ( ww=0; ww<FrameNCol; ww++ ) {
-		for (qq=0; qq<FrameNRow;qq++) {
-			pixel[ww][qq]=0;
-		}
-	}
+    double pixel[FrameNCol][FrameNRow];
+    int ww,qq;
+    //Dynamic arrays cannot be initialized in declaration
+    for ( ww=0; ww<FrameNCol; ww++ ) {
+      for (qq=0; qq<FrameNRow;qq++) {
+	pixel[ww][qq]=0;
+      }
+    }
     
     Long64_t nbytes = 0, nb = 0;
     for (Long64_t jentry=0; jentry<nentries;jentry++)
-    {
+      {
         // delete frame;
         // frame = NULL;
 #ifdef DEBUG
