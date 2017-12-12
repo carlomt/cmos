@@ -76,3 +76,4 @@ Per attivare gli output di debug ricompilare con la flag apposita:
 
 `make libCMOS.so DEBUG=ON`
 
+prova
