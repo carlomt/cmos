@@ -14,7 +14,7 @@
 #include "Seed.h"
 #include "SeedList.h"
 
-//#define DIM 307200 //640*480
+//#define DIM 316224 //648*488
 
 
 class Frame : public TObject

@@ -1,4 +1,3 @@
-//prova rosa 2
 #include <iostream>
 #include <fstream>
 #include <cstdlib>

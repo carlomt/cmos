@@ -123,7 +123,7 @@ int FileConverter(vector<string> filenames, int mesglevel,int version,string out
   TFile *hfile = new TFile(outfname.c_str(),"RECREATE","Example");
   
   TTree *DataTree = new TTree("CMOSDataTree","CMOS exp data");
-  Frame *frame = new Frame(480,640);
+  Frame *frame = new Frame(488,648);
   DataTree->Branch("frame",&frame);  
   
   

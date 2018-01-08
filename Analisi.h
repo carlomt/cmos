@@ -125,8 +125,8 @@ public:
     TH1F *Prob_1MeV;
     TH1F *Prob_500keV;
     
-    //TH1F *ped;
-    //TH1F *noise;
+    TH1F *ped;
+    TH1F *noise;
     
     
   TFile *fOutFile;

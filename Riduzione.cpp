@@ -25,7 +25,7 @@ using std::atoi;
 using std::atof;
 
 void print_help(string fname="executable");
-int Riduzione(string fname,double thres, string pedfname, string noisefname, size_t fiducialSideDim=3,  const size_t seedSide=7, const size_t localMaximumCheckSide=3, string outfname="reduced.root",  int FrameNCol=480, int FrameNRow=640);
+int Riduzione(string fname,double thres, string pedfname, string noisefname, size_t fiducialSideDim=3,  const size_t seedSide=7, const size_t localMaximumCheckSide=3, string outfname="reduced.root",  int FrameNCol=488, int FrameNRow=648);
 
 
 int main(int argc, char *argv[])
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     string outfname="reduced.root";
     string inputfname="";
     string pedfname="";
-    int FrameNCol = 480, FrameNRow = 640;
+    int FrameNCol = 488, FrameNRow = 648;
     string noisefname="";
     
     if(argc==1)
@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
                     std::vector<std::string> sizes = string_parser(argv[++i],"x");
                     if(sizes.size()!=2)
                     {
-                        std::cout<<"Error: the frame size has to have two numbers and has to be passed as 640x480."<<std::endl;
+                        std::cout<<"Error: the frame size has to have two numbers and has to be passed as 648x488."<<std::endl;
                         exit(-1);
                     }
                     FrameNRow = stoi(sizes[0]);
@@ -285,9 +285,9 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
         
         /////////////////////////////////////////Soglia///////////////////////////////////////////////////////
         /*
-         double thresN[480][640]={};
-         for(int i=0;i<480;i++){
-         for(int j=0;j<640;j++){
+         double thresN[488][648]={};
+         for(int i=0;i<488;i++){
+         for(int j=0;j<648;j++){
          thresN[i][j] = 5;
          }
          }
@@ -381,10 +381,10 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 						fattoriale = 1;
 						for(int i=n;i>1;i--){
 							fattoriale *= i;
-							//							cout<<"n="<< n<<", i="<< i<<" fattoriale= "<<fattoriale<<endl;
+							//	    	cout<<"n="<< n<<", i="<< i<<" fattoriale= "<<fattoriale<<endl;
 						}
 						prob += pow(media,n)*exp(-media)/fattoriale;
-						//					cout<<"media= "<<media<<endl;
+						//		      	cout<<"media= "<<media<<endl;
 						
 					}
 				}
@@ -392,7 +392,7 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 					out1<<j<<" "<<k<<" "<<prob<<" "<<pixel[j][k]<<endl;
 					somma += 1;
 					Ncluster -= pixel[j][k];
-					//					cout<<"MERDA dentro!"<<endl;
+					//			       	cout<<"MERDA dentro!"<<endl;
 				}
 				prob=0;
 			}
@@ -422,7 +422,7 @@ void print_help(string fname)
     cout<<"Option : -seedSize  (set the seeds side dimensions, default: 7)"<<endl;
     cout<<"Option : -checkLocalMaximumSide  (set the submatrix used to check local max, default: 3)"<<endl;
     cout<<"Option : -edge  (set the fiducial edge, default: 3)"<<endl;
-    cout<<"Option : -frameSize (set the frame sizes, default: 640x480)"<<endl;
+    cout<<"Option : -frameSize (set the frame sizes, default: 648x488)"<<endl;
     cout<<"Option : -help     (show this help)"<<endl;
     //    printf("       : -log (Log filename)\n");
     cout<<endl;

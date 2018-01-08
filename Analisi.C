@@ -13,9 +13,9 @@ ClassImp(Analisi);
 Analisi::Analisi(const std::string OutFileName, Double_t fcal)
 {
     
-    //ped = new TH1F("ped","ped",100,0.,100.);
+    ped = new TH1F("ped","ped",100,0.,100.);
     
-    //noise = new TH1F("noise","noise",50,0.,6.);
+    noise = new TH1F("noise","noise",50,0.,6.);
     
     NCluster = new TH1F("NCluster","Numero di cluster nei frame",200,0.,200.);
     NCluster->GetXaxis()->SetTitle("Numero di cluster");
@@ -24,48 +24,48 @@ Analisi::Analisi(const std::string OutFileName, Double_t fcal)
     TPaveStats *st = (TPaveStats*)NCluster->FindObject("stats");
     st->SetOptStat(1001111);   //Stampa l'integrale
     
-    map_seed = new TH2F("mapofseed","seedmap",480.,0.,480.,640.,0.,640.);
+    map_seed = new TH2F("mapofseed","seedmap",488.,0.,488.,648.,0.,648.);
     
-    map_seed_80 = new TH2F("mapofseed80","seedmap80",6.,0.,480.,8.,0.,640.);
+    map_seed_80 = new TH2F("mapofseed80","seedmap80",6.,0.,488.,8.,0.,648.);
     
-    map_seed_col = new TH2F("mapofseed col", "mappa seed colonna centrale di 1 mm",480.,0.,480.,179.,461.,640.); //istogramma colonna centrale di 1 mm
+    map_seed_col = new TH2F("mapofseed col", "mappa seed colonna centrale di 1 mm",488.,0.,488.,179.,461.,648.); //istogramma colonna centrale di 1 mm
     map_seed_col->Draw();
     gPad->Update();
     TPaveStats *stC = (TPaveStats*)map_seed_col->FindObject("stats");
     stC->SetOptStat(1001111);
     
-    map_seed1_5 = new TH2F("mapofseed 1di5", "mappa dei seed1",89.,10.,99.,640.,0.,640.); //istogramma1 di 5
+    map_seed1_5 = new TH2F("mapofseed 1di5", "mappa dei seed1",89.,10.,99.,648.,0.,648.); //istogramma1 di 5
     map_seed1_5->Draw();
     gPad->Update();
     TPaveStats *st1 = (TPaveStats*)map_seed1_5->FindObject("stats");
     st1->SetOptStat(1001111);
     
-    map_seed2_5 = new TH2F("mapofseed 2di5", "mappa dei seed2",89.,100.,189.,640.,0.,640.); //istogramma2 di 5
+    map_seed2_5 = new TH2F("mapofseed 2di5", "mappa dei seed2",89.,100.,189.,648.,0.,648.); //istogramma2 di 5
     map_seed2_5->Draw();
     gPad->Update();
     TPaveStats *st2 = (TPaveStats*)map_seed2_5->FindObject("stats");
     st2->SetOptStat(1001111);
     
-    map_seed3_5 = new TH2F("mapofseed 3di5", "mappa dei seed3",89.,189.,278.,640.,0.,640.); //istogramma3 di 5
+    map_seed3_5 = new TH2F("mapofseed 3di5", "mappa dei seed3",89.,189.,278.,648.,0.,648.); //istogramma3 di 5
     map_seed3_5->Draw();
     gPad->Update();
     TPaveStats *st3 = (TPaveStats*)map_seed3_5->FindObject("stats");
     st3->SetOptStat(1001111);
     
-    map_seed4_5 = new TH2F("mapofseed 4di5", "mappa dei seed4",89.,278.,367.,640.,0.,640.); //istogramma4 di 5
+    map_seed4_5 = new TH2F("mapofseed 4di5", "mappa dei seed4",89.,278.,367.,648.,0.,648.); //istogramma4 di 5
     map_seed4_5->Draw();
     gPad->Update();
     TPaveStats *st4 = (TPaveStats*)map_seed4_5->FindObject("stats");
     st4->SetOptStat(1001111);
     
-    map_seed5_5 = new TH2F("mapofseed 5di5", "mappa dei seed5",125.,367.,456.,640.,0.,640.); //istogramma5 di 5
+    map_seed5_5 = new TH2F("mapofseed 5di5", "mappa dei seed5",125.,367.,456.,648.,0.,648.); //istogramma5 di 5
     map_seed5_5->Draw();
     gPad->Update();
     TPaveStats *st5 = (TPaveStats*)map_seed5_5->FindObject("stats");
     st5->SetOptStat(1001111);
     
-    map_Row_seed = new TH1F("mapofRow","Posizione seed sulle righe",480.,0.,480.);
-    map_Col_seed = new TH1F("mapofCol","Posizione seed sulle colonne",640.,0.,640.);
+    map_Row_seed = new TH1F("mapofRow","Posizione seed sulle righe",488.,0.,488.);
+    map_Col_seed = new TH1F("mapofCol","Posizione seed sulle colonne",648.,0.,648.);
     
     dist_min_cluster = new TH1F("Distanza minima cluster","Distanza minima cluster",850.,0.,850.);
     dist_min_cluster->Draw();
@@ -186,8 +186,8 @@ Analisi::Analisi(const std::string OutFileName, Double_t fcal)
 
 Analisi::~Analisi()
 {
-    //delete ped;
-    //delete noise;
+    delete ped;
+    delete noise;
     cout<<" Numero Totale Cluster "<<map_seed->GetEntries()<<endl;
     cout<<" Zona Centrale "<<map_seed_col->Integral()<<endl;
     delete dist_min_cluster;
@@ -255,8 +255,8 @@ void Analisi::WriteOnFile()
     map_seed3_5->Write();
     map_seed4_5->Write();
     map_seed5_5->Write();
-    //ped->Write();
-    //noise->Write();
+    ped->Write();
+    noise->Write();
     dist_min_cluster->Write();
     Prob_100keV->Write();
     Prob_500keV->Write();

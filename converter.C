@@ -68,7 +68,7 @@ if(argc==1)
 
   TFile f("prova.root","RECREATE");
   TTree t("prova","una prova");
-  Frame *frame = new Frame(640,480);
+  Frame *frame = new Frame(648,488);
   //  std::vector<Seed> 
   SeedList *seeds = new SeedList();
   t.Branch("frame",&frame);  

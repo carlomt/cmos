@@ -1,4 +1,3 @@
-//prova francesco2
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
