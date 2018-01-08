@@ -7,6 +7,14 @@
 
 void ClassePed::Loop()
 {
+	// ######################################################
+	// ######################################################
+	// Questa classe permette di estrarre i file txt di piedistallo e noise
+	// Prende in input un file .root che e' il risultato di FileConverter
+	// applicato ad un un certo numero (insieme) di file raw usati come piedistallo
+	// Produce in output due file di testo .txt, da passare poi ancora a FileConverter
+	// ######################################################
+	
 	//   In a ROOT session, you can do:
 	//      root> .L ClassePed.C
 	//      root> ClassePed t
