@@ -19,14 +19,14 @@ void MacroPerPed1()
   
   TH1F *diff=new TH1F("diff","Differenze", 100, -10, 10); //istogramma per mettere le differenze
   
-  //int nrow=648, ncol=488;
-  int nrow=64, ncol=48; //versione con poche righe per vedere se funziona, poi riattivare quello vero (lento..:D)
+  int nrow=648, ncol=488;
+//  int nrow=64, ncol=48; //versione con poche righe per vedere se funziona, poi riattivare quello vero (lento..:D)
   double Val1[nrow][ncol];
   double Val2[nrow][ncol];
   double temp1, temp2, temp3, temp4;
   //TH1F *histo=new TH1F();
   for (int ii=0; ii<nrow; ii++) {
-    cout<<"Inizio riga ii= "<<ii<<endl;
+    if (ii%100==0)cout<<"Inizio riga ii= "<<ii<<endl;
     for (int jj=0; jj<ncol; jj++) {
       Tree1->Draw(Form("fData[%d][%d]",ii, jj)); //Finge di disegnarlo, ma in realtà per farlo lo schiaffa in un TH1F temporaneo chiamato "htemp"
       TH1 *myh1 = (TH1*)gPad->GetPrimitive("htemp"); //ci copiamo da qualche parte questo istogramma per non sovrascriverlo subito
