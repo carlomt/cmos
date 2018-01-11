@@ -95,7 +95,7 @@ void ClassePed::Loop()
 	for (kk=0; kk<VectVal.size(); kk++) {
 		media=VectVal.at(kk)/nentries;
 		STDDev=sqrt(VectValQuad.at(kk)/nentries-(media*media));
-		if (kk==0) cout<<"#############  FINITO! ############### "<<endl<<"Somma finale= "<<VectVal.at(kk)<<", numero files= "<<nentries<<", media= "<<", somma Quad finale= "<<VectValQuad.at(kk)<<", somma Quad finale/N = "<<VectValQuad.at(kk)/nentries<<" ### DevSTD= "<<STDDev<<endl;
+		if (kk==0) cout<<"#############  FINITO! ############### "<<endl<<"Somma finale= "<<VectVal.at(kk)<<", numero files= "<<nentries<<", media= "<< media<<", somma Quad finale= "<<VectValQuad.at(kk)<<", somma Quad finale/N = "<<VectValQuad.at(kk)/nentries<<" ### DevSTD= "<<STDDev<<endl;
 		
 		PedFile<<media<<" ";
 		NoiseFile<<STDDev<<" ";
