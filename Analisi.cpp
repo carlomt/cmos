@@ -25,7 +25,7 @@ int Analisi (SeedList &sl , string outfname)
   
   
   
-  TFile f ("/Users/Amedeo/repos/cmos/Analisi.root","recreate");
+  TFile f ("Analisi.root","recreate");
   TH2F *map_seed = new TH2F("mapofseed","seedmap",488.,0.,488.,648.,0.,648.);
   TH2F *map_seed_2 = new TH2F("mapofseed2","seedmap2",488.,0.,488.,648.,0.,648.);
   TH2F *trid_map_seed = new TH2F("3D map of seed","",488,2.,488.,648,2.,648.,150,2.,150.);

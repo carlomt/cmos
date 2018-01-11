@@ -76,4 +76,40 @@ Per attivare gli output di debug ricompilare con la flag apposita:
 
 `make libCMOS.so DEBUG=ON`
 
-prova
+#############
+Dopo la sessione di misure Y di gennaio @ Roma
+
+Tempi dei vari programmi:
+FileConverter:
+- qualche secondo su 100 frame buio
+- 40 secondi su 2000 frame segnale
+
+
+#### WORKFLOW
+- L'acquisizione produce:
+AAAA-MM-GG_NomeSensore_note{num}.raw
+(~600kB a frame -> 1.3 GB per acq 2000 frames)
+- FileConverter prende tutti i .raw e produce:
+AAAA-MM-GG_NomeSensore_note0000.root
+(~550MB per 2000 frames, ~40 s su 2000 frames)
+- PedAnalyzer.C prende in input questo root e produce:
+- I due file di testo da trasforamare poi in .root (tramite FileConverter) che serviranno per girare riduzione (~2MB ciascuno per 2000 frame)
+- Un file .root con tutti gli istogrammi e i vettori per usare eventualmente la macro di controllo stabilità (~100MB per 2000frame)
+   -AAAA-MM-GG_NomeSensore_note0000_buio_{NframesConsiderati}.txt
+   -AAAA-MM-GG_NomeSensore_note0000_noise_{NframesConsiderati}.txt
+   -AAAA-MM-GG_NomeSensore_note0000_PostPed.root
+   
+   
+
+
+
+
+
+
+
+
+
+
+
+
+

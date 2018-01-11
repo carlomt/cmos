@@ -383,9 +383,9 @@ SeedList Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  con
     std::cout.flush();
 #endif
     
-    for(size_t j=fiducialSideDim; j<(fNRow-fiducialSideDim); j++)
+    for(size_t j=fiducialSideDim; j<(fNRow-fiducialSideDim); j++)  //Ciclo su tutte le righe
     {
-        for(size_t i=fiducialSideDim; i<(fNCol-fiducialSideDim); i++)
+        for(size_t i=fiducialSideDim; i<(fNCol-fiducialSideDim); i++)   //Ciclo su tutte le colonne
         {
 #ifdef DEBUG
             std::cout<<" Frame::FindSeeds i "<<i<<" j "<<j<<std::endl;
@@ -393,7 +393,7 @@ SeedList Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  con
             std::cout.flush();
 #endif
             
-            if( At(i,j) > thres )
+            if( At(i,j) > thres )   //Se il pixel considerato è sopra soglia...
             {
                 bool addThis=true;
                 double thisCandidate = this->At(i,j);
@@ -407,13 +407,13 @@ SeedList Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  con
                 {
                     for(size_t ii=(i-lim); ii<=(i+lim); ii++)
                     {
-                        if(thisCandidate < this->At(ii,jj))
+                        if(thisCandidate < this->At(ii,jj))  //controllo se nei pixel vicini ce ne sono di piu intensi
                         {
                             addThis=false;
                         }
                     }
                 }//end check neghbours
-                if(addThis)
+                if(addThis)                                                       //se era davvero il piu alto dei vicini...
                 {
                     Seed tmp(i,j,fId,seedSide);
                     size_t step=(seedSide-1)/2;
@@ -432,19 +432,19 @@ SeedList Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  con
                             std::cout<<" adding the value "<<ttt<<std::endl;
                             std::cout.flush();
 #endif
-                            tmp.AddPixel(ttt);
+                            tmp.AddPixel(ttt);                                     //...lo salvo come seed (cioè salvo i 7x7=49 pixel attorno a lui
                         }
                     }
                     
                     res.Add(tmp);
                 }
-            }//end if At(i,j) > thres
+            }                                                                      //end if At(i,j) > thres
 #ifdef DEBUG
             std::cout<<" Frame::FindSeeds this value: "<<this->At(i,j)<<std::endl;
             std::cout.flush();
 #endif
-        }//end for i
-    }//end for j
+        }                                                                          //end for i
+    }                                                                              //end for j
 #ifdef DEBUG
     //  std::cout<<" Frame::FindSeeds returning: "<<res->Size()<<std::endl;
     std::cout<<" Frame::FindSeeds returning: "<<res.Size()<<std::endl;
