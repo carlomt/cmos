@@ -11,17 +11,37 @@ void PedAnalyzer::Loop()
 	// ######################################################
 	// Questa classe permette di estrarre i file txt di piedistallo e noise
 	// Prende in input un file .root che e' il risultato di FileConverter
-	// applicato ad un un certo numero (insieme) di file raw usati come piedistallo
+	// Per calcolare piedistalli e noise si usa una parte dei frame acquisiti (fPedToConsider)
 	// Produce in output:
 	// - due file di testo .txt, da passare poi ancora a FileConverter
 	// - un file "XXX_PostPed.root" in cui sono salvati:
-	//    - Un istogramma ("HistoXXX") per pixel con il valore scelto come piedistallo per il dato pixel (Nframes entries)
+	//    - Un istogramma ("HistoXXXXXX") per pixel con il valore scelto come piedistallo per il dato pixel (Nframes entries)
 	//    - Un istogramma ("DumpIstoTot") con tutti i valori rozzi letti in tutti i pixel (Npixel*Nframes entries)
-	//    - Due istogrammi ("DumpIstoAllMean" e "DumpIstoAllNoise") con tutti i valori dei
+	//    - Due istogrammi ("DumpIstoAllPed" e "DumpIstoAllNoise") con tutti i valori dei
 	//      piedistalli e dei noise per ogni pixel (Npixel entries)
 	//    - Due TVector per passare in maniera rapida i valori di piedistallo e noise alla Macro di controllo stabilità (MacroPerPedNoise)
 	// ######################################################
 	// tempo necessario per girare circa 10 minuti per 1000 files (1 minuto per 100)
+	// #####################################################
+	//	Percorso logico utilizzato:
+	//	- Inizio ciclo sui frame: per ogni frame: (jentry->fPedToConsider)
+	//	  - Inizio ciclo sui pixel: per ogni pixel: (kk->Size)
+	//	    - Salvo il valore del k-esimo pixel al j-esimo frame nell’istogramma HistoKK;
+	//	    - Salvo il valore del k-esimo pixel nell’istogramma totale DumpIstoTot;
+	//	    - Aggiungo il valore del k-esimo pixel al vettoreVectVal di NPixel elementi che rappresenterà quindi la somma di tutte i conteggi di quel pixel in tutti i frame considerati
+	//	  - Fine ciclo sui pixel
+	//	- Fine ciclo sui frame
+	//	- Secondo ciclo sui pixel: per ogni pixel: (kk->Size)
+	//	  - Ciclo sui bin degli istogrammi: per ogni bin: (rr->100)
+	//	    - Faccio media e devSTD considerando solo i bin con più di un entries, in modo da escludere quelli contenenti eventualmente un segnale che mi alzerebbero artificialmente la media del piedistallo. Se la devSTD è minore di 1 allora metto 1 per evitare i casi in cui sottostimo il noise (creando quindi falsi bad-pixel)
+	//    - Fine ciclo sui bin
+	//    - Salvo media e devSTD del k-esimo pixel in DumpIstoAllPed e DumpIstoAllNoise per avere istogrammi di TUTTI i piedistalli (cioè “NPixel” entries)
+	//	  - Salvo media e devSTD del k-esimo pixel in due TVector per salvarli nel file di output in modo rapido da usare con la macro PedCompare
+	//    - Scrivo sui due file .txt i valori di piedistallo e noise
+	//  - Fine ciclo sui pixel
+	
+	
+	//######### LAST MODIFIED ON 2018-01-15 by Collamaf
 	
 	//USAGE
 	/*
@@ -33,154 +53,104 @@ void PedAnalyzer::Loop()
 	if (fChain == 0) return;
 	
 	Long64_t nentries = fChain->GetEntriesFast();
-	int PedToConsider=100;
+	//	int PedToConsider=100;
+	if (fPedToConsider==-1) fPedToConsider=nentries;
 	vector<double> VectVal;
-	vector<double> VectValQuad;
-	TVectorD VectorMean(316224), VectorNoise(316224);
+	//	vector<double> VectValQuad;
+	fChain->GetEntry(1); //carico una entry per poter usare fNRow e fNCol
+	int Size=fNCol*fNRow;
+	int kk=0;
+	cout<<"Total number of pixels = "<<Size<<endl;
 	
-	TH1F* DumpIstoMean[316224];
+	TVectorD VectorPed(Size), VectorNoise(Size);
+	TH1F* DumpIstoPed[Size];
+	VectVal.resize(Size);
+	//	VectValQuad.resize(Size);
 	
 	TH1F* DumpIstoTot=new TH1F("DumpIstoTot","Tutti i valori di tutti i pixel per tutti i frame",10000, 0,1000);
-	TH1F* DumpIstoAllMean=new TH1F("DumpIstoAllMean","Valore del piedistallo di tutti i pixel",10000, 0,100);
+	TH1F* DumpIstoAllPed=new TH1F("DumpIstoAllPed","Valore del piedistallo di tutti i pixel",10000, 0,100);
 	TH1F* DumpIstoAllNoise=new TH1F("DumpIstoAllNoise","Valore del noise di tutti i pixel",10000, 0,100);
-	//	cout<<"SizePre= "<<fNRow*fNCol<<endl;
+	
+	for (kk=0; kk<Size; kk++) { //inizializzo i vettori e gli istogrammi per ciascun pixel
+		VectVal[kk]=0;
+		//		VectValQuad.at(kk)=0;
+		DumpIstoPed[kk]=new TH1F(Form("Histo%d",kk),Form("Histo%d",kk),100, 0, 100);
+	}
 	
 	TString InputFileName=Form("%s.root",nomefile.Data());
-	TString PedFileName=Form("%s_buio_%d.txt",nomefile.Data(),PedToConsider);
-	TString NoiseFileName=Form("%s_noise_%d.txt",nomefile.Data(),PedToConsider);
-	TString PostPedFileName=Form("%s_PostPed_%d.root",nomefile.Data(),PedToConsider);
-	
+	TString PedFileName=Form("%s_buio_%d.txt",nomefile.Data(),fPedToConsider);
+	TString NoiseFileName=Form("%s_noise_%d.txt",nomefile.Data(),fPedToConsider);
+	TString PostPedFileName=Form("%s_PostPed_%d.root",nomefile.Data(),fPedToConsider);
 	out=new TFile(PostPedFileName,"RECREATE");
-	
-	
-	//	ofstream PedFile(Form("%s_buio_%d.txt",nomefile.Data(),PedToConsider));
-	//	ofstream NoiseFile(Form("%s_noise_%d.txt",nomefile.Data(),PedToConsider));
-	
-	
 	ofstream PedFile(PedFileName);
 	ofstream NoiseFile(NoiseFileName);
 	
+	cout<<"######################################## "<<endl<<"I will use the first "<<fPedToConsider<<" frames of file "<<endl<<InputFileName<<endl<<" to compute pedestals and noise. I will produce:"<<endl;
+	cout<<PedFileName<<endl;
+	cout<<NoiseFileName<<endl;
+	cout<<PostPedFileName<<endl<<"######################################## "<<endl;
 	
-	int kk=0;
-	//	temp[488][648];
 	Long64_t nbytes = 0, nb = 0;
-	for (Long64_t jentry=0; jentry<PedToConsider;jentry++) {
+	for (Long64_t jentry=0; jentry<fPedToConsider;jentry++) {    //ciclo su tutti i frames
+		cout<<"Sto analizzando il file (frame) num= "<<jentry<<", di "<<nentries<<endl;
 		Long64_t ientry = LoadTree(jentry);
 		if (ientry < 0) break;
 		nb = fChain->GetEntry(jentry);   nbytes += nb;
-		
-		if (jentry==0) {  //Inizializzazioni varie fatte solo al primo frame
-			int Size=fNRow*fNCol;
-			cout<<"Size= "<<Size<<endl;
-			VectVal.resize(Size);
-			VectValQuad.resize(Size);
-			//			TH1F* DumpIstoMean[Size];
-			for (kk=0; kk<Size; kk++) { //inizializzo i vettori e gli istogrammi per ciascun pixel
-				VectVal[kk]=0;
-				VectValQuad.at(kk)=0;
-				DumpIstoMean[kk]=new TH1F(Form("Histo%d",kk),Form("Histo%d",kk),100, 0, 100);
-			}
-		}                 //fine inizializzazione
 		for (kk=0; kk<VectVal.size(); kk++) { //giro su tutti i pixel per leggerne e salvarne il valore
-			DumpIstoMean[kk]->Fill(fData[kk]);  //lo metto nell'istogramma del k-esimo pixel
-			DumpIstoTot->Fill(fData[kk]);       //metto il valore letto nell'istogramma "calderone"
+			DumpIstoPed[kk]->Fill(fData[kk]);  //lo metto nell'istogramma del k-esimo pixel
+			DumpIstoTot->Fill(fData[kk]);       //metto il valore letto nell'istogramma "calderone", contenente i valori di tutti i pixel in tutti i frame
 			VectVal.at(kk)+=fData[kk];
-			VectValQuad.at(kk)+=(fData[kk]*fData[kk]);
-			if (kk==0) cout<<"File num= "<<jentry<<", pixel num= "<<kk<<", valore aggiunto= "<<fData[kk]<<", somma attuale= "<<VectVal.at(kk)<<", somma Quad attuale= "<<VectValQuad.at(kk)<<endl;
 		}
-	} //chiude ciclo su files
+	} //chiude ciclo sui frames
 	
 	double STDDev=0;
-	double PedObsVal=0;
+	double PedEstimator=0;
 	double MediaCut=0;
 	double MediaCutSquare=0;
 	int CounterMediaCut=0;
 	int rr=0;
 	
 	for (kk=0; kk<VectVal.size(); kk++) {  //ri ciclo su tutti i pixel per scrivere la media
-		//		cout<<"Moda(-1)= "<<DumpIstoMean[kk]->GetMaximumBin()-1<<", RMS= "<<endl;
 		MediaCut=0;
 		MediaCutSquare=0;
 		CounterMediaCut=0;
 		
-		for (rr=0; rr<100; rr++) {          //ciclo sui 100 bin degli istogrammi per fare la media dei soli bin con piu di una entries evitando quindi quelli di segnale
-			if (DumpIstoMean[kk]->GetBinContent(rr)>1) {
-				MediaCut+=(DumpIstoMean[kk]->GetBinCenter(rr)*DumpIstoMean[kk]->GetBinContent(rr));
-				MediaCutSquare+=((DumpIstoMean[kk]->GetBinContent(rr)*DumpIstoMean[kk]->GetBinCenter(rr)*DumpIstoMean[kk]->GetBinCenter(rr)));
-				
-				CounterMediaCut+=DumpIstoMean[kk]->GetBinContent(rr);
-				if (0&&fabs(kk-200)<10)	cout<<"kk= "<<kk<<", Valore Bin= "<< DumpIstoMean[kk]->GetBinCenter(rr)<<", Contenuto bin= "<<DumpIstoMean[kk]->GetBinContent(rr) <<", MediaCut= "<< MediaCut <<", CounterMediaCut= "<<CounterMediaCut<<", MediaCutSquare= "<<MediaCutSquare<<endl;
+		for (rr=0; rr<100; rr++) {          //ciclo sui 100 bin degli istogrammi per fare la media dei soli bin con piu di una entries evitando quindi quelli (eventuali) di segnale
+			double yval=DumpIstoPed[kk]->GetBinContent(rr);
+			if (yval>1) {
+				int xbin=DumpIstoPed[kk]->GetBinCenter(rr);
+				MediaCut+= xbin*yval;
+				MediaCutSquare+=xbin*xbin*yval;
+				CounterMediaCut+=yval;
 			}
 		}
-		PedObsVal= MediaCut/CounterMediaCut;
+		PedEstimator= MediaCut/CounterMediaCut;
 		MediaCutSquare/=CounterMediaCut;
-		STDDev=MediaCutSquare-(PedObsVal*PedObsVal);
-		//		if (kk==200)		cout<<"PedObsVal= "<< PedObsVal<<", MediaCutSquare= "<<MediaCutSquare<<", STDDev= "<<STDDev<<endl;
-		//se voglio la media aritmetica
-		/*
-		 PedObsVal=VectVal.at(kk)/PedToConsider;
-		 STDDev=sqrt(VectValQuad.at(kk)/PedToConsider-(PedObsVal*PedObsVal));
-		 */
-		
-		//se voglio usare la moda al posto della media
-		//		/*
-		//		 PedObsVal=DumpIstoMean[kk]->GetMaximumBin()-1;
-		//		 STDDev=DumpIstoMean[kk]->GetRMS();
-		//		cout<<"MERDA"<<endl;
-		//		 */
-		
-		if (kk==0) cout<<"#############  FINITO! ############### "<<endl<<"Somma finale= "<<VectVal.at(kk)<<", numero files= "<<PedToConsider<<", media (o mediana)= "<<PedObsVal<<", somma Quad finale= "<<VectValQuad.at(kk)<<", somma Quad finale/N = "<<VectValQuad.at(kk)/PedToConsider<<" ### DevSTD= "<<STDDev<<endl;
-		
-		if (0) {
-			cout<<"kk= "<<kk<<", Moda= "<< PedObsVal <<", Media= "<<VectVal.at(kk)/PedToConsider<<endl;
-		}
-		VectorMean[kk]=PedObsVal;
+		STDDev=sqrt(MediaCutSquare-(PedEstimator*PedEstimator));
+		if (STDDev<1) STDDev=1;  //mettiamo il noise peggiore fra quello calcolato e 1
+
+		VectorPed[kk]=PedEstimator;
 		VectorNoise[kk]=STDDev;
-		PedFile<<PedObsVal<<" ";
+		PedFile<<PedEstimator<<" ";
 		NoiseFile<<STDDev<<" ";
-		DumpIstoMean[kk]->Write();
+		DumpIstoPed[kk]->Write();
 		
-		DumpIstoAllMean->Fill(PedObsVal);
+		DumpIstoAllPed->Fill(PedEstimator);
 		DumpIstoAllNoise->Fill(STDDev);
 	}
 	
-	DumpIstoAllMean->Write();
+	DumpIstoAllPed->Write();
 	DumpIstoAllNoise->Write();
 	DumpIstoTot->Write();
 	VectorNoise.Write("VectorNoise");
-	VectorMean.Write("VectorMean");
+	VectorPed.Write("VectorPed");
 	
 	PedFile.close();
 	NoiseFile.close();
 	
 	
-	cout<<"######################################## "<<endl<<"I use the first "<<PedToConsider<<" frames of file "<<endl<<InputFileName<<endl<<" to compute pedestals and noise. I will produce:"<<endl;
+	cout<<"######################################## "<<endl<<"I used the first "<<fPedToConsider<<" frames of file "<<endl<<InputFileName<<endl<<" to compute pedestals and noise. I produced:"<<endl;
 	cout<<PedFileName<<endl;
 	cout<<NoiseFileName<<endl;
 	cout<<PostPedFileName<<endl<<"######################################## "<<endl;
-	
-	
-	
-	/*
-	 (TFile *) 0x7fe29eec9560
-	 root [1] double x=0.5
-	 (double) 0.500000
-	 root [2] double y=0
-	 (double) 0.000000
-	 root [3] int nq=1
-	 (int) 1
-	 root [4] Histo2->GetQuantiles(
-	 Int_t GetQuantiles(Int_t nprobSum, Double_t* q, const Double_t* probSum = 0)
-	 root [4] Histo2->GetQuantiles(1, &y, &x)
-	 (int) 1
-	 root [5] cout<<y
-	 11.4939(std::__1::basic_ostream &) @0x7fff99742660
-	 root [6]
-	 
-	 
-	 
-	 */
-	
-	
-	
 }

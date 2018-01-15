@@ -1,4 +1,19 @@
-/*Verifica consistenza tra run di buio diversi*/
+
+
+// ######################################################
+// ######################################################
+// Questa macro verifica la consistenza tra due run di buio diversi
+// Prende in input due file NomeFile_PostPed.root che sono i risultati di PedAnalyzer.C
+// Produce in output un file NomeFile1_PostPed_CheckDiff.root contenente l'istogramma delle differenze (attenzione, il file prende solo il nome del primo dei due confrontati!)
+
+//######### LAST MODIFIED ON 2018-01-15 by Collamaf
+
+//USAGE
+/*
+ .L PedCompare.C
+ PedCompare("file1_PostPed","file2_PostPed")
+ */
+
 #include <TH2.h>
 #include <TStyle.h>
 #include <iostream>
@@ -6,29 +21,18 @@
 void PedCompare(TString filename1, TString filename2)
 {
 	cout<<"Program to compare two pedestal (+ noise) files: Now comparing file:"<<endl<<filename1<<".root"<<endl<<"with file:"<<endl<<filename2<<".root"<<endl;
-	//apertura file di input buio
-//	TFile fileCFR1 ("DatiProva/RootBuoni/2018-01-10_MT9V115_90Y_Decay05_Primi100_PostPed.root");
+	//apertura dei file di input buio
 	TFile fileCFR1 (Form("%s.root",filename1.Data()));
-	TVectorD *fVectorMean1=(TVectorD*)fileCFR1.Get("VectorMean");
+	TVectorD *fVectorPed1=(TVectorD*)fileCFR1.Get("VectorPed");
 	TVectorD *fVectorNoise1=(TVectorD*)fileCFR1.Get("VectorNoise");
-//	fVectorMean1->Print();
 
-	
-//	TFile fileCFR2 ("DatiProva/RootBuoni/2018-01-09_MT9V115_90Y_Decay01_Primi100_PostPed.root", "READ");
 	TFile fileCFR2 (Form("%s.root",filename2.Data()));
-	TVectorD* fVectorMean2 =  (TVectorD*) fileCFR2.Get("VectorMean");
+	TVectorD* fVectorPed2 =  (TVectorD*) fileCFR2.Get("VectorPed");
 	TVectorD* fVectorNoise2 =  (TVectorD*) fileCFR2.Get("VectorNoise");
 	
-	/*
-	fVectorMean1->Print();
-	fVectorMean2->Print();
-	fVectorNoise1->Print();
-	fVectorNoise2->Print();
-	*/
-	//apertura file di output
-//	TFile fout ("outputDiff.root","RECREATE");
-	TFile fout (Form("%s_CheckDiff.root",filename1.Data()),"RECREATE");
 	
+	//apertura file di output
+	TFile fout (Form("%s_CheckDiff.root",filename1.Data()),"RECREATE");
 	cout<<"Output in file:"<<endl<< Form("%s_CheckDiff.root",filename1.Data()) <<endl;
 	fout.cd();
 	TH1F *diff=new TH1F("diff","Differenze", 100, -10, 10); //istogramma per mettere le differenze
@@ -41,14 +45,12 @@ void PedCompare(TString filename1, TString filename2)
 	
 	for (int kk=0; kk<nrow*ncol; kk++) {
 		
-		ValMean1=fVectorMean1[0][kk];
+		ValMean1=fVectorPed1[0][kk];
 		ValNoise1=fVectorNoise1[0][kk];
-		ValMean2=fVectorMean2[0][kk];
+		ValMean2=fVectorPed2[0][kk];
 		ValNoise2=fVectorNoise2[0][kk];
-//		cout<<fVectorMean1[0][0];
 		
 //		cout<<kk<<" "<<ValMean1<<" "<<ValMean2<<" "<<ValNoise1<<" "<<ValNoise2<<" "<<  (ValMean2-ValMean1)/sqrt(pow(ValNoise2, 2)+pow(ValNoise1,2)) <<endl;
-		
 		diff->Fill((ValMean2-ValMean1)/sqrt(pow(ValNoise2, 2)+pow(ValNoise1,2))); //riempiamo l'istogramma con le differenze
 	}
 
