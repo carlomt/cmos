@@ -15,7 +15,7 @@ fId(0)
 {
 }
 
-Frame::Frame(const size_t nRow, const size_t nCol, const int Id)
+Frame::Frame(const size_t nCol, const size_t nRow, const int Id)
 :TObject(),
 fNRow(nRow),
 fNCol(nCol),

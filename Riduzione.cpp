@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
-
+#include <iomanip>
 #include "Frame.h"
 #include "Seed.h"
 #include "SeedList.h"
@@ -175,7 +175,9 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 	
 	if(noisefname.compare("")==0)
 	{
-		std::cerr<<"WARNING: The noise file is mandatory."<<endl;
+//		std::cerr<<"WARNING: The noise file is mandatory."<<endl;
+		std::cout<<"WARNING: You are running without noise file!! All noises will be assumed to be 1!!!"<<endl;
+
 		//      exit(-1);
 	}
 	else
@@ -275,9 +277,16 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 #endif
 		
 		// Frame per frame sottraggo il piedistallo e dividio per noise
+		/*
+		double signal=frame->At(170,384);
+		double noiseVal= noise->At(170,384);
+		double pedVal= pedestal->At(170,384);
+		 */
 		if(subtractPed)
 		{
+			
 			frame->Subtract(*pedestal);
+
 		}
 		
 		if(divideNoise)
@@ -285,7 +294,10 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 			frame->Divide(*noise);
 			//cout<<"DEBUG"<<endl;
 		}
-		// Alla fine di questa procedura la mia matrice non e' piu espressa in ADC ma in numero di sigma
+		//double post=frame->At(170,384);
+		//if (post>7) cout<<"########## ped= "<<pedVal<< ", noise= "<<noiseVal<<", signal= "<<signal<<", post= "<<post<<endl;
+		
+		// Alla fine di questa procedura la mia matrice non e' piu espressa in ADC ma in numero di sigma di differenza rispetto al piedistallo
 		
 		
 		/////////////////////////////////////////Soglia///////////////////////////////////////////////////////
@@ -307,14 +319,15 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 		int Row_seed = 0;
 		int Col_seed = 0;
 		
-		for(int i=0; i<seed_list.Size(); i++){  //Creo una mappa delle volte che ciascun pixel si è acceso
+		for(int i=0; i<seed_list.Size(); i++){  //Creo una mappa delle volte che ciascun pixel si è acceso, girando su tutti i seed della lista
 			Seed ts = seed_list.At(i);
 			Row_seed = ts.GetRow();
 			Col_seed = ts.GetCol();
-			pixel[Row_seed][Col_seed] += 1;
+//			cout<<"############ col" <<Col_seed<<" "<<Row_seed<<endl;
+			pixel[Col_seed][Row_seed] += 1;
 			//			cout<<"i= "<<i<<endl;
 		}
-		NClusterTot += seed_list.Size();              //Conto i cluster totali in tutta l'acquisizione
+		NClusterTot += seed_list.Size();              //Conto i cluster totali in tutta l'acquisizione (sono nel ciclo sui vari frame)
 		
 		//       seed_list = *seed_listP;
 		//cout<<seed_list.Size()<<endl;
@@ -324,7 +337,8 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 		//       seed_listP = NULL;
 		
 	}                                                      // FINE CICLO PRINCIPALE SUI FRAME
-	
+	cout<<"Prima di controllare i badpixel ho trovato Ncluster= " <<NClusterTot<<endl;
+
 	//	double Ncluster = mediaClusterPerFrame;
 	double MediaPixelTotAcq=NClusterTot/(FrameNCol*FrameNRow);          //numero medio di volte che un pixel si è acceso durante l'intera acquisizione
 	//	mediaClusterPerFrame = mediaClusterPerFrame/(FrameNCol*FrameNRow);  //media di cluster ottenuti per frame
@@ -338,11 +352,12 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 	///////////////////////////////////Selezione bad pixels con la gaussiana/////////////////////////////
 	//scorro la matrice di occupancy che mi ero creato per confrontare il numero di volte che ciascun pixel si è acceso con la media
 	if(MediaPixelTotAcq >= MeanEvalMethodThr){ //Luisa had "2", Stefano 3
+		cout<<"I am using Gauss"<<endl;
 		for(int j=0;j<FrameNCol;j++){
 			for(int k=0;k<FrameNRow;k++){
 				if(pixel[j][k] > MediaPixelTotAcq+GaussStatThr*sqrt(MediaPixelTotAcq)){   //se il pixel ha suonato molto piu della media lo scrivo nel file e aggiorno il contatore di badpixel e riduco il contatore di cluster del numero di volte che il badpixel aveva suonato
 					// if(pixel[j][k] >= 5){
-					BadPixelFile<<j<<" "<<k<<endl;
+					BadPixelFile<<j<<" "<<k<<", val "<<pixel[j][k]<<endl;
 					somma += 1;
 					NClusterTot -= pixel[j][k];
 				}
@@ -353,7 +368,9 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 	///////////////////////////////////Selezione bad pixels con Poisson//////////////////////////////
 	//scorro la matrice di occupancy che mi ero creato per confrontare il numero di volte che ciascun pixel si è acceso con la media
 	if(MediaPixelTotAcq < MeanEvalMethodThr){ //Luisa had "2", Stefano 3
-		long double epsilon=1.e-7; //Luisa had "0.0001", Stefano "0.0000001" - 1e-7 corrisponde a 6 sigma
+		cout<<"I am using Poisson"<<endl;
+
+		long double epsilon=2.559625088e-12; //Luisa had "0.0001", Stefano "0.0000001" - 1e-7 corrisponde a 6 sigma, ora mettiamo questo valore che corrispodne a 7 sigma: cout<<std::setprecision(10)<<TMath::Prob(49,1)<<endl;
 		int n=0;
 		double prob=0,fattoriale;
 		
@@ -365,9 +382,11 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 						fattoriale *= i;
 					}
 					prob += pow(MediaPixelTotAcq,n)*exp(-MediaPixelTotAcq)/fattoriale;
+//					if (j==154 && k==299) cout<<"OOOOOOOOO prob= "<<std::setprecision(10)<<std::setw(10)<<prob<<endl;
 				}
 				if ((1-prob) < epsilon){
 					BadPixelFile<<j<<" "<<k<<" "<<prob<<" "<<pixel[j][k]<<endl;
+//					if (j==154 && k==299) cout<<"OOOOOOOOO pixel val = "<<pixel[j][k]<<endl;
 					somma += 1;
 					NClusterTot -= pixel[j][k];
 				}
