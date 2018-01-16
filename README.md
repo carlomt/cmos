@@ -28,16 +28,34 @@ Il pacchetto e' composto di 3 eseguibili:
 
 ### FileConverter.x
 Coverte i file di output dell'acquisizione CMOS (*NomeFileNNNN.txt/.raw*) in root files (*NomeFileNNNN.root*), contenenti istanze della classe Frame.
-
+e.g.:
+```
+FileConverter DatiVari/AcquisizioneGEN/sorgenti/2018-01-10_MT9V115_90Y_Decay05/*.raw
+```
 ### PedAnalyzer.C
 Analizza i primi N frames (passabile da linea di comando, altrimenti li usa tutti) dell'acquisizione per calcolare piedistallo e noise di ogni pixel. Produce due file di testo (*NomeFileNNNN_buio.txt, NomeFileNNNN_noise.txt*) da mandare a file converter e un file root (*NomeFileNNNN_PostPed.root*) da usare per il confronto fra run di piedistallo con la macro (*PedCompare.C*)
+e.g.
+```
+root -l
+.L PedAnalyzer.C                                                                                                                                                     
+c=new PedAnalyzer("DatiVari/RootBuoni/2018-01-10_MT9V115_90Y_Decay23_0000",100)                                                                                          
+c->Loop() 
+```
 
 ### PedCompare.C
 Confronta due run di piedistallo facendo la distribuzione della differenza pixel a pixel. Prende in input da linea di comando i due file (*NomeFileNNNN_PostPed?.root*) e produce un file .root con l'istogramma (*NomeFileNNNN_CheckDiff.root*)
-
+e.g.
+```
+root -l
+.L PedCompare.C
+PedCompare("2018-01-10_MT9V115_90Y_Decay03_0000_PostPed_100.root","2018-01-10_MT9V115_90Y_Decay05_0000_PostPed_100.root")
+```
 ### Riduzione.x
 Prende in input il file (*NomeFileNNNN.root*) insieme ai file di buio e piedistallo (*NomeFileNNNN_buio.root, NomeFileNNNN_noise.root*) ed esegue l'algoritmo di riduzione del file con la ricerca dei cluster. Permette di settare molte variabili della riduzione da riga di comando (ad esempio la soglia in unità di sigma, -help mostra tali opzioni). Produce un file root (*NomeFileNNNN_Reduced.root*) con un'istanza della classe SeedList che all'interno ha un array di seed (istanze della classe Seed). Produce anche il file contenente l'elenco dei badpixel (*NomeFileNNNN_BadPixels.txt*)
-
+e.g.
+```
+Riduzione DatiVari/PostRic/2018-01-10_MT9V115_90Y_Decay05_0000.root -noise DatiVari/PostRic/2018-01-10_MT9V115_90Y_Decay05_0000_noise_100.root -ped DatiVari/PostRic/2018-01-10_MT9V115_90Y_Decay05_0000_buio_100.root -t 7
+```
 ### esempio.x 
 È il codice di Amedeo che prende in input il file prodotto dalla riduzione e produce tutti i plot che vengono salvati in un file chiamato di default `analized.root`
 
