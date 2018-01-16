@@ -37,3 +37,6 @@ CMOSDict.cxx
 *.pcm
 *.raw
 *.txt
+
+# Various Mac
+*.DS_Store
