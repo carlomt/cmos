@@ -15,7 +15,6 @@
 #include "string_parser.h"
 //#define DEBUG
 
-//#include "getFileCreationTime.h"
 
 using std::cout;
 using std::endl;
@@ -37,8 +36,7 @@ int main(int argc, char *argv[])
 	string execname=argv[1];  //Salvo il nome del file che voglio ridurre
 	std::string sourcename=execname.substr(0,execname.size()-5);  //tolgo ".root" alla fine per usare il nome file in seguito
 	
-	//	cout<<"from source file: "<<execname<<endl;
-	//	cout<<"edited last time at: "<<getFileCreationTime(execname)<<endl;
+		cout<<"from source file: "<<execname<<endl;
 	
 	double thres=2;
 	size_t seedSide=7;
@@ -134,14 +132,6 @@ int main(int argc, char *argv[])
 
 int Riduzione(string fname,double thres, string pedfname, string noisefname, size_t fiducialSideDim,  const size_t seedSide, const size_t localMaximumCheckSide, string outfname, int FrameNCol, int FrameNRow)
 {
-	// check to see if the event class is in the dictionary
-	// if it is not load the definition in libEvent.so
-	// if (!TClassTable::GetDict("Frame"))
-	//   {
-	//     string library=string(CMOSCODEDIR)+"/libCMOS.so";
-	//     cout<<"Loading library "<<library<<endl;
-	//     gSystem->Load(library.c_str());
-	//   }
 	std::string badfname=fname.substr(0,fname.size()-5);
 	bool subtractPed=false;
 	bool divideNoise=false;
@@ -260,28 +250,15 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 		cout<<"jentry: "<<jentry<<endl;
 		cout.flush();
 #endif
-		//       Long64_t ientry = CMOSDataTree->LoadTree(jentry);
-		//  #ifdef DEBUG
-		//        cout<<"Debug:   CMOSDataTree->LoadTree(jentry): "<<ientry <<endl;
-		//        cout.flush();
-		// #endif
-		//       if (ientry < 0) break;
 		nb = CMOSDataTree->GetEntry(jentry);   nbytes += nb;
 #ifdef DEBUG
 		cout<<"Debug:  CMOSDataTree->GetEntry(jentry): "<<nb <<endl;
 		cout<<"jentry: "<<jentry<<endl;
 		cout.flush();
 		cout<<"frame id "<<frame->GetId()<<endl;
-		//       cout<<"frame row "<<frame->GetNRow()<<endl;
-		//       SeedList prova= frame->FindSeeds(60);
 #endif
 		
 		// Frame per frame sottraggo il piedistallo e dividio per noise
-		/*
-		double signal=frame->At(170,384);
-		double noiseVal= noise->At(170,384);
-		double pedVal= pedestal->At(170,384);
-		 */
 		if(subtractPed)
 		{
 			
@@ -292,29 +269,12 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 		if(divideNoise)
 		{
 			frame->Divide(*noise);
-			//cout<<"DEBUG"<<endl;
 		}
-		//double post=frame->At(170,384);
-		//if (post>7) cout<<"########## ped= "<<pedVal<< ", noise= "<<noiseVal<<", signal= "<<signal<<", post= "<<post<<endl;
 		
 		// Alla fine di questa procedura la mia matrice non e' piu espressa in ADC ma in numero di sigma di differenza rispetto al piedistallo
 		
-		
-		/////////////////////////////////////////Soglia///////////////////////////////////////////////////////
-		/*
-		 double thresN[488][648]={};
-		 for(int i=0;i<488;i++){
-		 for(int j=0;j<648;j++){
-		 thresN[i][j] = 5;
-		 }
-		 }
-		 */
 		seed_list = frame->FindSeeds(thres,fiducialSideDim,seedSide,localMaximumCheckSide);
-		
-		
 		// Ho creato la lista dei seeds sopra soglia
-		
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
 		
 		int Row_seed = 0;
 		int Col_seed = 0;
@@ -348,7 +308,7 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 	std::ofstream BadPixelFile(Form("%s_badpixel.txt",badfname.c_str()),std::ios::out);
 	
 	double MeanEvalMethodThr=3;
-	double GaussStatThr=7;  //to be checked
+	double GaussStatThr=7;  //numero di sigma richieste per considerare un pixel bad con Gauss
 	///////////////////////////////////Selezione bad pixels con la gaussiana/////////////////////////////
 	//scorro la matrice di occupancy che mi ero creato per confrontare il numero di volte che ciascun pixel si è acceso con la media
 	if(MediaPixelTotAcq >= MeanEvalMethodThr){ //Luisa had "2", Stefano 3
@@ -356,7 +316,6 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 		for(int j=0;j<FrameNCol;j++){
 			for(int k=0;k<FrameNRow;k++){
 				if(pixel[j][k] > MediaPixelTotAcq+GaussStatThr*sqrt(MediaPixelTotAcq)){   //se il pixel ha suonato molto piu della media lo scrivo nel file e aggiorno il contatore di badpixel e riduco il contatore di cluster del numero di volte che il badpixel aveva suonato
-					// if(pixel[j][k] >= 5){
 					BadPixelFile<<j<<" "<<k<<", val "<<pixel[j][k]<<endl;
 					somma += 1;
 					NClusterTot -= pixel[j][k];
@@ -367,7 +326,7 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 	
 	///////////////////////////////////Selezione bad pixels con Poisson//////////////////////////////
 	//scorro la matrice di occupancy che mi ero creato per confrontare il numero di volte che ciascun pixel si è acceso con la media
-	if(MediaPixelTotAcq < MeanEvalMethodThr){ //Luisa had "2", Stefano 3
+	if(MediaPixelTotAcq < MeanEvalMethodThr){
 		cout<<"I am using Poisson"<<endl;
 
 		long double epsilon=2.559625088e-12; //Luisa had "0.0001", Stefano "0.0000001" - 1e-7 corrisponde a 6 sigma, ora mettiamo questo valore che corrispodne a 7 sigma: cout<<std::setprecision(10)<<TMath::Prob(49,1)<<endl;
@@ -376,17 +335,15 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 		
 		for(int j=0;j<FrameNCol;j++){
 			for(int k=0;k<FrameNRow;k++){
-				for(n=0;n<pixel[j][k]/*&&pixel[j][k]<3*MediaPixelTotAcq*/;n++){
+				for(n=0;n<pixel[j][k];n++){
 					fattoriale = 1;
 					for(int i=n;i>1;i--){
 						fattoriale *= i;
 					}
 					prob += pow(MediaPixelTotAcq,n)*exp(-MediaPixelTotAcq)/fattoriale;
-//					if (j==154 && k==299) cout<<"OOOOOOOOO prob= "<<std::setprecision(10)<<std::setw(10)<<prob<<endl;
 				}
 				if ((1-prob) < epsilon){
 					BadPixelFile<<j<<" "<<k<<" "<<prob<<" "<<pixel[j][k]<<endl;
-//					if (j==154 && k==299) cout<<"OOOOOOOOO pixel val = "<<pixel[j][k]<<endl;
 					somma += 1;
 					NClusterTot -= pixel[j][k];
 				}
