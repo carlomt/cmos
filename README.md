@@ -1,6 +1,6 @@
 # cmos Data Analysis Framework
 *Latest update to Readme:
-2017-01-16*
+2017-01-16 by collamaf*
 
 ## Come scaricare il codice:
 Per scaricare il codice andare nella cartella desiderata e lanciare il comando:
@@ -27,16 +27,22 @@ Facendo `source setthis.sh` si aggiungono al path FileConverter e Riduzione, ent
 Il pacchetto e' composto di 3 eseguibili:
 
 ### FileConverter.x
-Coverte i file di output dell'acquisizione CMOS (NomeAcquisizione`.txt/.raw) in root files
+Coverte i file di output dell'acquisizione CMOS (*NomeFileNNNN.txt/.raw*) in root files (*NomeFileNNNN.root*), contenenti istanze della classe Frame.
 
-I root files conterranno istanze della classe Frame
+### PedAnalyzer.C
+Analizza i primi N frames (passabile da linea di comando, altrimenti li usa tutti) dell'acquisizione per calcolare piedistallo e noise di ogni pixel. Produce due file di testo (*NomeFileNNNN_buio.txt, NomeFileNNNN_noise.txt*) da mandare a file converter e un file root (*NomeFileNNNN_PostPed.root*) da usare per il confronto fra run di piedistallo con la macro (*PedCompare.C*)
 
-Riduzione.x permette di settare molte variabili della riduzione da riga di comando (-help mostra tali opzioni)
-produce un file root con un'istanza della classe SeedList che all'interno ha un array di seed (istanze della classe Seed)
+### PedCompare.C
+Confronta due run di piedistallo facendo la distribuzione della differenza pixel a pixel. Prende in input da linea di comando i due file (*NomeFileNNNN_PostPed?.root*) e produce un file .root con l'istogramma (*NomeFileNNNN_CheckDiff.root*)
 
-esempio.x e' il codice di Amedeo che prende in input il file prodotto dalla riduzione e produce tutti i plot che vengono salvati in un file chiamato di default `analized.root`
+### Riduzione.x
+Prende in input il file (*NomeFileNNNN.root*) insieme ai file di buio e piedistallo (*NomeFileNNNN_buio.root, NomeFileNNNN_noise.root*) ed esegue l'algoritmo di riduzione del file con la ricerca dei cluster. Permette di settare molte variabili della riduzione da riga di comando (ad esempio la soglia in unità di sigma, -help mostra tali opzioni). Produce un file root (*NomeFileNNNN_Reduced.root*) con un'istanza della classe SeedList che all'interno ha un array di seed (istanze della classe Seed). Produce anche il file contenente l'elenco dei badpixel (*NomeFileNNNN_BadPixels.txt*)
 
-CMOSDict.cxx e' il dizionario delle classi per ROOT (se usato in modalita' interattiva) si crea con
+### esempio.x 
+È il codice di Amedeo che prende in input il file prodotto dalla riduzione e produce tutti i plot che vengono salvati in un file chiamato di default `analized.root`
+
+### CMOSDict.cxx 
+E il dizionario delle classi per ROOT (se usato in modalita' interattiva) si crea con
 
 `make CMOSDict.cxx`
 
@@ -58,53 +64,24 @@ poi si possono usare tutte le classi in interattivo, ad esempio:
 
 `root [3] prova.Draw("colz")`
 
-P.S.: Il codice di Amedeo e' estremamente verboso e forse andrebbe sistemato e aggiunto a setthis.sh
-oltre che estremamente lento (almeno per bb8)
-
-Il mio consiglio e' convertire alcuni file di dati in root su bb8 e copiarli sul tuo portatile con
-
-`scp lgiuliano@bb8.roma1.infn.it:/pathdelfile/nomefile.root .`
-
-e poi girare riduzione e analisi sul tuo portatile (facendo attenzione di avere l'ultima versione)
-
-
 Per attivare gli output di debug ricompilare con la flag apposita:
 
 `make clean`
 
 `make libCMOS.so DEBUG=ON`
 
-#############
-Dopo la sessione di misure Y di gennaio @ Roma
+## Tempi di esecuzione dei vari programmi
+### FileConverter:
+   40 secondi per acquisizione di 2000frames
+### Riduzione
+   ordine 30 secondi per acquisizione di 2000frames (ma dipende da quanti cluster trova..)
 
-Tempi dei vari programmi:
-FileConverter:
-- qualche secondo su 100 frame buio
-- 40 secondi su 2000 frame segnale
-
-
-#### WORKFLOW
-- L'acquisizione produce:
-AAAA-MM-GG_NomeSensore_note{num}.raw
-(~600kB a frame -> 1.3 GB per acq 2000 frames)
-- FileConverter prende tutti i .raw e produce:
-AAAA-MM-GG_NomeSensore_note0000.root
-(~550MB per 2000 frames, ~40 s su 2000 frames)
-- PedAnalyzer.C prende in input questo root e produce:
-- I due file di testo da trasforamare poi in .root (tramite FileConverter) che serviranno per girare riduzione (~2MB ciascuno per 2000 frame)
-- Un file .root con tutti gli istogrammi e i vettori per usare eventualmente la macro di controllo stabilità (~100MB per 2000frame)
-   -AAAA-MM-GG_NomeSensore_note0000_buio_{NframesConsiderati}.txt
-   -AAAA-MM-GG_NomeSensore_note0000_noise_{NframesConsiderati}.txt
-   -AAAA-MM-GG_NomeSensore_note0000_PostPed.root
+## Dimensioni dei tipici file prodotti:
+### *NomeFileNNNN.raw*
+   Circa 1.3GB per 2000 frame (~600KB a frame)
+### *NomeFileNNNN.root*
+   Circa 550MV per 2000 frame
    
-   
-
-
-
-
-
-
-
 
 
 
