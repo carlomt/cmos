@@ -41,7 +41,10 @@ root -l
 c=new PedAnalyzer("DatiVari/RootBuoni/2018-01-10_MT9V115_90Y_Decay23_0000",100)                                                                                          
 c->Loop() 
 ```
-
+Poi per convertire i .txt in .root:
+```
+FileConverter DatiVari/PostRic/2018-01-10_MT9V115_90Y_Decay05_0000_buio_100.txt
+```
 ### PedCompare.C
 Confronta due run di piedistallo facendo la distribuzione della differenza pixel a pixel. Prende in input da linea di comando i due file (*NomeFileNNNN_PostPed?.root*) e produce un file .root con l'istogramma (*NomeFileNNNN_CheckDiff.root*)
 e.g.
