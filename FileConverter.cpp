@@ -31,16 +31,17 @@
 //#define DEBUG
 using namespace std;
 
-int FileConverter(string filename,int mesglevel,int version,string outfname);
-int FileConverter(vector<string> filenames,int mesglevel,int version,string outfname);
+int FileConverter(string filename,int mesglevel,int version,string outfname, int sensor);
+int FileConverter(vector<string> filenames,int mesglevel,int version,string outfname, int sensor);
 void UnreadColumnsChecker(istringstream &iss, int counter);
 void print_help(string fname="executable");
 string CheckOutputExtension(const string fname);
 
 int main(int argc, char *argv[])
 {
-	cout<<argv[0]<< " 1.1"<<endl;
+	cout<<argv[0]<< " 2.0"<<endl;
 	cout<<"Last edit:   Jan 16 2018, by collamaf"<<endl;
+	cout<<"Now smoothly managing the two sensors: MTV011 and MTV115"<<endl;
 	cout<<"Compiled at: "<< __DATE__ <<", "<< __TIME__<<"."<<endl;
 	
 	string execname=argv[0];
@@ -54,6 +55,7 @@ int main(int argc, char *argv[])
 	int result=1;
 	int mesglevel=0;
 	int version=1;
+	int sensor=2; //variabile per la scelta del sensore: 1=MTV011, 2=MTV115 (default)
 	string outfname="";
 	vector<string> filenames;
 	
@@ -82,6 +84,10 @@ int main(int argc, char *argv[])
 				{
 					outfname=argv[++i];
 				}
+				else if(option.compare("-s")==0)
+				{
+					sensor=stoi(argv[++i]);
+				}
 				else
 				{
 					cout<<"option not recognized: "<<argv[i];
@@ -96,7 +102,7 @@ int main(int argc, char *argv[])
 	}
 	
 	
-	success= FileConverter(filenames,mesglevel,version,outfname);
+	success= FileConverter(filenames,mesglevel,version,outfname, sensor);
 	if(success<0)
 	{
 		result=-1;
@@ -104,14 +110,14 @@ int main(int argc, char *argv[])
 	return result;
 }
 
-int FileConverter(string filename, int mesglevel,int version,string outfname)
+int FileConverter(string filename, int mesglevel,int version,string outfname, int sensor)
 {
 	vector<string> filenames;
 	filenames.push_back(filename);
-	return FileConverter(filenames,mesglevel,version,outfname);
+	return FileConverter(filenames,mesglevel,version,outfname, sensor);
 }
 
-int FileConverter(vector<string> filenames, int mesglevel,int version,string outfnameI)
+int FileConverter(vector<string> filenames, int mesglevel,int version,string outfnameI, int sensorI)
 {
 	if(outfnameI.compare("")==0)
 	{
@@ -123,7 +129,13 @@ int FileConverter(vector<string> filenames, int mesglevel,int version,string out
 	TFile *hfile = new TFile(outfname.c_str(),"RECREATE","Example");
 	
 	TTree *DataTree = new TTree("CMOSDataTree","CMOS exp data");
-	Frame *frame = new Frame(488,648);
+	int NCol=488;
+	int NRow=648;
+	if (sensorI==1) {
+		NCol=480;
+		NRow=640;
+	}
+	Frame *frame = new Frame(NCol,NRow);
 	DataTree->Branch("frame",&frame);
 	
 	
