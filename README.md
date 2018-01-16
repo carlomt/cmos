@@ -2,7 +2,7 @@
 *Latest update to Readme:
 2017-01-16*
 
-# Come scaricare il codice:
+## Come scaricare il codice:
 Per scaricare il codice andare nella cartella desiderata e lanciare il comando:
 
 `git clone git@github.com:carlomt/cmos.git`
@@ -23,19 +23,13 @@ Tutti gli eseguibili si compilano con make e il nome dell'eseguibile (con .x all
 
 Tutti gli eseguibili hanno un help (eseguendoli senza opzioni o con -help)
 
-Facendo:
-`source setthis.sh`
-si aggiungono al path FileConverter e Riduzione, entrambi con l'autocompletion
-Il pacchetto e' composto di 3 eseguibili
+Facendo `source setthis.sh` si aggiungono al path FileConverter e Riduzione, entrambi con l'autocompletion
+Il pacchetto e' composto di 3 eseguibili:
 
-# FileConverter.x coverte output CMOS txt in root files
-i dati raw (in txt) sono su
+### FileConverter.x
+Coverte i file di output dell'acquisizione CMOS (NomeAcquisizione`.txt/.raw) in root files
 
-`@bb8.roma1.infn.it:/home/cmos/data/`
-
-(directory in sola lettura)
-
-i root files conterranno istanze della classe Frame
+I root files conterranno istanze della classe Frame
 
 Riduzione.x permette di settare molte variabili della riduzione da riga di comando (-help mostra tali opzioni)
 produce un file root con un'istanza della classe SeedList che all'interno ha un array di seed (istanze della classe Seed)
