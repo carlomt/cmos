@@ -36,3 +36,4 @@ CMOSDict.cxx
 \#*#
 *.pcm
 *.raw
+*.txt
