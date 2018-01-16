@@ -31,7 +31,7 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 int main(int argc, char *argv[])
 {
 	cout<<argv[0]<< " 2.0"<<endl;
-	cout<<"Last edit:   Jan 1, 2018 by collamaf+amorusor+alunni (during Y campaign)"<<endl;
+	cout<<"Last edit:   Jan 10, 2018 by collamaf+amorusor+alunni (during Y campaign)"<<endl;
 	cout<<"Compiled at: "<< __DATE__ <<", "<< __TIME__<<"."<<endl;
 	
 	string execname=argv[1];  //Salvo il nome del file che voglio ridurre

@@ -46,7 +46,7 @@ void PedAnalyzer::Loop()
 	//USAGE
 	/*
 	 .L PedAnalyzer.C
-	 c=new PedAnalyzer("DatiProva/RootBuoni/prova100")
+	 c=new PedAnalyzer("DatiProva/RootBuoni/prova100",100)
 	 c->Loop()
 	 */
 	
