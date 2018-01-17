@@ -24,7 +24,7 @@ using std::atoi;
 using std::atof;
 
 void print_help(string fname="executable");
-int Riduzione(string fname,double thres, string pedfname, string noisefname, size_t fiducialSideDim=3,  const size_t seedSide=7, const size_t localMaximumCheckSide=3, string outfname="reduced.root",  int FrameNCol=488, int FrameNRow=648);
+int Riduzione(string fname,double thres, string pedfname, string noisefname, size_t fiducialSideDim=3,  const size_t seedSide=7, const size_t localMaximumCheckSide=3, string outfname="reduced.root",  int FrameNCol=480, int FrameNRow=640);
 
 
 int main(int argc, char *argv[])
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 	string outfname=Form("%s_Reduced.root",sourcename.c_str());
 	string inputfname="";
 	string pedfname="";
-	int FrameNCol = 488, FrameNRow = 648;
+	int FrameNCol = 480, FrameNRow = 640;
 	string noisefname="";
 	
 	if(argc==1)
@@ -281,8 +281,10 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 		
 		for(int i=0; i<seed_list.Size(); i++){  //Creo una mappa delle volte che ciascun pixel si è acceso, girando su tutti i seed della lista
 			Seed ts = seed_list.At(i);
+                        Col_seed = ts.GetCol();
 			Row_seed = ts.GetRow();
-			Col_seed = ts.GetCol();
+			
+
 //			cout<<"############ col" <<Col_seed<<" "<<Row_seed<<endl;
 			pixel[Col_seed][Row_seed] += 1;
 			//			cout<<"i= "<<i<<endl;

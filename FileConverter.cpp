@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 	int result=1;
 	int mesglevel=0;
 	int version=1;
-	int sensor=2; //variabile per la scelta del sensore: 1=MTV011, 2=MTV115 (default)
+	int sensor=1; //variabile per la scelta del sensore: 1=MTV011, 2=MTV115 (default)
 	string outfname="";
 	vector<string> filenames;
 	

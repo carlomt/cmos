@@ -21,43 +21,38 @@ int Analisi (SeedList &sl , string outfname)
 { 
   int Row_seed = 0;
   int Col_seed = 0;
-  double V_adja = 2.;
+  double V_adja = 2.0;
   
   
   
-  TFile f ("/Users/Amedeo/repos/cmos/Analisi.root","recreate");
-  TH2F *map_seed = new TH2F("mapofseed","seedmap",480.,0.,480.,640.,0.,640.);
-  TH2F *map_seed_coarse = new TH2F("mapofseedcoarse","seedmapcoarso",61.,0.,480.,81.,0.,640.);
-  TH2F *map_seed_coarse2 = new TH2F("mapofseedcoarse61x81","seedmapcoarse",8.,0.,480.,8.,0.,640.); //mappa seed con bin larghi 61x81 pixel
-  TH2F *map_seed_2 = new TH2F("mapofseed2","seedmap2",480.,0.,480.,640.,0.,640.);
-  TH2F *trid_map_seed = new TH2F("3D map of seed","",480,2.,480.,640,2.,640.);
-  TH1F *V_single = new TH1F("Sigle_pixel_signal","Sigle pixel signal DV",47750,-50.,9500.);//0.2 per bin
-  TH1F *V_clu_Asy = new TH1F("Cluster_asymmetric","Cluster asymmetric signal",2025, -50., 4000.);
-  TH1F *V_clu_3x3_dist = new TH1F("Cluster_ 3x3","Cluster signal 3x3",2500,-50.,200.);
-  TH1F *V_clu_5x5_dist = new TH1F("Cluster_5x5","Cluster signal 5x5",20500,-50.,2000.);
-  TH1F *V_clu_7x7_dist = new TH1F("Cluster_7x7","Cluster signal 7x7",10500,-50.,2000.);
-  TH1F *Delta_5x5_vs_3x3_dist = new TH1F("Delta 5x5 vs 3x3","",105,-50.,1000.);
-  TH1F *Delta_5x5_vs_3x3_norm_dist = new TH1F("Delta 5x5 vs 3x3 norm","",205,-50.,2000.);
-  TH1F *Delta_7x7_vs_5x5_dist = new TH1F("Delta 7x7 vs 5x5","",100,-50.,150.);
-  TH1F *Delta_7x7_vs_5x5_norm_dist = new TH1F("Delta 7x7 vs 5x5 norm","",205,-50.,2000.);
-
-  TH2F *V_vs_npixel_cluster = new TH2F("V_vs_npixel_cluster","Signal vs number of pixels in a cluster",10001.,-10.,10000.,50.,0.,50.);
-  TH1F *N_pixel_per_cluster = new TH1F("Number of pixel in a cluster","",60,0,60);
+  TFile f ("Analisi.root","recreate");
+  TH2F *map_seed = new TH2F("mapofseed","seedmap",488.,0.,488.,648.,0.,648.);
+  TH2F *map_seed_2 = new TH2F("mapofseed2","seedmap2",488.,0.,488.,648.,0.,648.);
+  TH2F *trid_map_seed = new TH2F("3D map of seed","",488,2.,488.,648,2.,648.,150,2.,150.);
+  TH1F *V_single = new TH1F("Sigle pixel signal DV","",8000,-50.,950.);
+  TH1F *V_clu_Asy = new TH1F("Cluster asymmetric signal","",8000, -50., 5050.);
+  TH1F *V_clu_3x3_dist = new TH1F("Cluster signal 3x3","",8000,-50.,5050.);
+  TH1F *V_clu_5x5_dist = new TH1F("Cluster signal 5x5","",8000,-50.,5050.);
+  TH1F *V_clu_7x7_dist = new TH1F("Cluster signal 7x7","",8000,-50.,5050.);
+  TH1F *Delta_5x5_vs_3x3_dist = new TH1F("Delta 5x5 vs 3x3","",8000,-50.,5050.);
+  TH1F *Delta_5x5_vs_3x3_norm_dist = new TH1F("Delta 5x5 vs 3x3 norm","",8000,-50.,5050.);
+  TH1F *Delta_7x7_vs_5x5_dist = new TH1F("Delta 7x7 vs 5x5","",8000,-50.,5050.);
+  TH1F *Delta_7x7_vs_5x5_norm_dist = new TH1F("Delta 7x7 vs 5x5 norm","",8000,-50.,5050.);
+  TH2F *V_vs_npixel_cluster = new TH2F("Signal vs number of pixels in a cluster","",2000.,-10.,1000.,50.,0.,50.);
+  TH1F *N_pixel_per_cluster = new TH1F("Number of pixel in a cluster","",49,0.,49.);
 	
 
   
   
-  for(size_t i=0; i<sl.Size(); i++)
+  for(size_t i=0; i<sl->Size(); i++)
     {
-      Seed ts = sl.At(i);
+      Seed ts = sl->At(i);
       Row_seed = ts.GetRow();
       Col_seed = ts.GetCol();
       double adccountsCenter=ts(0,0);
-      map_seed->Fill(float(Col_seed),float(Row_seed));
-      map_seed_coarse->Fill(float(Col_seed),float(Row_seed));
-      map_seed_coarse2->Fill(float(Col_seed),float(Row_seed));
-      map_seed_2->Fill(float(Col_seed),float(Row_seed),float(adccountsCenter));
-      trid_map_seed->Fill(Col_seed,Row_seed,adccountsCenter);
+      map_seed->Fill(float(Row_seed),float(Col_seed));
+      map_seed_2->Fill(float(Row_seed),float(Col_seed),float(adccountsCenter));
+      trid_map_seed->Fill(Row_seed,Col_seed,adccountsCenter);
 
       //  double adccountsCenter=ts(0,0);
       int N = 0;
@@ -125,9 +120,6 @@ int Analisi (SeedList &sl , string outfname)
       V_clu_7x7 = 0.;
     }
   map_seed->Write();
-  map_seed->Write();
-  map_seed_coarse->Write();
-  map_seed_coarse2->Write();
   map_seed_2->Write();
   trid_map_seed->Write();
   V_single->Write();

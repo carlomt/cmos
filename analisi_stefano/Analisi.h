@@ -8,6 +8,9 @@
 #include "Frame.h"
 #include "Seed.h"
 
+#include "TStyle.h"
+#include "TCanvas.h"
+#include "TPaveStats.h"
 #include "TTree.h"
 #include "TFile.h"
 
@@ -26,22 +29,26 @@ class ACPoint
 class Analisi : public TObject
 {
 public:
-  Analisi(const std::string OutFileName);
+  Analisi(const std::string OutFileName, Double_t fcal);
   virtual ~Analisi();
     
   void WriteOnFile();
-  int AnalisiData (SeedList *sl);
+  int AnalisiData (SeedList *sl, Double_t fcal);
     
   inline void SetSecondaryThr(double thr){fSecondaryThr=thr;};
   
  private:
+  TPaveStats *st;
+  TH1F *dist_min_cluster;
+  TH1F *NCluster;
   TH2F *map_seed;
-  TH2F *map_seed_coarse;
-  TH2F *map_seed_coarse2;
-  TH2F *map_seed1_4;
-  TH2F *map_seed2_4;
-  TH2F *map_seed3_4;
-  TH2F *map_seed4_4;
+  TH2F *map_seed_80;
+  TH2F *map_seed_col;
+  TH2F *map_seed1_5;
+  TH2F *map_seed2_5;
+  TH2F *map_seed3_5;
+  TH2F *map_seed4_5;
+  TH2F *map_seed5_5;
   TH1F *map_Row_seed;	
   TH1F *map_Col_seed;
   TH1F *R_center_vs_cluster_dist;
@@ -49,6 +56,7 @@ public:
   TH1F *V_clu_Asy;
   TH1F *V_clu_Asy_4;
   TH1F *V_clu_3x3_dist;
+  TH1F *V_clu_3x3_dist_keV;
   TH1F *V_clu_5x5_dist;
   TH1F *V_clu_7x7_dist;
   TH1F *V_clu_9x9_dist;
@@ -102,10 +110,29 @@ public:
   TH2F *Emax_vs_N;
   TH2F *EasDivN_vs_Easy;
   TH2F *EasDivN_vs_N;
-  TTree *Albero;
+ // TTree *Albero;
+    
+    TFile *cumulative_raggix;
+    TFile *cumulative_90Sr;
+    TFile *cumulative_137Cs;
+    TFile *cumulative_60Co;
+    TH1F *h1;
+    TH1F *h2;
+    TH1F *h3;
+    TH1F *h4;
+    TH1F *Prob_100keV;
+    TH1F *Prob_up_1MeV;
+    TH1F *Prob_1MeV;
+    TH1F *Prob_500keV;
+    
+    TH1F *ped;
+    TH1F *noise;
+    
+    
   TFile *fOutFile;
-
-  
+    
+    
+  Double_t fcal;
   Double_t fSecondaryThr;
   Double_t  V_clu_3x3;
   Double_t RMS_nome_esteso; 
