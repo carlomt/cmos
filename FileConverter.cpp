@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 {
 	cout<<argv[0]<< " 2.0"<<endl;
 	cout<<"Last edit:   Jan 16 2018, by collamaf"<<endl;
-	cout<<"Now smoothly managing the two sensors by means of flag -s: MTV011 (2) and MTV115 (1- default)"<<endl;
+	cout<<"Now smoothly managing the two sensors by means of flag -s: MT9V115 (2) and MT9V011 (1- default)"<<endl;
 	cout<<"Compiled at: "<< __DATE__ <<", "<< __TIME__<<"."<<endl;
 	
 	string execname=argv[0];
