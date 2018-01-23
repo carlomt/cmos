@@ -26,7 +26,7 @@ class ACPoint
 class Analisi : public TObject
 {
 public:
-  Analisi(const std::string OutFileName);
+  Analisi(const std::string OutFileName, const std::string BadFileName);
   virtual ~Analisi();
     
   void WriteOnFile();
