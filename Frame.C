@@ -98,9 +98,9 @@ int Frame::ReadFile(const std::string filename,  const bool isBinary)
     }
     else
     {
-        //std::cout <<"File is not binary" <<std::endl;
         reader.open(filename.c_str(),std::ios_base::in);
-    }
+//		std::cout <<"File is not binary" <<std::endl;
+	}
     
     if(!reader.is_open())
     {
@@ -145,8 +145,8 @@ int Frame::ReadFile(const std::string filename,  const bool isBinary)
              }*/
             else{
                 //std::cout<<"File is not binary"<<std::endl;
-                reader >> tmp;
-                //std::cout << "tmp variable: "<<tmp<<std::endl;
+				reader.clear(); //added on 2018-01-23 by collamaf+amorusor for compatibility with Rosa's PC
+				reader >> tmp;
             }
             
             Set(i,j,tmp);

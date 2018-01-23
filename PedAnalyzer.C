@@ -74,7 +74,7 @@ void PedAnalyzer::Loop()
 	for (kk=0; kk<Size; kk++) { //inizializzo i vettori e gli istogrammi per ciascun pixel
 		VectVal[kk]=0;
 		//		VectValQuad.at(kk)=0;
-		DumpIstoPed[kk]=new TH1F(Form("Histo%d",kk),Form("Histo%d",kk),100, 0, 100);
+		DumpIstoPed[kk]=new TH1F(Form("Histo%d",kk),Form("Histo%d",kk),1000, 0, 1000);
 	}
 	
 	TString InputFileName=Form("%s.root",nomefile.Data());
@@ -115,7 +115,7 @@ void PedAnalyzer::Loop()
 		MediaCutSquare=0;
 		CounterMediaCut=0;
 		
-		for (rr=0; rr<100; rr++) {          //ciclo sui 100 bin degli istogrammi per fare la media dei soli bin con piu di una entries evitando quindi quelli (eventuali) di segnale
+		for (rr=0; rr<1000; rr++) {          //ciclo sui 100 bin degli istogrammi per fare la media dei soli bin con piu di una entries evitando quindi quelli (eventuali) di segnale
 			double yval=DumpIstoPed[kk]->GetBinContent(rr);
 			if (yval>1) {
 				int xbin=DumpIstoPed[kk]->GetBinCenter(rr);
@@ -128,7 +128,10 @@ void PedAnalyzer::Loop()
 		MediaCutSquare/=CounterMediaCut;
 		STDDev=sqrt(MediaCutSquare-(PedEstimator*PedEstimator));
 		if (STDDev<1) STDDev=1;  //mettiamo il noise peggiore fra quello calcolato e 1
-
+		if (0&&CounterMediaCut==0) {
+//			cout<<"ERRORE!!!!!! pixel numero: "<<kk<<endl;
+			PedEstimator=0;
+		}
 		VectorPed[kk]=PedEstimator;
 		VectorNoise[kk]=STDDev;
 		PedFile<<PedEstimator<<" ";
