@@ -82,7 +82,7 @@ echo "try: make Riduzione.x"
 fi
 
 
-function _mycomplete_esempio_()
+function _mycomplete_DataAnalysis_()
 {
 local cmd="${1##*/}"
 local word=${COMP_WORDS[COMP_CWORD]}
@@ -98,14 +98,14 @@ COMPREPLY=( $( compgen -W "-help -o" -- $word ) )
 fi
 }
 
-if [ -f ./esempio.x ]; then
-alias esempio='$CMOSCODEDIR/esempio.x'
+if [ -f ./DataAnalysis.x ]; then
+alias DataAnalysis='$CMOSCODEDIR/DataAnalysis.x'
 complete -d -X '.[^./]*' -F _mycomplete_Riduzione_ Riduzione
-echo "created the alias 'esempio' with autocompletion"
+echo "created the alias 'DataAnalysis' with autocompletion"
 if [[ Riduzione.cpp -nt Riduzione.x ]]; then
-echo "WARNING: esempio.cpp has been modified after Riduzione.x has been produced. Maybe you should recompile?"
+echo "WARNING: DataAnalysis.cpp has been modified after Riduzione.x has been produced. Maybe you should recompile?"
 fi
 else
-echo "WARNING: esempio.x does not exist, didi you compiled?"
-echo "try: make esempio.x"
+echo "WARNING: DataAnalysis.x does not exist, didi you compiled?"
+echo "try: make DataAnalusis.x"
 fi
