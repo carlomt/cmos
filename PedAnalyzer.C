@@ -41,7 +41,8 @@ void PedAnalyzer::Loop()
 	//  - Fine ciclo sui pixel
 	
 	
-	//######### LAST MODIFIED ON 2018-01-15 by Collamaf
+	//######### LAST MODIFIED ON 2018-01-23 by Collamaf
+	// now PedHisto have 1000 bins not 100
 	
 	//USAGE
 	/*
@@ -115,7 +116,7 @@ void PedAnalyzer::Loop()
 		MediaCutSquare=0;
 		CounterMediaCut=0;
 		
-		for (rr=0; rr<1000; rr++) {          //ciclo sui 100 bin degli istogrammi per fare la media dei soli bin con piu di una entries evitando quindi quelli (eventuali) di segnale
+		for (rr=0; rr<1000; rr++) {          //ciclo sui 1000 bin degli istogrammi per fare la media dei soli bin con piu di una entries evitando quindi quelli (eventuali) di segnale
 			double yval=DumpIstoPed[kk]->GetBinContent(rr);
 			if (yval>1) {
 				int xbin=DumpIstoPed[kk]->GetBinCenter(rr);
