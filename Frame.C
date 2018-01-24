@@ -197,7 +197,7 @@ void Frame::Set(const size_t i, const size_t j, const double val)
     {
         std::cerr<<"ERROR Frame::Set()"<<std::endl;
         // std::cout<<"sizes "<<fNRow<<" "<<fNCol<<std::endl;
-        // std::cout<<"pos   "<<i<<" "<<j<<std::endl;
+         std::cout<<"pos   "<<i<<" "<<j<<std::endl;
     }
 }
 
