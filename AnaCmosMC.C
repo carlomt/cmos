@@ -13,10 +13,10 @@
 // - un file XXX_Image.root, che contiene un TH2F per ogni frame con il segnale di quel frame, piu un TH2F globale con la sovrapposizone di tutti i segnali di tutti i frame, da usare come "Event Display"
 // USE:
 /*
-.L AnaCmosMC.C
-c=new AnaCmosMC("/Users/francesco/MonteCarlo/Sonda/SimCMOS/build/CMOSmcX0_Z2_NOCuD_Fil0_TBR10_DOTA_115")
-c->Loop()
-*/
+ .L AnaCmosMC.C
+ c=new AnaCmosMC("/Users/francesco/MonteCarlo/Sonda/SimCMOS/build/CMOSmcX0_Z2_NOCuD_Fil0_TBR10_DOTA_115")
+ c->Loop()
+ */
 
 #define AnaCmosMC_cxx
 #include "AnaCmosMC.h"
@@ -40,7 +40,7 @@ void AnaCmosMC::Loop()
 	
 	int SensorChoice=2; //1 is MT9V011, 2 is MT9V115
 	fChain->GetEntry(0); //carico una entries per poter prendere i valori dal file MC
-
+	
 	int NPixX=480, NPixY=640;
 	if (SensorChoice==2) {
 		NPixX=488;
@@ -56,8 +56,10 @@ void AnaCmosMC::Loop()
 	bool LowFlag=kFALSE;
 	bool debug=kFALSE;
 	vector<double> VectTot(NPixTot,0.);
+	vector<double> VectTotConv(NPixTot,0.);
 	double SmearingFactor=0;
 	TRandom *rand= new TRandom();
+	TRandom *randPoiss= new TRandom();
 	TStopwatch sw;
 	
 	Long64_t nbytes = 0, nb = 0;
@@ -76,7 +78,7 @@ void AnaCmosMC::Loop()
 	cout<<"Source Activity [Bq]= "<<AttSorg<<endl;
 	cout<<"Entries = "<<nentries<<endl; //is the number of events in which I have a signal
 	cout<<"It's like I'have simulated "<<NPrimMC/AttSorg<<" [s] of data taking, equivalent to about "<<NFramesMC <<" frames of 200 ms"<<endl;
-	cout<<"I will create a frame every "<<(int) nentries/NFramesMC<<" events, and append in case some empty ones" <<endl;
+	cout<<"I will create a frame every "<<(int)round((double)nentries/NFramesMC)<<" events, and append in case some empty ones" <<endl;
 	
 	if (nentries/NFramesMC == 0) {
 		LowFlag=kTRUE;
@@ -86,83 +88,110 @@ void AnaCmosMC::Loop()
 	
 	ImageFile->cd();
 	TH2F* cluster =new TH2F("cluster","cluster", NPixX/RedFactor, 0, NPixX, NPixY/RedFactor, 0, NPixY);
-//	double temp=0;
-
+	//	double temp=0;
+	
 	int ContaPixel[NFramesMC];
-
+	
 	TH2F* ClusterVec[NFramesMC];
 	for (kk=0; kk<NFramesMC; kk++){
-	ClusterVec[kk]=new TH2F(Form("ClusterVec%d",kk),Form("Cluster for frame n%d", kk), NPixX/RedFactor, 0, NPixX, NPixY/RedFactor, 0, NPixY);
+		ClusterVec[kk]=new TH2F(Form("ClusterVec%d",kk),Form("Cluster for frame n%d", kk), NPixX/RedFactor, 0, NPixX, NPixY/RedFactor, 0, NPixY);
 		ContaPixel[kk]=0;
 	}
-	kk=0; //azzero il contatore dei pixel nel frame
+	kk=0; //azzero il contatore dei frame
 	
 	
 	sw.Start();
 	//############################################
 	//########## LOOP SU TUTTI GLI EVENTI
 	//#######
-	for (Long64_t jentry=0; jentry<nentries&&1;jentry++) { //Ciclo su tutti gli eventi MC (cioè Isotopo priario per Isotopo primario )
+	for (Long64_t jentry=0; jentry<nentries&&1;jentry++) { //Ciclo su tutti le entries MC (cioè Isotopo priario per Isotopo primario che ha rilasciato un segnale!)
 		Long64_t ientry = LoadTree(jentry);
 		if (ientry < 0) break;
 		nb = fChain->GetEntry(jentry);   nbytes += nb;
 		if (debug) cout<<endl;
-//		temp+=EDepInPixel->size();
 		ContaPixel[kk]+=PixelID->size(); //conto di quanti pixel accesi è fatto ciascun frame
-		//		cout<<"MERDA "<<EDepInPixel->size()<<" Somma= "<<temp<<endl;
+		
+		
+		
 		for (int ii=0; ii<PixelID->size(); ii++){  //loop su tutti i pixel accesi durante quell'evento
-
 			//calcolo gli indici I e J per il pixel considerato: in questo modo vanno da 0 a NCol/NRow -1 come vuole Frame
 			int Ipix=((int)(PixelID->at(ii))-1)%NPixX;
 			int Jpix=((PixelID->at(ii)-1)/NPixX);
 			
-			//			frame->SetAdd(Ipix, Jpix, (EDepInPixel->at(ii))*1000);
-			
 			// ###### Aggiungo al pixel nel dato frame il valore trovato
-			//frame->SetAdd(Ipix, Jpix, (int)(EDepInPixel->at(ii)*1000*ConvFactor));
-			VectTot[(int)(PixelID->at(ii))]+=(int)(EDepInPixel->at(ii)*1000*ConvFactor);
+			// Incremento l'elemento del vettore corrispondente a quel pixel aggiungendo l'energia depositata in [keV]
+			//			VectTot[(int)(PixelID->at(ii))]+=(int)(EDepInPixel->at(ii)*1000*ConvFactor);
+			VectTot[(int)(PixelID->at(ii))]+=(EDepInPixel->at(ii));
+			//			cout<< (int)(PixelID->at(ii)) <<" "<< (EDepInPixel->at(ii)) <<" "<<VectTot[(int)(PixelID->at(ii))] <<endl;
 			// ##############################
 			
-			if (debug) cout<<"evento: "<<jentry<<", px: "<<PixelID->at(ii)<<", colonna= "<<Ipix<<", x= "<<PixXPos->at(ii)<<", riga= "<<Jpix<<", y= "<<PixYPos->at(ii)<<", ene= "<<EDepInPixel->at(ii)<<", eneConv= "<<(int)(EDepInPixel->at(ii)*1000*ConvFactor)<<endl;
-			//			cout<<"evento: "<<jentry<<", ene= "<<EDepInPixel->at(ii)*1000<<" [keV], = "<<(int)(EDepInPixel->at(ii)*1000*ConvFactor)<<" [ADC]"<<endl;
+			//			if (ii==PixelID->size()-1) cout<<"MERDAAA "<<VectTot[(int)(PixelID->at(ii))]<<endl;
+			
+			if (debug) cout<<"evento: "<<jentry<<", px: "<<(int)PixelID->at(ii)<<", colonna= "<<Ipix<<", x= "<<PixXPos->at(ii)<<", riga= "<<Jpix<<", y= "<<PixYPos->at(ii)<<", ene= "<<EDepInPixel->at(ii)<<", eneConv= "<<(int)(EDepInPixel->at(ii)*ConvFactor)<<endl;
+			
+			//Accendo il pixel nei relativi istogrammi
 			cluster->Fill(Ipix, Jpix);
-			//			cout<<"Ipix= "<<Ipix;
-			//			cout<<", Jpix= "<<Jpix<<endl;
-			
 			ClusterVec[FrameCounter]->Fill(Ipix, Jpix);
-			//			ClusterVec[FrameCounter]->SetBinContent(Ipix, Jpix, 1);
-		}
-		//			cout<<"jentries: "<<jentry<<", nentries: "<<nentries<<", NFramesMC= "<<NFramesMC<<", nentries/NFramesMC= "<<nentries/NFramesMC<<", jentry%(nentries/NFramesMC)= "<<jentry%(nentries/NFramesMC)<<endl;
-		if (LowFlag || jentry%(nentries/NFramesMC+1)==0 ) { //se sono in regime di "ogni entry va in un frame" o se sono al cambio di frame salvo il frame e ne inizio un altro
+		}  //fine loop su tutti i pixel accesi in quell'evento
+		// Ora dentro ClusterVec ho salvato per ciascun pixel il rilascio di energia (ancora in keV!!) dovuto agli eventi appartenenti a questo frame!
+		
+		
+		
+		
+		if (LowFlag || ((jentry+1)%((int)round((double)nentries/NFramesMC))==0) )
+		{ //se sono in regime di "ogni entry va in un frame" o se sono al cambio di frame salvo il frame e ne inizio un altro
 			
-			for (jj=0; jj<NPixTot; jj++) { //prima di salvare il frame aggiungo l'eventuale rumore MC
-				SmearingFactor=rand->Gaus(0,1);
-				VectTot[kk]+=SmearingFactor;
-//				cout<<SmearingFactor<<endl;
+			for (jj=0; jj<NPixTot; jj++)
+			{ //prima di salvare il frame riciclo su tutti i pixel per aggiumgere l'eventuale rumore MC
+				if (debug&&VectTot[jj]>=0) cout<<"Fino a evento n= "<<jentry<<", Frame n= "<<FrameCounter<<", Px n= "<<jj<<", Before sm and conv was= " << VectTot[jj];
+				SmearingFactor=(rand->Gaus(0,1));
+				VectTotConv[jj]=(int)(1000*ConvFactor*VectTot[jj]); //converte keV -> ADC
+				if (debug&&VectTot[jj]>=0) cout<<", Before smearing after conv was= " << VectTotConv[jj]<<", adding smearing of= "<<(int)SmearingFactor;
+				VectTotConv[jj]+=(int)SmearingFactor;
+				if (debug&&VectTot[jj]>=0) cout<<", after smearing= "<<VectTotConv[jj]<<endl;
+				
+				int IpixBis=(jj)%NPixX;
+				int JpixBis=((jj)/NPixX);
+				frame->Set(IpixBis, JpixBis, VectTotConv[jj]); //aggiungo al frame il valore di quel pixel
+				
+				
+#if 0
+				//				SmearingFactor=0;
+				if (1) cout<<"Evt n= "<<jentry<<", Frame n= "<<FrameCounter<<", Pixel n= "<<jj<<", Before smearing and conv was= " << VectTot[jj];
+				//				VectTot[jj]*=1000*ConvFactor; //converte keV -> ADC
+				///				VectTot[jj]=(int)(1000*ConvFactor*VectTot[jj]); //converte keV -> ADC
+				
+				if (1) cout<<", Before smearing after conv was= " << VectTot[jj]<<", adding smearing of= "<<(int)SmearingFactor;
+				VectTot[jj]+=(int)SmearingFactor;
+				if (1) cout<<", after smearing= "<<VectTot[jj]<<endl;
 				int IpixBis=(jj)%NPixX;
 				int JpixBis=((jj)/NPixX);
 				frame->Set(IpixBis, JpixBis, VectTot[jj]); //aggiungo al frame il valore di quel pixel
+#endif
 			}
 			
-			VectTot.clear();
+			VectTot.clear(); //svuoto il vettore di appoggio di tutti i pixel per prepararmi al nuovo frame
+			VectTotConv.clear();
+			
 			if (FrameCounter%100==0) cout<<"Saving Frame Number: "<<FrameCounter<<endl;
 			frame->SetId(FrameCounter);
 			ImageFile->cd();
 			ClusterVec[FrameCounter]->Write();
-			//			FrameFile->cd();
 			FrameCounter++;
-//			ClusterVec[FrameCounter]=new TH2F(Form("ClusterVec%d",FrameCounter),"ClusterVec", NPixX/RedFactor, 0, NPixX, NPixY/RedFactor, 0, NPixY);
 			MCTree->Fill();
 			frame->Clear();
-			kk++; //contatore dei pixel nel frame
+			kk++; //contatore dei frame
 		}
-	}
+		
+		
+		
+	} //fine ciclo sulle entries MC
 	
 	//#######
 	//########## FINE LOOP SU TUTTI GLI EVENTI
 	//############################################
 	
-//	for (kk=0; kk<NPixTot;kk++) cout<<"pixel num "<<kk<<", valore= "<<VectTot[kk]<<endl;
+	//	for (kk=0; kk<NPixTot;kk++) cout<<"pixel num "<<kk<<", valore= "<<VectTot[kk]<<endl;
 	
 	
 	if (FrameCounter<NFramesMC && !LowFlag) {
