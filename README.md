@@ -1,6 +1,6 @@
 # cmos Data Analysis Framework
 *Latest update to Readme:
-2017-01-16 by collamaf*
+2017-01-25 by collamaf*
 Pacchetto software per l'analisi dei dati acquisiti dal sensore CMOS. Funziona sia con il sensore MTV011 che con il sensore MTV115.
 
 ## Come scaricare il codice:
