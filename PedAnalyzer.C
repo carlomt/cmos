@@ -68,14 +68,14 @@ void PedAnalyzer::Loop()
 	VectVal.resize(Size);
 	//	VectValQuad.resize(Size);
 	
-	TH1F* DumpIstoTot=new TH1F("DumpIstoTot","Tutti i valori di tutti i pixel per tutti i frame",10000, 0,1000);
-	TH1F* DumpIstoAllPed=new TH1F("DumpIstoAllPed","Valore del piedistallo di tutti i pixel",10000, 0,100);
+	TH1F* DumpIstoTot=new TH1F("DumpIstoTot","Tutti i valori di tutti i pixel per tutti i frame",10240, 0,1024);
+	TH1F* DumpIstoAllPed=new TH1F("DumpIstoAllPed","Valore del piedistallo di tutti i pixel",10240, 0,1024);
 	TH1F* DumpIstoAllNoise=new TH1F("DumpIstoAllNoise","Valore del noise di tutti i pixel",10000, 0,100);
 	
 	for (kk=0; kk<Size; kk++) { //inizializzo i vettori e gli istogrammi per ciascun pixel
 		VectVal[kk]=0;
 		//		VectValQuad.at(kk)=0;
-		DumpIstoPed[kk]=new TH1F(Form("Histo%d",kk),Form("Histo%d",kk),1000, 0, 1000);
+		DumpIstoPed[kk]=new TH1F(Form("Histo%d",kk),Form("Histo%d",kk),1024, 0,1024);
 	}
 	
 	TString InputFileName=Form("%s.root",nomefile.Data());
@@ -116,7 +116,7 @@ void PedAnalyzer::Loop()
 		MediaCutSquare=0;
 		CounterMediaCut=0;
 		
-		for (rr=0; rr<1000; rr++) {          //ciclo sui 1000 bin degli istogrammi per fare la media dei soli bin con piu di una entries evitando quindi quelli (eventuali) di segnale
+		for (rr=1; rr<=1024; rr++) {          //ciclo sui 1000 bin degli istogrammi per fare la media dei soli bin con piu di una entries evitando quindi quelli (eventuali) di segnale
 			double yval=DumpIstoPed[kk]->GetBinContent(rr);
 			if (yval>1) {
 				int xbin=DumpIstoPed[kk]->GetBinCenter(rr);
@@ -126,6 +126,7 @@ void PedAnalyzer::Loop()
 			}
 		}
 		PedEstimator= MediaCut/CounterMediaCut;
+		if (CounterMediaCut==0) cout<<"ATTENZIONE DIVIDO PER 0!!! pixel num "<<kk<<endl;
 		MediaCutSquare/=CounterMediaCut;
 		STDDev=sqrt(MediaCutSquare-(PedEstimator*PedEstimator));
 		if (STDDev<1) STDDev=1;  //mettiamo il noise peggiore fra quello calcolato e 1
