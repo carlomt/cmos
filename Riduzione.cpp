@@ -2,7 +2,6 @@
 #include <fstream>
 #include <cstdlib>
 #include <iomanip>
-#include <vector>
 #include "Frame.h"
 #include "Seed.h"
 #include "SeedList.h"
