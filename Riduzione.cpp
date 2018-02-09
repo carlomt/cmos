@@ -308,7 +308,7 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
   //mediaClusterPerFrame = mediaClusterPerFrame/(FrameNCol*FrameNRow);      //media di cluster ottenuti per frame
 	
   int TotBadPixel=0;
-  int IDpixel=0, sum=0;                                                     //dichiaro due variabili utili a identificare l'ID di tutti i pixel
+  int IDpixel=0;                                                           
   std::ofstream BadPixelFile(Form("%s_badpixel.txt",badfname.c_str()),std::ios::out);
   
   double MeanEvalMethodThr=3;
@@ -320,17 +320,18 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
   if(MediaPixelTotAcq >= MeanEvalMethodThr){                              //Luisa had "2", Stefano 3
     cout<<"I am using Gauss"<<endl;
     cout<<"I will print on file .txt (in order): IDpixel Ncol NRow NtimesON"<<endl;
-		
+    
     for(int j=0;j<FrameNCol;j++){
       for(int k=0;k<FrameNRow;k++){
-	IDpixel=sum+k;
+	if(j<FrameNCol && k<FrameNRow){
+	    IDpixel= j+k*FrameNCol;
+	  }
 	if(pixel[j][k] > MediaPixelTotAcq+GaussStatThr*sqrt(MediaPixelTotAcq)){   //se il pixel ha suonato molto piu della media lo scrivo nel file e aggiorno il contatore di badpixel e riduco il contatore di cluster del numero di volte che il badpixel aveva suonato
 	  BadPixelFile<<IDpixel<<" "<<j<<" "<<k<<" "<<pixel[j][k]<<endl;
 	  TotBadPixel += 1;
 	  NClusterTot -= pixel[j][k];
 	}
       }
-      sum=IDpixel+1;
     }
   }
 	
@@ -347,7 +348,9 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 
     for(int j=0;j<FrameNCol;j++){
       for(int k=0;k<FrameNRow;k++){
-	IDpixel=sum+k;
+	if(j<FrameNCol && k<FrameNRow){                                   //ad ogni pixel (j,k) associo un numero riga per riga, che va da 0 a 316223
+	    IDpixel= j+k*FrameNCol;
+	  }
 	for(n=0;n<pixel[j][k];n++){
 	  fattoriale = 1;
 	  for(int i=n;i>1;i--){
@@ -363,7 +366,6 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 	}
 	prob=0;
       }
-      sum=IDpixel+1;
     }
   }
   	
