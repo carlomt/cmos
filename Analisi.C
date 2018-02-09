@@ -64,17 +64,22 @@ Analisi::Analisi(const std::string OutFileName, const std::string BadFileName)
 	// Albero->Branch("Nclu",&N,"Nclu/I");
 	// Albero->Branch("EasDivN",&Eas_div_Npix,"EasDivN/D");
 	fOutFile= new TFile(OutFileName.c_str(),"Recreate");
-//	std::ifstream out1("badpixel.txt",std::ios::in);
-	std::ifstream out1(BadFileName.c_str(),std::ios::in);
-	if (!out1.is_open()) cout<<"FILE NON TROVATO! "<< BadFileName.c_str() <<endl;
-	while(!out1.eof()){
-		int row=0, col=0, control=0, sigmas=0;
-		out1>>col>>row>>control>>sigmas;
-//		cout<< col<<" "<< row<<endl;
-		ACPoint bad(col,row);
-		Badpixels.push_back(bad);
+	
+	//std::ifstream BadPixInFile("badpixel.txt",std::ios::in);
+	std::ifstream BadPixInFile(BadFileName.c_str(), std::ios::in);  //apro in lettura il file .txt dei bad pixels
+	if (!BadPixInFile.is_open()) {
+	  cout<<"FILE NON TROVATO!"<< BadFileName.c_str() <<endl;
 	}
-	out1.close();
+	else{
+	  while(!BadPixInFile.eof()){
+	    int IDpixel=0, row=0, col=0, control=0, sigmas=0;
+	    BadPixInFile>>IDpixel>>col>>row>>control>>sigmas;
+	    //		cout<< col<<" "<< row<<endl;
+	    ACPoint bad(col,row);
+	    Badpixels.push_back(bad);                                   //li metto nel vettore "Badpixels" (vedi Analisi.h)
+	  }
+	}
+	BadPixInFile.close();
 }
 
 
