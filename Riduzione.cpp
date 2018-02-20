@@ -278,7 +278,7 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
       int Row_seed = 0;
       int Col_seed = 0;
                                                       //Creo una mappa delle volte che ciascun pixel si è acceso, girando su tutti i seed della lista
-      for(int i=0; i<seed_list.Size(); i++){            
+      for(size_t i=0; i<seed_list.Size(); i++){            
 	Seed ts = seed_list.At(i);
 	Col_seed = ts.GetCol();
 	Row_seed = ts.GetRow();
@@ -390,7 +390,7 @@ void print_help(string fname)
   cout<<"Option : -seedSize  (set the seeds side dimensions, default: 7)"<<endl;
   cout<<"Option : -checkLocalMaximumSide  (set the submatrix used to check local max, default: 3)"<<endl;
   cout<<"Option : -edge  (set the fiducial edge, default: 3)"<<endl;
-  cout<<"Option : -frameSize (set the frame sizes, default: 648x488)"<<endl;
+  cout<<"Option : -frameSize (set the frame sizes, default: 640x480)"<<endl;
   cout<<"Option : -help     (show this help)"<<endl;
   //printf("       : -log (Log filename)\n");
   cout<<endl;
