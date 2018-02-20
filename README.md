@@ -62,15 +62,21 @@ PedCompare("2018-01-10_MT9V115_90Y_Decay03_0000_PostPed_100.root","2018-01-10_MT
 
 ```
 ### Riduzione.x
-Prende in input il file (*NomeFileNNNN.root*) insieme ai file di buio e piedistallo (*NomeFileNNNN_buio.root, NomeFileNNNN_noise.root*) ed esegue l'algoritmo di riduzione del file con la ricerca dei cluster. Permette di settare molte variabili della riduzione da riga di comando (ad esempio la soglia in unità di sigma, -help mostra tali opzioni). Produce un file root (*NomeFileNNNN_Reduced.root*) con un'istanza della classe SeedList che all'interno ha un array di seed (istanze della classe Seed). Produce anche il file contenente l'elenco dei badpixel (*NomeFileNNNN_BadPixels.txt*). Funziona con entrambi i sensori, grazie alla flag `-frameSize 640x480`.
+Prende in input il file (*NomeFileNNNN.root*) insieme ai file di buio e piedistallo (*NomeFileNNNN_buio.root, NomeFileNNNN_noise.root*) ed esegue l'algoritmo di riduzione del file con la ricerca dei cluster. Permette di settare molte variabili della riduzione da riga di comando (ad esempio la soglia in unità di sigma, -help mostra tali opzioni). Produce un file root (*NomeFileNNNN_Reduced.root*) con un'istanza della classe SeedList che all'interno ha un array di seed (istanze della classe Seed). Produce anche il file contenente l'elenco dei bad pixels (*NomeFileNNNN_badpixel.txt*). Funziona con entrambi i sensori, grazie alla flag `-frameSize 640x480`.
 e.g.
 
 ```
-Riduzione DatiVari/PostRic/2018-01-10_MT9V115_90Y_Decay05_0000.root -noise DatiVari/PostRic/2018-01-10_MT9V115_90Y_Decay05_0000_noise_100.root -ped DatiVari/PostRic/2018-01-10_MT9V115_90Y_Decay05_0000_buio_100.root -t 7
+Riduzione DatiVari/PostRic/2018-01-10_MT9V115_90Y_Decay05_0000.root -noise DatiVari/PostRic/2018-01-10_MT9V115_90Y_Decay05_0000_noise_100.root -ped DatiVari/PostRic/2018-01-10_MT9V115_90Y_Decay05_0000_buio_100.root -t 7 -frameSize 648x488
 
 ```
 ### DataAnalysis.x 
-È il codice di Amedeo che prende in input il file prodotto dalla riduzione e produce tutti i plot che vengono salvati in un file root (*NomeFileNNNN_Analized.root*).
+Prende in input il file ridotto (*NomeFileNNNN_Reduced.root*) e il file dei bad pixels (*NomeFileNNNN_badpixel.txt*) e fornisce diversi plot che vengono salvati in un file root (*NomeFileNNNN_Analized.root*). Funziona con entrambi i sensori, grazie alla flag `-frameSize 640x480`.
+e.g.
+
+```
+Riduzione DatiVari/PostRic/2018-01-10_MT9V115_90Y_Decay05_0000_Reduced.root -frameSize 648x488
+
+```
 
 ### CMOSDict.cxx 
 E il dizionario delle classi per ROOT (se usato in modalita' interattiva) si crea con
