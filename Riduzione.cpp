@@ -126,8 +126,7 @@ int main(int argc, char *argv[])
     }
 	
   return  Riduzione( inputfname, thres, pedfname, noisefname, fiducialEdge,  seedSide,  localMaximumCheckSide,  outfname, FrameNCol, FrameNRow);
-	
-	
+  
 }
 
 
