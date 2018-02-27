@@ -13,8 +13,9 @@ ClassImp(Analisi);
 Analisi::Analisi(const std::string OutFileName, const std::string BadFileName, int FrameNCol, int FrameNRow)
 {
   //********************GRAFICI***********************************
-  HistoNCluster = new TH1F("NCluster","Numero di cluster nei frame",200,0.,200.);
-  HistoNCluster->GetXaxis()->SetTitle("Numero di cluster");
+  HistoNSeeds = new TH1F("NSeeds","Numero di seed per frame",200,0.,200.);
+  HistoNSeeds->GetXaxis()->SetTitle("# of seeds");
+  HistoNSeeds->GetYaxis()->SetTitle("count");
   
   map_seed = new TH2F("mapofseed","Seedmap",FrameNCol,0.,FrameNCol,FrameNRow,0.,FrameNRow);
   map_seed_coarse = new TH2F("mapofseedcoarse8x8","Seedmapcoarse",8.,0.,FrameNCol,8.,0.,FrameNRow);           //mappa seed con bin larghi 8x8 pixel
@@ -23,17 +24,13 @@ Analisi::Analisi(const std::string OutFileName, const std::string BadFileName, i
   map_seed2_4 = new TH2F("mapofseed 2di4", "mappa dei seed2",122.,122.,244.,FrameNRow,0.,FrameNRow);          //istogramma2 di 4
   map_seed3_4 = new TH2F("mapofseed 3di4", "mappa dei seed3",122.,244.,366.,FrameNRow,0.,FrameNRow);          //istogramma3 di 4
   map_seed4_4 = new TH2F("mapofseed 4di4", "mappa dei seed4",122.,366.,488.,FrameNRow,0.,FrameNRow);          //istogramma4 di 4
-  map_Row_seed = new TH1F("mapofRow","posizione seed sulle righe",FrameNRow,0.,FrameNRow);
+  map_Row_seed = new TH1F("mapofRow","posizione seed sulle righe",FrameNRow,0.,FrameNRow);                    //ATTENZIONE a regione fiduciale!! Con Riduzione.x si è tolto il bordo del sensore: 3<Righe<645 e 3<Colonne<485
   map_Col_seed = new TH1F("mapofCol","posizione seed sulle colonne",FrameNCol,0.,FrameNCol);
 
-  HistoDistSeed = new TH1F("Distanza seed","Distanza relativa tra i seed",500.,0.,1000.);
+  HistoDistSeeds = new TH1F("Dist relativa tra seeds","Distanza relativa tra seeds",500.,-40.,850.);
+  HistoDistSeeds->GetXaxis()->SetTitle("dist seeds");
+  HistoDistSeeds->GetYaxis()->SetTitle("count");
 
-  HistoDist_min_cluster = new TH1F("Distanza minima cluster","Distanza minima cluster",500.,0.,1000.);
-  HistoDist_min_cluster->Draw();
-  gPad->Update();
-  TPaveStats *st2 = (TPaveStats*)HistoDist_min_cluster->FindObject("stats");
-  st2->SetOptStat(1111111);   //Stampa l'integrale
-  
   HistoR_vs_Cluster = new TH1F("Dist_Cen_Cluster","Distance between center and cluster",100,-50.,500.);        //distanza tra centro del sensore e la posizione di un seed
 
   ///////////////////////////////////////////////////////
@@ -49,7 +46,7 @@ Analisi::Analisi(const std::string OutFileName, const std::string BadFileName, i
   HistoClusterAsy->GetXaxis()->SetTitle("Energia Cluster (ADC)");
   HistoClusterAsy->GetYaxis()->SetTitle("Conteggi");
   
-  HistoCluster3x3 = new TH1F("Cluster_3x3","Cluster signal 3x3",1000,-50.,2500.);                               //energia del cluster 3x3 simmetrico
+  HistoCluster3x3 = new TH1F("Cluster_3x3","Cluster signal 3x3",1000,-50.,2500.);                              //energia del cluster 3x3 simmetrico
   HistoCluster3x3->GetXaxis()->SetTitle("Energia Cluster (ADC)");
   HistoCluster3x3->GetYaxis()->SetTitle("Conteggi");
   
@@ -75,7 +72,7 @@ Analisi::Analisi(const std::string OutFileName, const std::string BadFileName, i
   V_vs_EPixMax = new TH2F("V_clu_vs_EPixMax","Cluster signal Vs Energy of max pixel",1000,0.,2000.,2500, 0.,2500.);//grafico di correlaz
   V_fract_NpixClu_vs_EPixMax = new TH2F("V_clu_fract_NpixClu_vs_EPixMax","Cluster signal normalized to N Vs Energy of max pixel",500,0.,1000.,2500, 0.,1500.);  //grafico di correlaz
   
-  HistoRMSclu_Asy = new TH1F("RMSclu_Asy","RMS cluster asimmetrico",1010,-10.,1000.);                                                                //indice dispersione dell'energia del cluster
+  HistoRMSclu_Asy = new TH1F("RMSclu_Asy","RMS cluster asimmetrico",1010,-10.,1000.);                              //indice dispersione dell'energia del cluster
   RMS_vs_V = new TH2F("RMS_vs_V_clu","RMS Vs Signal of Cluster",1010,-10.,2000.,1500,0.,2500.);
   RMS_vs_V_fract_NpixClu = new TH2F("RMS_vs_V_clu_fract_NpixClu","RMS Vs Signal of Cluster Normalized to N",1010,-10.,1000.,1500,0.,2500.);
   NpixClu_vs_RMS = new TH2F("NpixClu_vs_RMS","Number of pixel in a cluster Vs RMS",500,-10.,1000.,1010,-10.,1000.);
@@ -116,9 +113,9 @@ Analisi::Analisi(const std::string OutFileName, const std::string BadFileName, i
 
 Analisi::~Analisi()
 {
-  cout<<"Numero Totale Cluster: "<<map_seed->GetEntries()<<endl;
-  
-  delete HistoNCluster;
+  cout<<"Numero Totale Seed: "<<map_seed->GetEntries()<<endl;
+
+  delete HistoNSeeds;
   delete map_seed;
   delete map_seed_coarse;
   delete map_seed_coarse2;
@@ -128,8 +125,7 @@ Analisi::~Analisi()
   delete map_seed4_4;
   delete map_Row_seed;
   delete map_Col_seed;
-  delete HistoDistSeed;
-  delete HistoDist_min_cluster;
+  delete HistoDistSeeds;
   delete HistoR_vs_Cluster;
   delete HistoV_single;
   delete HistoClusterAsy;
@@ -167,7 +163,7 @@ Analisi::~Analisi()
 
 void Analisi::WriteOnFile()
 {
-  HistoNCluster->Write();
+  HistoNSeeds->Write();
   map_seed->Write();
   map_seed_coarse->Write();
   map_seed_coarse2->Write();
@@ -177,8 +173,7 @@ void Analisi::WriteOnFile()
   map_seed4_4->Write();
   map_Col_seed->Write();
   map_Row_seed->Write();
-  HistoDistSeed->Write();
-  HistoDist_min_cluster->Write();
+  HistoDistSeeds->Write();
   HistoR_vs_Cluster->Write();
   HistoV_single->Write();
   HistoClusterAsy->Write();
@@ -218,95 +213,125 @@ void Analisi::WriteOnFile()
 
 int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow)
 {
-  const int TOLERANCE_PIXELS = 2;                  //pixel di tolleranza nel calcolo del cluster asimmetrico: vengono annessi al cluster anche i pixel che superano la soglia secondaria e che distano fino a 2 pixel dal primo vicino
+  const int TOLERANCE_PIXELS = 2;                  //pixel di tolleranza nel calcolo del cluster asimmetrico: vengono annessi al cluster anche i pixel che superano la soglia secondaria (V_adja) e che distano fino a 2 pixel dal primo vicino
   
-  int Row_seed = 0;                                //riga del seed
-  int Col_seed = 0;                                //colonna del seed
-  int Row_seed2 = 0;
-  int Col_seed2 = 0;
-  double distMinCluster = 10000, distSeed = 10000; //(??)
-  int flagDist1=0, flagDist2=0;
+  int Row_seed=0;                                  //riga del seed
+  int Col_seed=0;                                  //colonna del seed
+  
+  int distSeed=0; 
+  int flagDistA=0;
 
-  double sogliaMinSeed = 10;                       //distanza minima che devono avere i seed
-  double V_adja = 2.;                              //soglia secondaria//fSecondaryThr prima era 4.0//prima era 2.6
-  int cont = 0;
-  int Ncluster = 0;
-  
-  for(size_t i=0; i<sl->Size(); i++)              //INIZIO 1° CICLO SULLA LISTA DEI SEED 
+  double sogliaMinSeed=10;                         //distanza minima che devono avere i seed per appartenere a due eventi diversi 
+  double V_adja=2.;                                //soglia secondaria//fSecondaryThr prima era 4.0//prima era 2.6
+
+  int NSeed=0;
+  int NSeedDouble=0;
+  int cont=0;
+
+  //cout<<"\n**********************START************************"<<endl;
+  for(size_t i=0; i<sl->Size(); i++)               //INIZIO 1° CICLO SULLA LISTA SEED 
     {
-      Seed ts = sl->At(i);                        //accedo agli elementi appartenenti alla lista dei seed
-      Row_seed = ts.GetRow();                     //ad ogni seed (ts) vi associo la riga...
-      Col_seed = ts.GetCol();                     //...e la colonna
-      
+      //cout<<"*************FRAME #"<<sl->GetIdFrame()<<" - SEED_tot = "<<sl->Size()<<"************"<<endl;  //check: numero del frame e numero dei seed per ogni frame
+      Seed ts = sl->At(i);                                                          //accedo agli elementi appartenenti alla lista (vedi SeedList.h)
+      //cout<<"At(i="<<i<<") "<<ts<<endl;                                             //check
+      Row_seed = ts.GetRow();
+      Col_seed = ts.GetCol();
+      //cout<<"Seed_i #"<<i<<": "<<"Col_i "<<Col_seed<<" Row_i "<<Row_seed<<endl;     //check
+
       
       //////////////////////////////////////ELIMINO BAD PIXEL//////////////////////////////////
       
-      int flagBadPix=0;
-      for(size_t i=0; i<Badpixels.size();i++){
-	if(Badpixels.at(i).x == Col_seed && Badpixels.at(i).y == Row_seed){    //se la colonna e la riga dei bad pixels coincidono con quelle relative ai seed...
-	  flagBadPix=1;                                                        //...setto la flag uguale a 1..
-	  break;                                                               //..e esco dal ciclo scartando il bad pixel
+      int flagBadPixA=0;
+      for(size_t i=0; i<Badpixels.size();i++)                                      //ciclo sui bad pixels
+	{
+	  if(Badpixels.at(i).x == Col_seed && Badpixels.at(i).y == Row_seed)       //se la colonna e la riga del bad pixel coincidono con quelle del seed..
+	    {
+	      flagBadPixA=1;                                                        
+	      //cout<<".. è BAD!"<<endl;                                             //check 
+	      break;                                                               //..esco dal ciclo scartando il bad pixel
+	    }
 	}
-      }
-      //cout<<"flag: "<<flagBadPixel<<endl;
-      if(flagBadPix==1) continue;                                              //se la flag è uguale a 1 ripeto il ciclo for per cercare altri bad pixel, altrimenti proseguo
+      if(flagBadPixA==1)
+	{
+	  continue;                                                                //se flagBadPix è 1 ripeto il ciclo sui bad pixels per cercarne altri, altrimenti proseguo
+	}
 
       
       /////////////////////////////////ELIMINAZIONE SEED VICINI///////////////////////////////
 
-      //cout<<"1 "<<Row_seed<<" "<<Col_seed<<endl;
-      for(size_t j=0; j<sl->Size(); j++){            //INIZIO 2° CILCO SULLA LISTA DEI SEED
-            
-	Seed ts2 = sl->At(j);                        //rigiro sui seed e ridefinisco il seed come "ts2"
-	Row_seed2 = ts2.GetRow();                    //il seed ts2 si troverà alla riga.. 
-	Col_seed2 = ts2.GetCol();                    //..e alla colonna
-	if((Row_seed == Row_seed2) && (Col_seed == Col_seed2)) continue;//se sto vedendo lo stesso seed nei due cicli, non lo considero
-            
-	int flagBadPix=0;
-	for(size_t i=0; i<Badpixels.size();i++){     //quando riscorro la lista dei seed per la 2a volta devo ritogliere i bad pixel
-	  if(Badpixels.at(i).x == Row_seed2 && Badpixels.at(i).y == Col_seed2){
-	    flagBadPix=1;
-	    break;
-	  }
-	}
-	if(flagBadPix==1) continue;
-            
-	//cout<<"2 "<<Row_seed2<<" "<<Col_seed2<<endl;
-            
-	int distX = Col_seed - Col_seed2;
-	int distY = Row_seed - Row_seed2;
-            
-	distSeed = sqrt(distX*distX+distY*distY);
-	HistoDistSeed->Fill(distSeed); 
-	flagDist1=0;
-	//cout<<"Distanza "<<distSeed<<" Energia 1 "<<ts(0,0)<<" Energia 2 "<<ts2(0,0)<<endl;
-            
-	if(distSeed <= sogliaMinSeed && (ts(0,0) < ts2(0,0)) ){  //se la distanza tra i seed è minore di 10 e il valore del segnale registrato dal seed 1 è minore di quello del seed 2
-	  flagDist1=1;
-	  break;                                                 //...esco dal 2°ciclo sui seed e continuo la ricerca*: questi due seed quindi verranno considerati come un unico evento appartenenete allo stesso cluster
-	}
-      
-	if(distSeed<=sogliaMinSeed)flagDist2=1;                  //se la distanza tra i seed è minore di 10 (?)
+      int flagDistB=0;
+      int Row_seed2 = 0;
+      int Col_seed2 = 0;
+      for(size_t j=0; j<sl->Size(); j++)                           //INIZIO 2° CILCO SULLA LISTA DEI SEED
+	{
+	  Seed ts2 = sl->At(j);                                    
+	  Row_seed2 = ts2.GetRow();                                 
+	  Col_seed2 = ts2.GetCol();
+	  //cout<<"Seed_j #"<<j<<": "<<"Col_j "<<Col_seed2<<" Row_j "<<Row_seed2<<endl;   //check
+	  
+	  if((Row_seed == Row_seed2) && (Col_seed == Col_seed2))
+	    {
+	      //cout<<"..è lo STESSO PIXEL!"<<endl;                  //check
+	      continue;                                            //se sto vedendo lo stesso pixel nei due cicli, non lo considero
+	    }
+	  
+	  int flagBadPixB=0;
+	  for(size_t i=0; i<Badpixels.size();i++)                   //quando riscorro la lista per la 2a volta devo ritogliere i bad pixels
+	    {
+	      if(Badpixels.at(i).x == Col_seed2 && Badpixels.at(i).y == Row_seed2)
+		{
+		  flagBadPixB=1;
+		  //cout<<".. è BAD!"<<endl;                          //check 
+		  break;
+		}
+	    }
+	  if(flagBadPixB==1)
+	    {
+	      continue;
+	    }
 
-	if(distSeed<distMinCluster){
-	  distMinCluster = distSeed;
-	}
-            
-	if(distX <= 3 && distX >= -3 && distY <= 3 && distY >= -3 && (distX!=0 || distY!=0)){  //se mi trovo entro una matrice 7x7
-	  cont++;
-	}
-      }                                              //FINE 2° CICLO SULLA LISTA DEI SEED
+	  int distX = Col_seed - Col_seed2;
+	  int distY = Row_seed - Row_seed2;
+	  distSeed = sqrt( pow(distX,2) + pow(distY,2) ); 
+	  flagDistA=0;
 
-      if(flagDist1==1) continue;                     //*(vedi primo if)
-        
-      //if(distMinSeed != 10000){
-      //cout<<endl<<"Dist min "<<distMinSeed<<endl;
-      if(flagDist2==0)HistoDist_min_cluster->Fill(distMinCluster);
-      //}
-      distMinCluster = 10000;
-      Ncluster += 1;
+	  
+	  if(ts(0,0)<ts2(0,0))                                       //se il valore del segnale registrato dal seed 1 è minore di quello del seed 2..(*)->vedi sotto //questa condizione serve per non contare due volte la distanza tra due stessi seed
+	    {
+	      flagDistA=1;
+	    }
+	  else
+	    {
+	      HistoDistSeeds->Fill(distSeed);
+	      //cout<<"->DistSeed: "<<distSeed<<endl;                  //check
+	    }
+
+	  if(distSeed < sogliaMinSeed && ts(0,0)<ts2(0,0) )         //1a condizione utile per identificare il double counting: ho lo stesso evento se mi trovo entro 10 pixel; 2a condizione idem sopra 
+	    {
+	      flagDistB=1;
+	      //cout<<"..è < 10!"<<endl;                               //check
+	    }
+	  
+
+	  if(distX <= 3 && distX >= -3 && distY <= 3 && distY >= -3 && (distX!=0 || distY!=0))
+	    {
+	      cont++;                                                //conto con che frequenza si hanno due seed entro una matrice 7x7
+	    }
+	}                                                            //FINE 2° CICLO SULLA LISTA DEI SEED 
+
+      NSeed +=1;                                                     //conto quanti seed in totale ho in questo frame
       
+      if(flagDistA==1)
+	{
+	  continue;                                                  //(*)..il seed1 non viene contato per l'analisi successiva e ripeto il 2° ciclo sui seed 
+	}
       
+      if(flagDistB==1)
+	{
+	  NSeedDouble += 1;                                          //conteggio dei seed con dist<10 (nota: è lo stesso per ts<ts2 o ts>ts2)
+	  continue;                                                  //se l'attivo non considero nelle analisi successive i seed1 con dist<10 da seed2 e energia minore di quella del seed2; così non sto accorpando i due seed, ma perdo segnale del seed1 per quelli che hanno una distanza compresa tra 5 e 9, ovvero fuori dalla matrice 7x7 salvata da Riduzione.x      
+	}
+
       ///////////////////////////////Riempimento istogrammi mappe dei seed////////////////////////////////////////
       
       map_Row_seed->Fill(Row_seed);
@@ -327,114 +352,82 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow)
       
       //////////////////////////////Costruzione dei Cluster Asimmetrici//////////////////////////////////     
       
-      //RF definire
-      // char logStr[10000];
-      // char logStr3[10000];
-      // sprintf(logStr, ""); //?!?!
-		
-      std::vector<ACPoint> preCluster; // = vector<ACPoint>{};
-      std::vector<ACPoint> cluster;    // = vector<ACPoint>{};
-      cluster.push_back(ACPoint(0,0));
-      int N = 1;
-      double EPixMax=0.;                                            //pixel che ha il massimo valore di segnale all'interno del cluster: energia del seed
+      std::vector<ACPoint> preCluster;                              //conterrà i valori dei pixel (della matrice centrata nel seed salvata da Riduzione.x) che supereranno la soglia secondaria
+      std::vector<ACPoint> cluster;                                 
+      cluster.push_back(ACPoint(0,0));                              //contiene tutti i valori dei pixel della matrice centrata nel seed salvata da Riduzione.x
       
-      for (int k = ts.GetPixelMin(); k < ts.GetPixelMax(); k++)
+      int N = 1;
+      double EPixMax=0.;                                            //massimo valore registrato da un pixel all'interno della matrice: energia del seed
+
+      //INIZIO ciclo sulla matrice centrata nel seed (salvata da Riduzione.x) a partire dal pixel in alto a sx
+      for (int k = ts.GetPixelMin(); k < ts.GetPixelMax(); k++)     //vedi Seed.h/Seed.C->p.e. per la matrice 7x7 sto scorrendo le RIGHE a partire dal pixel -3 rispetto al centro fino ad arrivare al pixel +3 rispetto al centro
 	{
-	  for (int l = ts.GetPixelMin(); l < ts.GetPixelMax(); l++)
+	  for (int l = ts.GetPixelMin(); l < ts.GetPixelMax(); l++) //idem sopra, ma per le COLONNE
 	    {
-	      float tsValue = ts(l,k);                              //valore registrato dal pixel
-	      if(tsValue>EPixMax)
+	      float tsValue = ts(l,k);                              //valore registrato dal pixel alla posizione (l,k)
+	      if(tsValue>EPixMax)                                   //se il valore è maggiore di..
 		{
-		  EPixMax=tsValue;
+		  EPixMax=tsValue;                                  //..assegna a quest'ultimo l'etichetta di "pixel con massimo valore all'interno della matrice" 
 		}
-	      
-	      bool isOverThreshold = tsValue > V_adja;              //variabile che mi permette di valutare i pixel maggiori della soglia secondaria
-	      
-	      // if (isOverThreshold)
-	      // 	{
-	      // 	  sprintf(logStr, "%s[[%+04.0f]] ", logStr, tsValue);
-	      // 	}
-	      // else
-	      // 	{
-	      // 	  sprintf(logStr, "%s (%+04.0f)  ", logStr, tsValue);
-	      // 	}
-	      
-	      
-	      if (k == 0 && l == 0)
+	   
+	      if (k == 0 && l == 0)                                  //se k=l=0 sono nel centro della matrice, quindi sono il seed..
 		{
-		  continue;
+		  continue;                                          //..quindi appartengo sicuramente al cluster e vado a cercare altri possibili candidati
 		}
+	       
+	      bool isOverThreshold = tsValue > V_adja;             
 	      
-	      if (isOverThreshold)
+	      if (isOverThreshold)                                   //se sono sopra soglia..
 		{
-		  ACPoint currentPoint = ACPoint(l,k);    //creo il punto corrispondente al k e l attuali nel ciclo
-		  preCluster.push_back(currentPoint);     //scrivo il pixel che potrebbe appartenente al cluster
+		  ACPoint currentPoint = ACPoint(l,k);               //..salvo le coordinate del pixel che potrebbe appartenere al cluster
+		  preCluster.push_back(currentPoint);                //riempio il vettore con i pixel possibili candidati
 		  
 		}
 	    }
-	  //sprintf(logStr, "%s\n", logStr);
+	 
 	}
-      
-      //sprintf(logStr, "%s\n\n", logStr);
-      
-      bool found;                                         //found=esiste almeno un pixel nei precluster adiacente ad uno di quelli nel cluster?
+      //FINE ciclo sulla matrice centrata nel seed
+    
+      bool found;                                                   //found=esiste almeno un pixel nel "preCluster" adiacente ad uno di quelli nel "cluster"?
       
       do {
 	found = false;
-	
-	for (size_t i = 0; i < preCluster.size(); i++)
-	  {
-	    
-	    ACPoint preClusterPoint = preCluster.at(i);    //dammi il punto all'i-sima posizione della lista di precluster
-	    for (size_t j = 0; j < cluster.size(); j++)
+	for (size_t i = 0; i < preCluster.size(); i++)              //giro sui possibili candidati che potrebbero essere inclusi nel cluster
+	  {	    
+	    ACPoint preClusterPoint = preCluster.at(i);             //i-esima posizione del vettore preCluster
+	    for (size_t j = 0; j < cluster.size(); j++)             //giro su tutti i pixel della matrice 
 	      {
 		ACPoint clusterPoint = cluster.at(j);
-		if (std::abs(preClusterPoint.x-clusterPoint.x) <= TOLERANCE_PIXELS && std::abs(preClusterPoint.y-clusterPoint.y) <= TOLERANCE_PIXELS)
+		if (std::abs(preClusterPoint.x-clusterPoint.x) <= TOLERANCE_PIXELS && std::abs(preClusterPoint.y-clusterPoint.y) <= TOLERANCE_PIXELS)                                                            //se la distanza è minore di 2 sia su x che su y.. 
 		  {
-		    
-		    //sprintf(logStr, "%s\n(%d, %d) is near (%d, %d)", logStr, preClusterPoint.x, preClusterPoint.y, clusterPoint.x, clusterPoint.y);
-		    N++;                                   //aumento il numero dei pixel nel cluster
+		    N++;                                            //..aggiungo il pixel al cluster
 		    found = true;
-		    cluster.push_back(preClusterPoint);
-		    preCluster.erase(preCluster.begin()+i);
-		    break;
+		    cluster.push_back(preClusterPoint);             //riempio il vettore con i pixel "vincitori" 
+		    preCluster.erase(preCluster.begin()+i);         //rimuovo gli elementi del vettore dall'inizio fino all'i-esima posizione, in modo che quando arrivo alla fine il vettore sia completamente vuoto 
+		    break;                                          //esco dal ciclo j
 		  }
 	      }
-	    
 	    if (found)
 	      {
-		break;
+		break;                                              //esco dal ciclo i
 	      }
 	  }
-	
-      } while (found);
-      //sprintf(logStr, "%s\n\n", logStr);
-      
-      
-      //cout << logStr;
-      //char logStr2[10000];
-      //sprintf(logStr2, "Result: ");
+      } while (found);                                              //giro fintanto che ci sono possibili candidati 
       
       
       ///////////////////////Calcolo Segnale Cluster Asimmetrico/////////////////////////
       
       double V_clu_Asy = 0;
       double V_clu_Asy_medio = 0.;
-      //if(N==4)cout<<" cluster a 4 pixels"<< endl; //debug 4pixels
-      //cout<< cluster.size()<< " "<< N << endl;
       for (size_t i = 0; i < cluster.size(); i++)                 //scorro la lista dei pixel appartenenti al cluster
 	{
 	  ACPoint currentPoint = cluster.at(i);                   //accedo al pixel i-esimo del cluster
-	  //	  sprintf(logStr2, "%s (%d, %d) -", logStr2, currentPoint.x, currentPoint.y);
 	  V_clu_Asy += ts(currentPoint.x, currentPoint.y);        //sommo i segnali dei pixel appartenenti al cluster
-	  //  if(N==4)
-	  // cout<<currentPoint.x<<" " <<currentPoint.y<<" "<<ts(currentPoint.x,currentPoint.y)<<endl;//debug 4pixels
 	}
-    V_clu_Asy_medio = (V_clu_Asy)/cluster.size();                 //calcolo segnale medio del cluster
-      //sprintf(logStr2, "%s\n\n\n\n\n\n", logStr2);
-      //cout << logStr2;
-       
-       /////////////////////////Calcolo RMS Cluster Asimmetrico////////////////////////
+      V_clu_Asy_medio = (V_clu_Asy)/cluster.size();               //calcolo segnale medio del cluster
+
+      
+      /////////////////////////Calcolo RMS Cluster Asimmetrico////////////////////////
       
       double RMS_2 = 0.;
       double RMS_2_1 = 0.;
@@ -442,52 +435,37 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow)
       for (size_t i = 0; i < cluster.size(); i++)
 	{
 	  ACPoint currentPoint = cluster.at(i);
-	  float tsValue = ts(currentPoint.x,currentPoint.y);      //valore del segnale del singolo pixel
-	  //sprintf(logStr3, "%s[[%f]]\n ",logStr3,tsValue);
-	  RMS_2_1 += (pow((tsValue - V_clu_Asy_medio),2));
+	  float tsValue = ts(currentPoint.x,currentPoint.y);      //valore del segnale del singolo pixel appartenente al cluster asimmetrico
+	  RMS_2_1 += (pow((tsValue - V_clu_Asy_medio),2));        //calcolo RMS^2
 	}
-      RMS_2=cluster.size()>1 ? RMS_2_1/(cluster.size()-1) : 0 ;     // -> espressione da testare ? azione_true : azione_false
-      RMSclu_Asy = sqrt(RMS_2);
-      
-      //////////////////////////////DEBUG RMS//////////////////////////////////////
-      
-      /* if (RMS_2 <1  && cluster.size()==15)
-	 {
-	 //cout << logStr;
-	 //cout << logStr2;
-	 //	  cout<<logStr3;
-	 cout<<"V_clu ="<<V_clu_Asy<<endl;
-	 cout<<"Npix ="<<cluster.size()<<endl;
-	 cout<<"V_clu_fractN ="<<V_clu_fract_n<<endl;
-	 cout<<"RMS2_1 ="<<RMS_2_1<<endl;
-	 cout<<"RMS2 ="<<RMS_2<<endl;
-	 cout<<"RMS =" << RMS_<<endl;
-	 }*/
+      RMS_2 = cluster.size()>1 ? RMS_2_1/(cluster.size()-1) : 0 ; // -> espressione da testare ? azione_true : azione_false //in questo caso l'espressione da testare è cluster.size()>1 e se è vera RMS_2 vale "azione_true", altrimenti vale 0 ("azione_false")
+      RMSclu_Asy = sqrt(RMS_2); 
+
       
       ////////////////////////////Calcolo Cluster Simmetrici///////////////////////////
 
       double V_clu_3x3 = 0.;
       double V_clu_5x5 = 0.;
       double V_clu_7x7 = 0.;
-      for(int j=ts.GetPixelMin(); j<ts.GetPixelMax(); j++)
+      //ciclo sulla matrice centrata nel seed (salvata da Riduzione.x) a partire dal pixel in alto a sx
+      for(int j=ts.GetPixelMin(); j<ts.GetPixelMax(); j++)        //RIGHE
 	{
-	  for(int i=ts.GetPixelMin(); i<ts.GetPixelMax(); i++)
+	  for(int i=ts.GetPixelMin(); i<ts.GetPixelMax(); i++)    //COLONNE
 	    {
-	      HistoV_single->Fill(ts(i,j));
-	      
+	      HistoV_single->Fill(ts(i,j));                       //in questo istogramma si avranno, per ogni seed trovato, tutti i valori registrati dai pixel che appartengono alla matrice 3x3 centrata nel seed 	      
 	      if(j>=-1 && j<=1 && i>=-1 && i<=1)
 		{
-		  V_clu_3x3+=ts(i,j);
+		  V_clu_3x3 += ts(i,j);
 		}
 	      
 	      if(j>=-2 && j<=2 && i>=-2 && i<=2)
 		{
-		  V_clu_5x5+=ts(i,j);
+		  V_clu_5x5 += ts(i,j);
 		}
 	      
 	      if(j>=-3 && j<=3 && i>=-3 && i<=3)
 		{
-		  V_clu_7x7+=ts(i,j);
+		  V_clu_7x7 += ts(i,j);
 		}
 	    }
 	}
@@ -509,11 +487,10 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow)
       
       Emax_fract_E3x3 =(float(EPixMax) / V_clu_3x3);
       E_CluAsy_fract_NpixClu = (V_clu_Asy /float(N));         
-      //RF qui calcoli
       
       ///////////////////////RIEMPIMENTO ISTOGRAMMI/////////////////////////
       
-      V_vs_NpixClu->Fill(float(V_clu_Asy),float(N));
+      V_vs_NpixClu->Fill(float(V_clu_Asy),float(N));          //Nota: N è il numero di pixel nel cluster asimmetrico!
       NpixClu_vs_V->Fill(float(N),float(V_clu_Asy));
       HistoV_fract_NpixClu->Fill(float(V_clu_Asy_medio));
       HistoNpixClu->Fill(float(N));
@@ -538,7 +515,7 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow)
       HistoDelta_5x5_vs_3x3_norm->Fill(Delta_5x5_vs_3x3_norm);
       HistoDelta_7x7_vs_5x5->Fill(Delta_7x7_vs_5x5);
       HistoDelta_7x7_vs_5x5_norm->Fill(Delta_7x7_vs_5x5_norm);
-      HistoEmax_fract_E3x3->Fill(Emax_fract_E3x3); // qui calcoli
+      HistoEmax_fract_E3x3->Fill(Emax_fract_E3x3);
       HistoE_CluAsy_fract_NpixClu->Fill(E_CluAsy_fract_NpixClu);
       
       E_CluAsy_fract_NpixClu_vs_3x3->Fill(E_CluAsy_fract_NpixClu,V_clu_3x3);
@@ -551,31 +528,16 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow)
       
     }                                            //FINE 1° CICLO SULLA LISTA DEI SEED
   
-  /////////////////////////Conteggio Seed Vicini///////////////////////////
-  
-  for(size_t i=0; i<sl->Size(); i++)
-    {
-      Seed ts = sl->At(i);
-      for(size_t j=i+1; j<sl->Size(); j++)
-	{
-	  Seed ts2 = sl->At(j);
-	  
-	  int distX = ts.GetCol()-ts2.GetCol();
-	  int distY = ts.GetRow()-ts2.GetRow();
-	  
-	  if(distX <= 3 && distX >= -3 && distY <= 3 && distY >= -3 && (distX!=0 || distY!=0))
-	    {
-	      cont++;
-	    }
-	}
-    }
+  int SeedGOOD=NSeed-NSeedDouble;                                           //conto il numero di seed buoni che ho avuto nel frame 
+  /*cout<<"************AT THE END of this FRAME***************"<<endl;        //check finale
+    cout<<"*Seed: "<<NSeed<<endl;
+    cout<<"*SeedDist<10: "<<NSeedDouble<<endl;
+    cout<<"*SeedGOOD: "<<SeedGOOD<<endl;
+    cout<<"***************************************************"<<endl;*/
+
   HistoContNeigh->Fill(cont);
-  HistoNCluster->Fill(Ncluster);
-  
-  /* row_med /= sl->Size();
-     col_med /= sl->Size();
-     cout<<row_med<<" "<<col_med<<endl;
-  */
+  HistoNSeeds->Fill(SeedGOOD);
+
   return(0);
   
 }
