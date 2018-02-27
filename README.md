@@ -74,7 +74,7 @@ Prende in input il file ridotto (*NomeFileNNNN_Reduced.root*) e il file dei bad 
 e.g.
 
 ```
-Riduzione DatiVari/PostRic/2018-01-10_MT9V115_90Y_Decay05_0000_Reduced.root -frameSize 648x488
+DataAnalysis DatiVari/PostRic/2018-01-10_MT9V115_90Y_Decay05_0000_Reduced.root -frameSize 648x488
 
 ```
 
