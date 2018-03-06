@@ -16,8 +16,14 @@ Analisi::Analisi(const std::string OutFileName, const std::string BadFileName, i
   HistoNSeeds = new TH1F("NSeeds","Numero di seed per frame",200,0.,200.);
   HistoNSeeds->GetXaxis()->SetTitle("# of seeds");
   HistoNSeeds->GetYaxis()->SetTitle("count");
+
+  map_seedCheck = new TH2F("mapOfSeedCheck","SeedmapCheck if 159<distSeed<161",FrameNCol,0.,FrameNCol,FrameNRow,0.,FrameNRow);
+  map_seedCheckCol = new TH2F("mapOfSeedCheckCol","SeedmapCheckCol if 159<distSeed<161",FrameNCol,0.,FrameNCol,FrameNCol,0.,FrameNCol);
+  col_seedCheck = new TH1F("colOfSeedCheck", "Col Seed if 159<distSeed<161", FrameNCol, 0., FrameNCol);
+  row_seedCheck = new TH1F("rowOfSeedCheck", "Row Seed if 159<distSeed<161", FrameNRow, 0., FrameNRow);
   
   map_seed = new TH2F("mapofseed","Seedmap",FrameNCol,0.,FrameNCol,FrameNRow,0.,FrameNRow);
+  map_seedDist10 = new TH2F("mapofseedDist10","Seedmap dist<10",FrameNCol,0.,FrameNCol,FrameNRow,0.,FrameNRow);
   map_seed_coarse = new TH2F("mapofseedcoarse8x8","Seedmapcoarse",8.,0.,FrameNCol,8.,0.,FrameNRow);           //mappa seed con bin larghi 8x8 pixel
   map_seed_coarse2 = new TH2F("mapofseedcoarse61x81","Seedmapcoarse61x81",61.,0.,FrameNCol,81.,0.,FrameNRow); //mappa seed con bin larghi 61x81 pixel
   map_seed1_4 = new TH2F("mapofseed 1di4", "mappa dei seed1",122.,0.,122.,FrameNRow,0.,FrameNRow);            //istogramma1 di 4: zoom su colonne da 0 a 122
@@ -27,7 +33,7 @@ Analisi::Analisi(const std::string OutFileName, const std::string BadFileName, i
   map_Row_seed = new TH1F("mapofRow","posizione seed sulle righe",FrameNRow,0.,FrameNRow);                    //ATTENZIONE a regione fiduciale!! Con Riduzione.x si è tolto il bordo del sensore: 3<Righe<645 e 3<Colonne<485
   map_Col_seed = new TH1F("mapofCol","posizione seed sulle colonne",FrameNCol,0.,FrameNCol);
 
-  HistoDistSeeds = new TH1F("Dist relativa tra seeds","Distanza relativa tra seeds",500.,-40.,850.);
+  HistoDistSeeds = new TH1F("Dist relativa tra seeds","Distanza relativa tra seeds",1000.,-10.5,989.5);
   HistoDistSeeds->GetXaxis()->SetTitle("dist seeds");
   HistoDistSeeds->GetYaxis()->SetTitle("count");
 
@@ -113,10 +119,16 @@ Analisi::Analisi(const std::string OutFileName, const std::string BadFileName, i
 
 Analisi::~Analisi()
 {
-  cout<<"Numero Totale Seed: "<<map_seed->GetEntries()<<endl;
+  cout<<"Numero Totale Seed: "<<map_seed->GetEntries()<<endl;  
+  cout<<"Numero seed a dist<10: "<<map_seedDist10->GetEntries()<<endl;
 
   delete HistoNSeeds;
+  delete map_seedCheck;
+  delete map_seedCheckCol;
+  delete col_seedCheck;
+  delete row_seedCheck;
   delete map_seed;
+  delete map_seedDist10;
   delete map_seed_coarse;
   delete map_seed_coarse2;
   delete map_seed1_4;
@@ -164,7 +176,12 @@ Analisi::~Analisi()
 void Analisi::WriteOnFile()
 {
   HistoNSeeds->Write();
+  map_seedCheck->Write();
+  map_seedCheckCol->Write();
+  col_seedCheck->Write();
+  row_seedCheck->Write();
   map_seed->Write();
+  map_seedDist10->Write();
   map_seed_coarse->Write();
   map_seed_coarse2->Write();
   map_seed1_4->Write();
@@ -213,19 +230,13 @@ void Analisi::WriteOnFile()
 
 int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow)
 {
-  const int TOLERANCE_PIXELS = 2;                  //pixel di tolleranza nel calcolo del cluster asimmetrico: vengono annessi al cluster anche i pixel che superano la soglia secondaria (V_adja) e che distano fino a 2 pixel dal primo vicino
-  
   int Row_seed=0;                                  //riga del seed
   int Col_seed=0;                                  //colonna del seed
-  
-  int distSeed=0; 
-  int flagDistA=0;
-
+  double distSeed=0; 
   double sogliaMinSeed=10;                         //distanza minima che devono avere i seed per appartenere a due eventi diversi 
-  double V_adja=2.;                                //soglia secondaria//fSecondaryThr prima era 4.0//prima era 2.6
-
-  int NSeed=0;
-  int NSeedDouble=0;
+  //int NSeed=0;
+  //int NSeedDouble=0;
+  int SeedOK=0;
   int cont=0;
 
   //cout<<"\n**********************START************************"<<endl;
@@ -276,7 +287,7 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow)
 	    }
 	  
 	  int flagBadPixB=0;
-	  for(size_t i=0; i<Badpixels.size();i++)                   //quando riscorro la lista per la 2a volta devo ritogliere i bad pixels
+	  for(size_t i=0; i<Badpixels.size();i++)                  //quando riscorro la lista per la 2a volta devo ritogliere i bad pixels
 	    {
 	      if(Badpixels.at(i).x == Col_seed2 && Badpixels.at(i).y == Row_seed2)
 		{
@@ -292,46 +303,49 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow)
 
 	  int distX = Col_seed - Col_seed2;
 	  int distY = Row_seed - Row_seed2;
-	  distSeed = sqrt( pow(distX,2) + pow(distY,2) ); 
-	  flagDistA=0;
+	  distSeed = sqrt( pow(distX,2) + pow(distY,2) );
+	  //cout<<"Distanza = "<<distSeed<<" Segnale_i = "<<ts(0,0)<<" Segnale_j = "<<ts2(0,0)<<endl;   //check
+
+	  if(distX <= 3 && distX >= -3 && distY <= 3 && distY >= -3 && (distX!=0 || distY!=0))
+	    {
+	      cont++;                                                //non è utile all'eliminazione dei seed..conto solo con che frequenza si hanno più seed entro una matrice 7x7
+	    }
+
+	  if(distSeed<161 && distSeed>159 && ts(0,0)<ts2(0,0))
+	    {
+	      map_seedCheck->Fill((Col_seed),(Row_seed));
+	      map_seedCheckCol->Fill((Col_seed),(Col_seed2));
+	      col_seedCheck->Fill(Col_seed);
+	      row_seedCheck->Fill(Row_seed);
+	      //cout<<"*************FRAME #"<<sl->GetIdFrame()<<" - SEED_tot = "<<sl->Size()<<"************"<<endl;
+	      //cout<<"Seed_i #"<<i<<": "<<"Col_i "<<Col_seed<<" Row_i "<<Row_seed<<endl;           //check
+	      //cout<<"Seed_j #"<<j<<": "<<"Col_j "<<Col_seed2<<" Row_j "<<Row_seed2<<endl<<endl;   //check
+	    }
 
 	  
-	  if(ts(0,0)<ts2(0,0))                                       //se il valore del segnale registrato dal seed 1 è minore di quello del seed 2..(*)->vedi sotto //questa condizione serve per non contare due volte la distanza tra due stessi seed
-	    {
-	      flagDistA=1;
-	    }
-	  else
+	  if(ts(0,0)<ts2(0,0))                                       //se il valore registrato dal seed 1 è minore di quello del seed 2..//questa condizione serve per non contare due volte la distanza tra due stessi seed
 	    {
 	      HistoDistSeeds->Fill(distSeed);
 	      //cout<<"->DistSeed: "<<distSeed<<endl;                  //check
 	    }
-
-	  if(distSeed < sogliaMinSeed && ts(0,0)<ts2(0,0) )         //1a condizione utile per identificare il double counting: ho lo stesso evento se mi trovo entro 10 pixel; 2a condizione idem sopra 
+	 
+	  if(distSeed <= sogliaMinSeed && ts(0,0)<ts2(0,0))          //1a condizione utile per identificare il double counting: ho lo stesso evento se mi trovo entro 10 pixel; 2a condizione idem sopra 
 	    {
 	      flagDistB=1;
-	      //cout<<"..è < 10!"<<endl;                               //check
+	      //cout<<"..è < 10!  "<<NSeedDouble<<endl;                //check 
+	      //NSeedDouble += 1;                                      //check:conteggio dei seed con dist<10 (nota: è lo stesso per ts<ts2 o ts>ts2)
+	      map_seedDist10->Fill((Col_seed),(Row_seed));
 	    }
-	  
+	}                                                            //FINE 2° CICLO SULLA LISTA DEI SEED
+      //NSeed +=1;                                                     //check:conto quanti seed in totale ho in questo frame
 
-	  if(distX <= 3 && distX >= -3 && distY <= 3 && distY >= -3 && (distX!=0 || distY!=0))
-	    {
-	      cont++;                                                //conto con che frequenza si hanno due seed entro una matrice 7x7
-	    }
-	}                                                            //FINE 2° CICLO SULLA LISTA DEI SEED 
-
-      NSeed +=1;                                                     //conto quanti seed in totale ho in questo frame
-      
-      if(flagDistA==1)
+      if(flagDistB==1)                                               
 	{
-	  continue;                                                  //(*)..il seed1 non viene contato per l'analisi successiva e ripeto il 2° ciclo sui seed 
-	}
-      
-      if(flagDistB==1)
-	{
-	  NSeedDouble += 1;                                          //conteggio dei seed con dist<10 (nota: è lo stesso per ts<ts2 o ts>ts2)
-	  continue;                                                  //se l'attivo non considero nelle analisi successive i seed1 con dist<10 da seed2 e energia minore di quella del seed2; così non sto accorpando i due seed, ma perdo segnale del seed1 per quelli che hanno una distanza compresa tra 5 e 9, ovvero fuori dalla matrice 7x7 salvata da Riduzione.x      
+	  continue;
 	}
 
+      SeedOK +=1;                                                    //conto i seed buoni che ho avuto in questo frame
+      
       ///////////////////////////////Riempimento istogrammi mappe dei seed////////////////////////////////////////
       
       map_Row_seed->Fill(Row_seed);
@@ -351,13 +365,16 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow)
       HistoR_vs_Cluster->Fill(R_center_vs_cluster);                                                             
       
       //////////////////////////////Costruzione dei Cluster Asimmetrici//////////////////////////////////     
-      
-      std::vector<ACPoint> preCluster;                              //conterrà i valori dei pixel (della matrice centrata nel seed salvata da Riduzione.x) che supereranno la soglia secondaria
+
+      const int TOLERANCE_PIXELS = 2;                               //pixel di tolleranza nel calcolo del cluster asimmetrico: vengono annessi al cluster anche i pixel che superano la soglia secondaria (V_adja) e che distano fino a 2 pixel dal primo vicino
+       double V_adja=2.;                                            //soglia secondaria//fSecondaryThr prima era 4.0//prima era 2.6
+
+      std::vector<ACPoint> preCluster;                              //conterrà le coordinate dei pixel con valore > V_adja (della matrice centrata nel seed salvata da Riduzione.x)
       std::vector<ACPoint> cluster;                                 
-      cluster.push_back(ACPoint(0,0));                              //contiene tutti i valori dei pixel della matrice centrata nel seed salvata da Riduzione.x
-      
+      cluster.push_back(ACPoint(0,0));                              //inizializzo vettore che conterrà tutte le coord. del cluster asim.
       int N = 1;
       double EPixMax=0.;                                            //massimo valore registrato da un pixel all'interno della matrice: energia del seed
+
 
       //INIZIO ciclo sulla matrice centrata nel seed (salvata da Riduzione.x) a partire dal pixel in alto a sx
       for (int k = ts.GetPixelMin(); k < ts.GetPixelMax(); k++)     //vedi Seed.h/Seed.C->p.e. per la matrice 7x7 sto scorrendo le RIGHE a partire dal pixel -3 rispetto al centro fino ad arrivare al pixel +3 rispetto al centro
@@ -384,9 +401,8 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow)
 		  
 		}
 	    }
-	 
-	}
-      //FINE ciclo sulla matrice centrata nel seed
+	}//FINE ciclo sulla matrice centrata nel seed
+      
     
       bool found;                                                   //found=esiste almeno un pixel nel "preCluster" adiacente ad uno di quelli nel "cluster"?
       
@@ -447,6 +463,7 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow)
       double V_clu_3x3 = 0.;
       double V_clu_5x5 = 0.;
       double V_clu_7x7 = 0.;
+      
       //ciclo sulla matrice centrata nel seed (salvata da Riduzione.x) a partire dal pixel in alto a sx
       for(int j=ts.GetPixelMin(); j<ts.GetPixelMax(); j++)        //RIGHE
 	{
@@ -525,18 +542,19 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow)
       Emax_vs_NpixClu->Fill(float(N),float(EPixMax));
       E_CluAsy_fract_NpixClu_vs_E_CluAsy->Fill(E_CluAsy_fract_NpixClu,float(V_clu_Asy));
       E_CluAsy_fract_NpixClu_vs_NpixClu->Fill(E_CluAsy_fract_NpixClu,float(N));
-      
+
     }                                            //FINE 1° CICLO SULLA LISTA DEI SEED
   
-  int SeedGOOD=NSeed-NSeedDouble;                                           //conto il numero di seed buoni che ho avuto nel frame 
+  //int SeedGOOD=NSeed-NSeedDouble;                                           //check:conto il numero di seed buoni che ho avuto nel frame 
   /*cout<<"************AT THE END of this FRAME***************"<<endl;        //check finale
-    cout<<"*Seed: "<<NSeed<<endl;
-    cout<<"*SeedDist<10: "<<NSeedDouble<<endl;
-    cout<<"*SeedGOOD: "<<SeedGOOD<<endl;
-    cout<<"***************************************************"<<endl;*/
+  cout<<"*Seed: "<<NSeed<<endl;
+  cout<<"*SeedDist<10: "<<NSeedDouble<<endl;
+  cout<<"*SeedGOOD: "<<SeedGOOD<<endl;
+  cout<<"***************************************************"<<endl;*/
 
   HistoContNeigh->Fill(cont);
-  HistoNSeeds->Fill(SeedGOOD);
+  HistoNSeeds->Fill(SeedOK);
+  //HistoNSeeds->Fill(SeedGOOD);
 
   return(0);
   

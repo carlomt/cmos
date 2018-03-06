@@ -104,15 +104,13 @@ int main(int argc, char *argv[])
   
   Long64_t nbytes = 0, nb = 0;
   Analisi analisi(outfname, badfname, FrameNCol, FrameNRow);
-  
-  for (Long64_t jentry=0; jentry<nentries;jentry++) //Ciclo sui seed (o frame?)
+
+  for (Long64_t jentry=0; jentry<nentries; jentry++)              //Ciclo sui FRAME
     {
-      //cout<<"GetEntry("<<jentry<<")"<<endl;
-      // cout.flush();
+      //std::cout<<"Frame #"<<seed_list->GetIdFrame()<<std::endl;   //check
+      //cout.flush();
       nb = ReducedDataTree->GetEntry(jentry);   nbytes += nb;
-      // std::cout<<seed_list->GetIdFrame()<<std::endl;
-      // cout.flush();
-      analisi.AnalisiData(seed_list, FrameNCol, FrameNRow);
+      analisi.AnalisiData(seed_list, FrameNCol, FrameNRow);       //qui avrò ciclo sui seed (vedi Analisi.C)
     }
   cout<<"output file name: "<<outfname<<endl;
   analisi.WriteOnFile();

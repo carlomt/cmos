@@ -40,7 +40,12 @@ public:
  private:
   TPaveStats *st; //dichiaro i membri della classe (che definirò in Analisi.C)
   TH1F *HistoNSeeds;
+  TH2F *map_seedCheck;
+  TH2F *map_seedCheckCol;
+  TH1F *col_seedCheck;
+  TH1F *row_seedCheck;
   TH2F *map_seed;
+  TH2F *map_seedDist10;
   TH2F *map_seed_coarse;
   TH2F *map_seed_coarse2;
   TH2F *map_seed1_4;
