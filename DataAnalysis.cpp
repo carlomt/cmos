@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
+#include <iomanip>
 
 #include "Frame.h"
 #include "Seed.h"
@@ -29,7 +30,7 @@ void print_help(string fname="executable");
 int main(int argc, char *argv[])
 {
   cout<<argv[0]<< " 2.0"<<endl;
-  cout<<"Last edit:   Jan 23 2018, by amorusor+collamaf"<<endl;
+  cout<<"Last edit:   Feb 25 2018, by amorusor"<<endl;
   cout<<"Compiled at: "<< __DATE__ <<", "<< __TIME__<<"."<<endl;
   
   string execname=argv[1];                                       //Salvo il nome del file che voglio analizzare
@@ -40,6 +41,7 @@ int main(int argc, char *argv[])
   string inputfname="";
   string outfname=Form("%s_Analized.root", sourcename.c_str());
   string badfname=Form("%s_badpixel.txt", sourcename.c_str());
+  
   int FrameNCol = 480, FrameNRow = 640;
   
   if(argc==1)
@@ -102,15 +104,13 @@ int main(int argc, char *argv[])
   
   Long64_t nbytes = 0, nb = 0;
   Analisi analisi(outfname, badfname, FrameNCol, FrameNRow);
-  
-  for (Long64_t jentry=0; jentry<nentries;jentry++) //Ciclo sui seed (o frame?)
+
+  for (Long64_t jentry=0; jentry<nentries; jentry++)              //Ciclo sui FRAME
     {
-      //cout<<"GetEntry("<<jentry<<")"<<endl;
-      // cout.flush();
+      //std::cout<<"Frame #"<<seed_list->GetIdFrame()<<std::endl;   //check
+      //cout.flush();
       nb = ReducedDataTree->GetEntry(jentry);   nbytes += nb;
-      // std::cout<<seed_list->GetIdFrame()<<std::endl;
-      // cout.flush();
-      analisi.AnalisiData(seed_list, FrameNCol, FrameNRow);
+      analisi.AnalisiData(seed_list, FrameNCol, FrameNRow);       //qui avrò ciclo sui seed (vedi Analisi.C)
     }
   cout<<"output file name: "<<outfname<<endl;
   analisi.WriteOnFile();
@@ -121,7 +121,7 @@ void print_help(string fname)
   cout<<"Source: "<<__FILE__<<endl;
   cout<<endl;
   cout<<"Usage  : "<<fname<<" (option) inputfile"<<endl;
-  cout<<"Option : -o  (set output filename)"<<endl;
+  cout<<"Option : -o  (set output filename)"<<endl;		     
   cout<<"Option : -frameSize (set the frame sizes, default: 640x480)"<<endl;
   cout<<"Option : -help     (show this help)"<<endl;
   cout<<endl;

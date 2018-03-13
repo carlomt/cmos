@@ -38,9 +38,14 @@ public:
   inline void SetSecondaryThr(double thr){fSecondaryThr=thr;};
   
  private:
-  TPaveStats *st; //dichiaro i membri della classe (che definirò in Analisi.C) 
-  TH1F *HistoNCluster;
+  TPaveStats *st; //dichiaro i membri della classe (che definirò in Analisi.C)
+  TH1F *HistoNSeeds;
+  TH2F *map_seedCheck;
+  TH2F *map_seedCheckCol;
+  TH1F *col_seedCheck;
+  TH1F *row_seedCheck;
   TH2F *map_seed;
+  TH2F *map_seedDist10;
   TH2F *map_seed_coarse;
   TH2F *map_seed_coarse2;
   TH2F *map_seed1_4;
@@ -49,8 +54,7 @@ public:
   TH2F *map_seed4_4;
   TH1F *map_Row_seed;	
   TH1F *map_Col_seed;
-  TH1F *HistoDistSeed;
-  TH1F *HistoDist_min_cluster;
+  TH1F *HistoDistSeeds;
   TH1F *HistoR_vs_Cluster;
   TH1F *HistoV_single;
   TH1F *HistoClusterAsy;
