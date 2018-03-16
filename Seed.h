@@ -40,7 +40,7 @@ class Seed : public TObject
   inline size_t GetRow() const {return fRow;};
   inline size_t GetCol() const {return fCol;};
   inline int GetSideSize() const {return fSideSize;};
-  inline size_t GetSize() const {return fData.size();};  //size of the matrix centered on the seed
+  inline size_t GetSeedSize() const {return fData.size();};  //size of the matrix centered on the seed
 
   inline int GetPixelMin() const {return -fSideSize/2;};
   inline int GetPixelMax() const {return fSideSize/2+1;};

@@ -190,26 +190,26 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
       noisef.Close();
       divideNoise=true;
     }
-	
+  
   cout<<"reducing file: "<<fname<<" ."<<endl;
-	
+  
   TFile f(fname.c_str(),"READ");
   TTree *CMOSDataTree = (TTree*) f.Get("CMOSDataTree");
   //f->GetObject("CMOSDataTree",CMOSDataTree);
-	
+  
 #ifdef DEBUG
   cout<<"Debug: f->GetObject(\"CMOSDataTree\",CMOSDataTree);"<<endl;
 #endif
-	
- 
+  
+  
   Frame *frame = new Frame(FrameNCol, FrameNRow);           //Creo l'oggetto frame con i dati
-	
+  
   TBranch *bFrame = CMOSDataTree->GetBranch("frame");
   bFrame->SetAddress(&frame);
-
+  
   TBranch *nFrame = CMOSDataTree->GetBranch("frame");
   nFrame->SetAddress(&frame);
-	
+  
 #ifdef DEBUG
   cout<<"Debug: CMOSDataTree->SetBranchAddress(\"frame\",&frame);"<<endl;
 #endif
@@ -218,14 +218,14 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
   TTree *ReducedDataTree=new TTree("CMOSReducedData","CMOS exp reduced data");
   SeedList seed_list;
   ReducedDataTree->Branch("seed_list",&seed_list);
-	
+  
   //Long64_t nentries = CMOSDataTree->GetEntriesFast();
   Long64_t nentries = CMOSDataTree->GetEntries();
-	
+  
 #ifdef DEBUG
   cout<<"Debug: CMOSDataTree->GetEntriesFast(): "<<nentries <<endl;
 #endif
-	
+  
   double NClusterTot=0;                                   //numero totale di cluster ottenuti in tutti i frame
   double pixel[FrameNCol][FrameNRow];                     //matrice che contiene le volte che ogni pixel ha superato la soglia
   int ww,qq;
@@ -238,7 +238,7 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 
   Long64_t nbytes = 0, nb = 0;
   for (Long64_t jentry=0; jentry<nentries;jentry++)       // CICLO PRINCIPALE SUI FRAME
-    {
+  {
 #ifdef DEBUG
       cout<<"Debug:  starting loop"<<endl;
       cout<<"jentry: "<<jentry<<endl;
@@ -254,9 +254,9 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 		
                                                          // Frame per frame sottraggo il piedistallo e dividio per noise
       if(subtractPed)
-	{
+      {
 			
-	  frame->Subtract(*pedestal);
+	frame->Subtract(*pedestal);
 
 	}
 		

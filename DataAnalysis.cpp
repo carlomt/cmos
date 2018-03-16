@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
 	  temp=seed_list->At(SeedIndex);                                           //accedo agli elementi contenuti nella lista originale
 	  if (debug) FileAppoggio<<"#################################################################################### FRAME "<<seed_list->GetIdFrame()<<" Seed N "<<SeedIndex<<" \nLISTA originale:\n"<<temp<<endl;
 
-	  if (debug) FileAppoggio<<"Mi copio in temp il seed num "<<SeedIndex<<" ha n elementi: "<<temp.GetSize()<<endl;
+	  if (debug) FileAppoggio<<"Mi copio in temp il seed num "<<SeedIndex<<" ha n elementi: "<<temp.GetSeedSize()<<endl;
 			
 	  int Row_seed=temp.GetRow();
 	  int Col_seed=temp.GetCol();
