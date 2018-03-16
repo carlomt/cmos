@@ -173,8 +173,7 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
   else
     {                                                            //Carica il Frame di noise
       TFile noisef( noisefname.c_str(),"READ");
-      TTree* CMOSDataTreeNoise = (TTree*) noisef.Get("CMOSDataTree");
-   
+      TTree *CMOSDataTreeNoise = (TTree*) noisef.Get("CMOSDataTree");
       CMOSDataTreeNoise->SetName("CMOSDataTreeNoise");
       Long64_t nentriesNoise = CMOSDataTreeNoise->GetEntries();
       if(nentriesNoise>1)
