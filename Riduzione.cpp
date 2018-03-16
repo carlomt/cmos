@@ -226,7 +226,6 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
   cout<<"Debug: CMOSDataTree->GetEntriesFast(): "<<nentries <<endl;
 #endif
 	
-	
   double NClusterTot=0;                                   //numero totale di cluster ottenuti in tutti i frame
   double pixel[FrameNCol][FrameNRow];                     //matrice che contiene le volte che ogni pixel ha superato la soglia
   int ww,qq;
@@ -266,7 +265,7 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 	  frame->Divide(*noise);
 	}	
                                                        // Alla fine di questa procedura la mia matrice non e' piu espressa in ADC, ma in numero di sigma di differenza rispetto al piedistallo
-		
+
       seed_list = frame->FindSeeds(thres,fiducialSideDim,seedSide,localMaximumCheckSide);     // Ho creato la lista dei seeds sopra soglia
 		
       int Row_seed = 0;
@@ -288,10 +287,13 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
       ReducedDataTree->Fill();
       seed_list.Clear();
       //seed_listP = NULL;
+
+       cout<<"CHE PALLEEEEEEE"<<endl;
 		
     }                                                // FINE CICLO PRINCIPALE SUI FRAME
   cout<<"Prima di controllare i badpixel ho trovato Ncluster= " <<NClusterTot<<endl;
 
+       cout<<"CHE PALLEEEEEEE 2"<<endl;
 
   
   ////////////////////////////////////////////////VADO A CERCARE I BADPIXEL/////////////////////////////////////////////////////
