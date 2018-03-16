@@ -25,7 +25,7 @@ class SeedList : public TObject
   Seed operator()(size_t i) const {return fData[i];};
   
   void Add(const Seed &s);
-  
+    
   inline void SetIdFrame(const int idFrame){fIdFrame=idFrame;};
   inline int GetIdFrame(){return fIdFrame;};
   inline size_t GetSize() const {return fData.size();};

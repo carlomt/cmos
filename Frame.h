@@ -14,7 +14,7 @@
 #include "Seed.h"
 #include "SeedList.h"
 
-//#define DIM 316224 //648*488
+//#define DIM 316224 //488*648
 
 
 class Frame : public TObject
@@ -72,7 +72,7 @@ class Frame : public TObject
   void Set(const size_t i, const size_t j, const double val=0);
   void SetAdd(const size_t i, const size_t j, const double val=0); //Added by collamaf
 
-  SeedList FindSeeds(const double thres, const size_t fiducialSideDim=3,  const size_t seedSide=7, const size_t localMaximumCheckSide=3) const;
+  SeedList FindSeeds(const double thres, const size_t fiducialSideDim=4,  const size_t seedSide=7, const size_t localMaximumCheckSide=3) const;
 
   size_t RemovePixelBelowThres(const int thres=0, const double val=0);
 
