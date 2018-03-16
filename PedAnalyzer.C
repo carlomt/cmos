@@ -32,8 +32,8 @@ void PedAnalyzer::Loop()
 	//	  - Fine ciclo sui pixel
 	//	- Fine ciclo sui frame
 	//	- Secondo ciclo sui pixel: per ogni pixel: (kk->Size)
-	//	  - Ciclo sui bin degli istogrammi: per ogni bin: (rr->100)
-	//	    - Faccio media e devSTD considerando solo i bin con più di un entries, in modo da escludere quelli contenenti eventualmente un segnale che mi alzerebbero artificialmente la media del piedistallo. Se la devSTD è minore di 1 allora metto 1 per evitare i casi in cui sottostimo il noise (creando quindi falsi bad-pixel)
+	//	  - Ciclo sui bin degli istogrammi: per ogni bin: (rr->1024)
+	//	    - Faccio media e devSTD considerando solo i bin con più di una entry, in modo da escludere quelli contenenti eventualmente un segnale che mi alzerebbero artificialmente la media del piedistallo. Se la devSTD è minore di 1 allora metto 1 per evitare i casi in cui sottostimo il noise (creando quindi falsi bad-pixel)
 	//    - Fine ciclo sui bin
 	//    - Salvo media e devSTD del k-esimo pixel in DumpIstoAllPed e DumpIstoAllNoise per avere istogrammi di TUTTI i piedistalli (cioè “NPixel” entries)
 	//	  - Salvo media e devSTD del k-esimo pixel in due TVector per salvarli nel file di output in modo rapido da usare con la macro PedCompare
@@ -97,9 +97,9 @@ void PedAnalyzer::Loop()
 		Long64_t ientry = LoadTree(jentry);
 		if (ientry < 0) break;
 		nb = fChain->GetEntry(jentry);   nbytes += nb;
-		for (kk=0; kk<VectVal.size(); kk++) { //giro su tutti i pixel per leggerne e salvarne il valore
+		for (kk=0; kk<VectVal.size(); kk++) {      //giro su tutti i pixel per leggerne e salvarne il valore
 			DumpIstoPed[kk]->Fill(fData[kk]);  //lo metto nell'istogramma del k-esimo pixel
-			DumpIstoTot->Fill(fData[kk]);       //metto il valore letto nell'istogramma "calderone", contenente i valori di tutti i pixel in tutti i frame
+			DumpIstoTot->Fill(fData[kk]);      //metto il valore letto nell'istogramma "calderone", contenente i valori di tutti i pixel in tutti i frame
 			VectVal.at(kk)+=fData[kk];
 		}
 	} //chiude ciclo sui frames
@@ -116,7 +116,7 @@ void PedAnalyzer::Loop()
 		MediaCutSquare=0;
 		CounterMediaCut=0;
 		
-		for (rr=1; rr<=1024; rr++) {          //ciclo sui 1000 bin degli istogrammi per fare la media dei soli bin con piu di una entries evitando quindi quelli (eventuali) di segnale
+		for (rr=1; rr<=1024; rr++) {          //ciclo sui 1024 bin degli istogrammi per fare la media dei soli bin con piu di una entry evitando quindi quelli (eventuali) di segnale
 			double yval=DumpIstoPed[kk]->GetBinContent(rr);
 			if (yval>1) {
 				int xbin=DumpIstoPed[kk]->GetBinCenter(rr);

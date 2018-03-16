@@ -25,13 +25,13 @@ using std::atof;
 using std::vector;
 
 void print_help(string fname="executable");
-int Riduzione(string fname,double thres, string pedfname, string noisefname, size_t fiducialSideDim=3,  const size_t seedSide=7, const size_t localMaximumCheckSide=3, string outfname="reduced.root",  int FrameNCol=480, int FrameNRow=640);
+int Riduzione(string fname,double thres, string pedfname, string noisefname, size_t fiducialSideDim=4,  const size_t seedSide=7, const size_t localMaximumCheckSide=3, string outfname="reduced.root",  int FrameNCol=640, int FrameNRow=480);
 
 
 int main(int argc, char *argv[])
 {
   cout<<argv[0]<< " 2.0"<<endl;
-  cout<<"Last edit:   Feb 01 2018, by amorusor"<<endl;
+  cout<<"Last edit:   Mar 14 2018, by collamaf and amorusor"<<endl;
   cout<<"Compiled at: "<< __DATE__ <<", "<< __TIME__<<"."<<endl;
 	
   string execname=argv[1];                                         //Salvo il nome del file che voglio ridurre
@@ -41,12 +41,12 @@ int main(int argc, char *argv[])
 	
   double thres=2;
   size_t seedSide=7;
-  size_t fiducialEdge=3;
+  size_t fiducialEdge=4;
   size_t localMaximumCheckSide=3;
   string outfname=Form("%s_Reduced.root",sourcename.c_str());
   string inputfname="";
   string pedfname="";
-  int FrameNCol = 480, FrameNRow = 640;
+  int FrameNCol = 640, FrameNRow = 480;
   string noisefname="";
 	
   if(argc==1)
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 		std::vector<std::string> sizes = string_parser(argv[++i],"x");
 		if(sizes.size()!=2)
 		  {
-		    std::cout<<"Error: the frame size has to have two numbers and has to be passed as 648x488."<<std::endl;
+		    std::cout<<"Error: the frame size has to have two numbers and has to be passed as 480x640."<<std::endl;
 		    exit(-1);
 		  }
 		FrameNRow = stoi(sizes[0]);
@@ -156,13 +156,13 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
       TBranch *bFramePed = CMOSDataTreePed->GetBranch("frame");
       bFramePed->SetAddress(&pedestal);
       CMOSDataTreePed->GetEntry(0);
-		
+      
       bFramePed=NULL;
       CMOSDataTreePed=NULL;
       pedf.Close();
       subtractPed=true;
     }
-	
+
   if(noisefname.compare("")==0)
     {
       //std::cerr<<"WARNING: The noise file is mandatory."<<endl;
@@ -173,7 +173,8 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
   else
     {                                                            //Carica il Frame di noise
       TFile noisef( noisefname.c_str(),"READ");
-      TTree *CMOSDataTreeNoise = (TTree*) noisef.Get("CMOSDataTree");
+      TTree* CMOSDataTreeNoise = (TTree*) noisef.Get("CMOSDataTree");
+   
       CMOSDataTreeNoise->SetName("CMOSDataTreeNoise");
       Long64_t nentriesNoise = CMOSDataTreeNoise->GetEntries();
       if(nentriesNoise>1)
@@ -184,7 +185,7 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
       TBranch *bFrameNoise = CMOSDataTreeNoise->GetBranch("frame");
       bFrameNoise->SetAddress(&noise);
       CMOSDataTreeNoise->GetEntry(0);
-		
+  
       bFrameNoise=NULL;
       CMOSDataTreeNoise=NULL;
       noisef.Close();
@@ -203,11 +204,10 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 	
  
   Frame *frame = new Frame(FrameNCol, FrameNRow);           //Creo l'oggetto frame con i dati
-  //CMOSDataTree->SetBranchAddress("frame",&frame);
 	
   TBranch *bFrame = CMOSDataTree->GetBranch("frame");
   bFrame->SetAddress(&frame);
-	
+
   TBranch *nFrame = CMOSDataTree->GetBranch("frame");
   nFrame->SetAddress(&frame);
 	
@@ -219,7 +219,6 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
   TTree *ReducedDataTree=new TTree("CMOSReducedData","CMOS exp reduced data");
   SeedList seed_list;
   ReducedDataTree->Branch("seed_list",&seed_list);
-  //SeedList *seed_listP;
 	
   //Long64_t nentries = CMOSDataTree->GetEntriesFast();
   Long64_t nentries = CMOSDataTree->GetEntries();
@@ -238,13 +237,10 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
       pixel[ww][qq]=0;
     }
   }
-	
-	
+
   Long64_t nbytes = 0, nb = 0;
   for (Long64_t jentry=0; jentry<nentries;jentry++)       // CICLO PRINCIPALE SUI FRAME
     {
-      //delete frame;
-      //frame = NULL;
 #ifdef DEBUG
       cout<<"Debug:  starting loop"<<endl;
       cout<<"jentry: "<<jentry<<endl;
@@ -300,7 +296,6 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 
   
   ////////////////////////////////////////////////VADO A CERCARE I BADPIXEL/////////////////////////////////////////////////////
-
   
   //double Ncluster = mediaClusterPerFrame;
   double MediaPixelTotAcq=NClusterTot/(FrameNCol*FrameNRow);                //numero medio di volte che un pixel si è acceso durante l'intera acquisizione
@@ -370,10 +365,13 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
   	
   BadPixelFile.close();
   cout<<"Media: "<<MediaPixelTotAcq<<endl<<"# bad-pixels: "<<TotBadPixel<<endl<<"# cluster: "<<NClusterTot<<endl;
-	
+
+  pedestal->Write("PedestalFrame");                                        //nel file Reduced.root salvo il Frame di piedistallo...
+  noise->Write("NoiseFrame");                                              //..e di noise, così da poterli riutilizzare nell'analisi
   ReducedDataTree->Write();
   outfile->Write();
   outfile->Close();
+  cout<<"output file name: "<<outfname<<endl;
   return(NClusterTot);
 }
 
@@ -388,8 +386,8 @@ void print_help(string fname)
   cout<<"Option : -noise  (set the noise file)"<<endl;
   cout<<"Option : -seedSize  (set the seeds side dimensions, default: 7)"<<endl;
   cout<<"Option : -checkLocalMaximumSide  (set the submatrix used to check local max, default: 3)"<<endl;
-  cout<<"Option : -edge  (set the fiducial edge, default: 3)"<<endl;
-  cout<<"Option : -frameSize (set the frame sizes, default: 640x480)"<<endl;
+  cout<<"Option : -edge  (set the fiducial edge, default: 4)"<<endl;
+  cout<<"Option : -frameSize (set the frame sizes, default: 480x640)"<<endl;
   cout<<"Option : -help     (show this help)"<<endl;
   //printf("       : -log (Log filename)\n");
   cout<<endl;

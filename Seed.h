@@ -1,4 +1,3 @@
-//edit
 #ifndef Seed_HH
 #define Seed_HH
 
@@ -18,36 +17,40 @@ class Seed : public TObject
 
   virtual void Clear(Option_t *option="");
 
-double operator()(const int posX, const int posY); // position with respect to the relative maximum i.e. 0,0 is the center 
-double operator()(const int posX, const int posY) const;
+  double operator()(const int posX, const int posY); //position with respect to the relative maximum i.e. (0,0) is the center 
+  double operator()(const int posX, const int posY) const;
 
-inline double At(const int posX, const int posY){return operator()(posX,posY);};
-inline double At(const int posX, const int posY) const {return operator()(posX,posY);};
+  inline double At(const int posX, const int posY){return operator()(posX,posY);};
+  inline double At(const int posX, const int posY) const {return operator()(posX,posY);};
 
-bool operator>(const Seed &l) const;
-bool operator<(const Seed &l) const;
-bool operator==(const Seed &l) const;
+  bool operator>(const Seed &l) const;
+  bool operator<(const Seed &l) const;
+  bool operator==(const Seed &l) const;
   
-void Set(const size_t Col, const size_t Row, const std::vector<double> &val, const int idFrame=-99);
-void Set(const size_t Col, const size_t Row, const int idFrame=-99);
+  void Set(const size_t Col, const size_t Row, const std::vector<double> &val, const int idFrame=-99);
+  void Set(const size_t Col, const size_t Row, const int idFrame=-99);
+  
+  double GetVal(const int index) {return fData[index];};
+  void SetVal(const int index, const double val);
+  int SetIndex(const int Col, const int Row);
 
-void AddPixel(const double val);//add a pixel to the seed, it starts from upper left
+  void AddPixel(const double val); //add a pixel to the seed, it starts from upper left
  
- inline int GetIdFrame() const {return fIdFrame;};
- inline size_t GetRow() const {return fRow;};
- inline size_t GetCol() const {return fCol;};
- // inline size_t GetSideSize() const {return fSideSize;};
- inline int GetSideSize() const {return fSideSize;};
+  inline int GetIdFrame() const {return fIdFrame;};
+  inline size_t GetRow() const {return fRow;};
+  inline size_t GetCol() const {return fCol;};
+  inline int GetSideSize() const {return fSideSize;};
+  inline size_t GetSize() const {return fData.size();};  //size of the matrix centered on the seed
 
- inline int GetPixelMin() const {return -fSideSize/2;};
- inline int GetPixelMax() const {return fSideSize/2+1;};
-
-private:
- size_t fRow, fCol;
-int  fSideSize;
-std::vector<double> fData;
-int fIdFrame;
-size_t fLastAddedPixel;
+  inline int GetPixelMin() const {return -fSideSize/2;};
+  inline int GetPixelMax() const {return fSideSize/2+1;};
+ 
+ private:
+  size_t fRow, fCol;
+  int  fSideSize;
+  std::vector<double> fData;
+  int fIdFrame;
+  size_t fLastAddedPixel;
 
  public:
   
