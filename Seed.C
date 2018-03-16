@@ -135,7 +135,7 @@ void Seed::Set(const size_t Col, const size_t Row, const int idFrame)
   fIdFrame=idFrame;
 }
 
-int Seed::SetIndex(const int i, const int j)
+int Seed::GetIndex(const int i, const int j)
 {
   int m=(fSideSize-1)/2;
   int x=i+m;

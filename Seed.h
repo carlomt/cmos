@@ -32,7 +32,7 @@ class Seed : public TObject
   
   double GetVal(const int index) {return fData[index];};
   void SetVal(const int index, const double val);
-  int SetIndex(const int Col, const int Row);
+  int GetIndex(const int Col, const int Row);
 
   void AddPixel(const double val); //add a pixel to the seed, it starts from upper left
  
