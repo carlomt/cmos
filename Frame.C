@@ -30,7 +30,7 @@ fId(Id)
 	
 	fData.resize(fNRow*fNCol);
 #ifdef DEBUG
-	for (int ss=0; ss<fNRow*fNCol; ss++){
+	for (size_t ss=0; ss<fNRow*fNCol; ss++){
 		//		std::cout<<"Initialization: "<<fData.at(ss)<<std::endl;
 	}
 #endif	
@@ -123,7 +123,7 @@ int Frame::ReadFile(const std::string filename,  const bool isBinary)
   int kk = 0;
   unsigned char *buffer = (unsigned char*)malloc(filelen);
   if(isBinary){
-    int value = fread(buffer,filelen,sizeof(unsigned char),infile);   //var value inutilizzata->if inutilizzato
+    int value = fread(buffer,filelen,sizeof(unsigned char),infile);   //***ATTENZIONE: qui leggo il file binario!***// anche se poi value è una variabile inutilizzata
     //std::cout <<"int value: "<< value <<std::endl;
   }
   
@@ -373,7 +373,6 @@ size_t Frame::RemovePixelBelowThres(const int thres, const double val)
 	return counter;
 }
 
-//SeedList Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  const size_t seedSide, const size_t localMaximumCheckSide, const Frame &LFramePed, const Frame &LFrameNoise) const
 SeedList Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  const size_t seedSide, const size_t localMaximumCheckSide) const
 {
 #ifdef DEBUG
@@ -417,7 +416,7 @@ SeedList Frame::FindSeeds(const double thres, const size_t fiducialSideDim,  con
 							addThis=false;
 						}
 					}
-				}//end check neghbours
+				}//end check neighbours
 				if(addThis)                                                       //se era davvero il piu alto dei vicini...
 				{
 					Seed tmp(i,j,fId,seedSide);

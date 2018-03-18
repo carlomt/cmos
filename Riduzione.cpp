@@ -167,7 +167,6 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
     {
       //std::cerr<<"WARNING: The noise file is mandatory."<<endl;
       std::cout<<"WARNING: You are running without noise file!! All noises will be assumed to be 1!!!"<<endl;
-
       //exit(-1);
     }
   else
@@ -200,7 +199,6 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 #ifdef DEBUG
   cout<<"Debug: f->GetObject(\"CMOSDataTree\",CMOSDataTree);"<<endl;
 #endif
-  
   
   Frame *frame = new Frame(FrameNCol, FrameNRow);           //Creo l'oggetto frame con i dati
   
@@ -286,15 +284,10 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
       //frame->GetId()<<" "<<"seed list size: "<<seed_list.Size()<<endl;
       ReducedDataTree->Fill();
       seed_list.Clear();
-      //seed_listP = NULL;
-
-       cout<<"CHE PALLEEEEEEE"<<endl;
-		
+      //seed_listP = NULL;		
     }                                                // FINE CICLO PRINCIPALE SUI FRAME
-  cout<<"Prima di controllare i badpixel ho trovato Ncluster= " <<NClusterTot<<endl;
-
-       cout<<"CHE PALLEEEEEEE 2"<<endl;
-
+  cout<<"PRIMA di controllare i bad pixels ho trovato"<<endl<<"# cluster: " <<NClusterTot<<endl;
+  
   
   ////////////////////////////////////////////////VADO A CERCARE I BADPIXEL/////////////////////////////////////////////////////
   
@@ -365,6 +358,7 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
   }
   	
   BadPixelFile.close();
+  cout<<"DOPO aver controllato i bad pixels ho ottenuto"<<endl;
   cout<<"Media: "<<MediaPixelTotAcq<<endl<<"# bad-pixels: "<<TotBadPixel<<endl<<"# cluster: "<<NClusterTot<<endl;
 
   pedestal->Write("PedestalFrame");                                        //nel file Reduced.root salvo il Frame di piedistallo...
