@@ -9,29 +9,35 @@ using std::cout;
 
 ClassImp(Analisi);
 
-Analisi::Analisi(const std::string OutFileName, const std::string BadFileName, int FrameNCol, int FrameNRow)
+Analisi::Analisi(const std::string OutFileName, const std::string BadFileName, int FrameNCol, int FrameNRow, Double_t fcal)
 {
   //********************GRAFICI***********************************
-  HistoNSeeds = new TH1F("NSeeds","Numero di seed per frame",200,0.,200.);
+  HistoNSeeds = new TH1F("NSeeds","Number of seeds per frame",50,-1.5,48.5);
   HistoNSeeds->GetXaxis()->SetTitle("# of seeds");
-  HistoNSeeds->GetYaxis()->SetTitle("count");
+  HistoNSeeds->GetYaxis()->SetTitle("Counts");
   
   map_seed = new TH2F("mapofseed","Seedmap",FrameNCol,0.,FrameNCol,FrameNRow,0.,FrameNRow);
-  map_seedDist10 = new TH2F("mapofseedDist10","Seedmap dist<10",FrameNCol,0.,FrameNCol,FrameNRow,0.,FrameNRow);
+  map_seed->GetXaxis()->SetTitle("Col");
+  map_seed->GetYaxis()->SetTitle("Row");
+
+  map_seedDist10 = new TH2F("mapofseedDist10","Seedmap with seeds at dist<10",FrameNCol,0.,FrameNCol,FrameNRow,0.,FrameNRow);
+  map_seedDist10->GetXaxis()->SetTitle("Col");
+  map_seedDist10->GetYaxis()->SetTitle("Row");
+  
   map_seed_coarse = new TH2F("mapofseedcoarse8x8","Seedmapcoarse",8.,0.,FrameNCol,8.,0.,FrameNRow);           //mappa seed con bin larghi 8x8 pixel
   map_seed_coarse2 = new TH2F("mapofseedcoarse61x81","Seedmapcoarse61x81",61.,0.,FrameNCol,81.,0.,FrameNRow); //mappa seed con bin larghi 61x81 pixel
-  map_seed1_4 = new TH2F("mapofseed 1di4", "mappa dei seed1",122.,0.,122.,FrameNRow,0.,FrameNRow);            //istogramma1 di 4: zoom su colonne da 0 a 122
-  map_seed2_4 = new TH2F("mapofseed 2di4", "mappa dei seed2",122.,122.,244.,FrameNRow,0.,FrameNRow);          //istogramma2 di 4
-  map_seed3_4 = new TH2F("mapofseed 3di4", "mappa dei seed3",122.,244.,366.,FrameNRow,0.,FrameNRow);          //istogramma3 di 4
-  map_seed4_4 = new TH2F("mapofseed 4di4", "mappa dei seed4",122.,366.,488.,FrameNRow,0.,FrameNRow);          //istogramma4 di 4
-  map_Row_seed = new TH1F("mapofRow","posizione seed sulle righe",FrameNRow,0.,FrameNRow);                    //ATTENZIONE a regione fiduciale!! Con Riduzione.x si è tolto il bordo del sensore: 3<Righe<645 e 3<Colonne<485
+  map_seed1_4 = new TH2F("mapofseed_1di4", "mappa dei seed1",122.,0.,122.,FrameNRow,0.,FrameNRow);            //istogramma1 di 4: zoom su colonne da 0 a 122
+  map_seed2_4 = new TH2F("mapofseed_2di4", "mappa dei seed2",122.,122.,244.,FrameNRow,0.,FrameNRow);
+  map_seed3_4 = new TH2F("mapofseed_3di4", "mappa dei seed3",122.,244.,366.,FrameNRow,0.,FrameNRow);
+  map_seed4_4 = new TH2F("mapofseed_4di4", "mappa dei seed4",122.,366.,FrameNRow,FrameNRow,0.,FrameNRow);
+  map_Row_seed = new TH1F("mapofRow","posizione seed sulle righe",FrameNRow,0.,FrameNRow);                    //ATTENZIONE a regione fiduciale!! Con Riduzione.x si è tolto il bordo del sensore: 4<Righe<644 e 4<Colonne<484
   map_Col_seed = new TH1F("mapofCol","posizione seed sulle colonne",FrameNCol,0.,FrameNCol);
 
-  HistoDistSeeds = new TH1F("Dist relativa tra seeds","Distanza relativa tra seeds",1000.,-10.5,989.5);
-  HistoDistSeeds->GetXaxis()->SetTitle("dist seeds");
-  HistoDistSeeds->GetYaxis()->SetTitle("count");
+  HistoDistSeeds = new TH1F("Dist_Btw_Seeds","Relative distance between seeds",1000.,-10.5,989.5);
+  HistoDistSeeds->GetXaxis()->SetTitle("Distance of seeds");
+  HistoDistSeeds->GetYaxis()->SetTitle("Counts");
 
-  HistoR_vs_Cluster = new TH1F("Dist_Cen_Cluster","Distance between center and cluster",100,-50.,500.);        //distanza tra centro del sensore e la posizione di un seed
+  HistoR_vs_Cluster = new TH1F("Dist_Cen_Cluster","Distance between sensor center and clusters",100,-50.5,549.5);    //distanza tra centro del sensore e la posizione di un seed
 
   ///////////////////////////////////////////////////////
   //Nei grafici seguenti:
@@ -40,44 +46,58 @@ Analisi::Analisi(const std::string OutFileName, const std::string BadFileName, i
   // dove s=segnale prodotto dalla particella
   //      k= frazione del segnale raccolto dal pixel
   //      n=rumore del pixel
-  HistoV_single = new TH1F("Single pixel signal","Single pixel signal: DV",47750,-50.,1000.);//0.2 per bin     //segnale netto che ho per ogni pixel: DV=(s-ped), calcolato per ogni frame e per ogni pixel
   
-  HistoClusterAsy = new TH1F("Cluster_asymmetric","Cluster asymmetric signal",1000, -50., 3000.);              //energia del cluster asimmetrico
-  HistoClusterAsy->GetXaxis()->SetTitle("Energia Cluster (ADC)");
-  HistoClusterAsy->GetYaxis()->SetTitle("Conteggi");
+  HistoV_single = new TH1F("SinglePix_Signal","Single pixel signal: DV",200,-50.,1150.);//0.2 per bin     //segnale netto che ho per ogni pixel: DV=(s-ped), calcolato per ogni frame e per ogni pixel
+  HistoV_single->GetXaxis()->SetTitle("Cluster Energy (ADC)");
+  HistoV_single->GetYaxis()->SetTitle("Counts");
   
-  HistoCluster3x3 = new TH1F("Cluster_3x3","Cluster signal 3x3",1000,-50.,2500.);                              //energia del cluster 3x3 simmetrico
-  HistoCluster3x3->GetXaxis()->SetTitle("Energia Cluster (ADC)");
-  HistoCluster3x3->GetYaxis()->SetTitle("Conteggi");
+  HistoClusterAsy = new TH1F("Cluster_asymmetric","Cluster asymmetric signal",200, -50., 3950.);         //energia del cluster asimmetrico
+  HistoClusterAsy->GetXaxis()->SetTitle("Cluster Energy (ADC)");
+  HistoClusterAsy->GetYaxis()->SetTitle("Counts");
   
-  HistoCluster5x5 = new TH1F("Cluster_5x5","Cluster signal 5x5",1000,-50.,2500.);
-  HistoCluster5x5->GetXaxis()->SetTitle("Energia Cluster (ADC)");
-  HistoCluster5x5->GetYaxis()->SetTitle("Conteggi");
+  HistoCluster3x3 = new TH1F("Cluster_3x3","Cluster signal 3x3",200,-50.,3950.);                         //energia del cluster 3x3 simmetrico
+  HistoCluster3x3->GetXaxis()->SetTitle("Cluster Energy (ADC)");
+  HistoCluster3x3->GetYaxis()->SetTitle("Counts");
+
+  HistoCluster3x3keV = new TH1F("Cluster_3x3keV","Cluster signal 3x3 keV",200,-50.,3950.);
+  HistoCluster3x3keV->GetXaxis()->SetTitle("Cluster Energy (keV)");
+  HistoCluster3x3keV->GetYaxis()->SetTitle("Counts");
   
-  HistoCluster7x7 = new TH1F("Cluster_7x7","Cluster signal 7x7",1000,-50.,2500.);
-  HistoCluster7x7->GetXaxis()->SetTitle("Energia Cluster (ADC)");
-  HistoCluster7x7->GetYaxis()->SetTitle("Conteggi");
+  HistoCluster5x5 = new TH1F("Cluster_5x5","Cluster signal 5x5",200,-50.,3950.);
+  HistoCluster5x5->GetXaxis()->SetTitle("Cluster Energy (ADC)");
+  HistoCluster5x5->GetYaxis()->SetTitle("Counts");
   
-  HistoDelta_5x5_vs_3x3 = new TH1F("Delta 5x5 vs 3x3","",200,-200.,200.);                                       //"Delta"=verifica sull'isolamento topologico* 
-  HistoDelta_5x5_vs_3x3_norm = new TH1F("Delta 5x5 vs 3x3 norm","",155,-200.,200.);
-  HistoDelta_7x7_vs_5x5 = new TH1F("Delta 7x7 vs 5x5","",155,-200.,200.);
-  HistoDelta_7x7_vs_5x5_norm = new TH1F("Delta 7x7 vs 5x5 norm","",155,-200.,200.);
+  HistoCluster7x7 = new TH1F("Cluster_7x7","Cluster signal 7x7",200,-50.,3950.);
+  HistoCluster7x7->GetXaxis()->SetTitle("Cluster Energy (ADC)");
+  HistoCluster7x7->GetYaxis()->SetTitle("Counts");
+
+  HistoCluster9x9 = new TH1F("Cluster_9x9","Cluster signal 9x9",200,-50.,3950.);
+  HistoCluster9x9->GetXaxis()->SetTitle("Cluster Energy (ADC)");
+  HistoCluster9x9->GetYaxis()->SetTitle("Counts");
+  
+  HistoDelta_5x5_vs_3x3 = new TH1F("Delta_5x5vs3x3","",250,-50.,950.);                                  //"Delta"=verifica sull'isolamento topologico* 
+  HistoDelta_5x5_vs_3x3_norm = new TH1F("Delta_5x5vs3x3_norm","",100,-30.,70.);
+  HistoDelta_7x7_vs_5x5 = new TH1F("Delta_7x7vs5x5","",250,-50.,950.);
+  HistoDelta_7x7_vs_5x5_norm = new TH1F("Delta_7x7vs5x5_norm","",100,-30.,70.);
+  HistoDelta_9x9_vs_7x7= new TH1F("Delta_9x9vs7x7","",250,-50.,950.);
+  HistoDelta_9x9_vs_7x7_norm = new TH1F("Delta_9x9vs7x7_norm","",100,-30.,70.);
+  
   
   V_vs_NpixClu = new TH2F("V_vs_NpixClu","Signal Vs Number of pixels in a cluster",10001.,-10.,10000.,50.,0.,50.);//grafico di correlazione
   NpixClu_vs_V = new TH2F("NpixClu_vs_V","Number of pixel in a cluster Vs Signal",50.,0.,50.,10001.,-10.,10000.); //grafico di correlazione
-  HistoNpixClu= new TH1F("NpixClu","Number of pixel in a cluster",60,0,60);                                       //numero di pixel appartenenti al cluster: *isolamento topologico
-  HistoV_fract_NpixClu = new TH1F("E_vs_NpixClu","Signal normalized to the number of pixels",4000,-50.,2500.);
-  HistoEPixMax = new TH1F("EpixelMax","Energy of max pixel",500,0.,1000.);
+  HistoNpixClu= new TH1F("NpixClu","Number of pixel in a cluster",60,-1.,59.);                                    //numero di pixel appartenenti al cluster: *isolamento topologico
+  HistoV_fract_NpixClu = new TH1F("E_vs_NpixClu","Signal normalized to the number of pixels",300, -10.,890.);
+  HistoEPixMax = new TH1F("EpixelMax","Energy of max pixel",200,0.,1000.);
   V_vs_EPixMax = new TH2F("V_clu_vs_EPixMax","Cluster signal Vs Energy of max pixel",1000,0.,2000.,2500, 0.,2500.);//grafico di correlaz
   V_fract_NpixClu_vs_EPixMax = new TH2F("V_clu_fract_NpixClu_vs_EPixMax","Cluster signal normalized to N Vs Energy of max pixel",500,0.,1000.,2500, 0.,1500.);  //grafico di correlaz
   
-  HistoRMSclu_Asy = new TH1F("RMSclu_Asy","RMS cluster asimmetrico",1010,-10.,1000.);                              //indice dispersione dell'energia del cluster
+  HistoRMSclu_Asy = new TH1F("RMSclu_Asy","RMS cluster asimmetrico",250,-10.,950.);                              //indice dispersione dell'energia del cluster
   RMS_vs_V = new TH2F("RMS_vs_V_clu","RMS Vs Signal of Cluster",1010,-10.,2000.,1500,0.,2500.);
   RMS_vs_V_fract_NpixClu = new TH2F("RMS_vs_V_clu_fract_NpixClu","RMS Vs Signal of Cluster Normalized to N",1010,-10.,1000.,1500,0.,2500.);
   NpixClu_vs_RMS = new TH2F("NpixClu_vs_RMS","Number of pixel in a cluster Vs RMS",500,-10.,1000.,1010,-10.,1000.);
   RMS_vs_EPixMax = new TH2F("RMS_vs_EPixMax","RMS Vs Energy of max pixel",1010,-10.,1000.,2500, 0.,3000.);
-  HistoEmax_fract_E3x3 = new TH1F("Emax/E3x3","Rapporto energia pixel max ed energia matrice 3x3",500,0.,10.);
-  HistoE_CluAsy_fract_NpixClu = new TH1F("E(asy)/NpixClu","Rapporto energia cluster asimmetrico e numero di pixel nel cluster",1500,0.,1500.);
+  HistoEmax_fract_E3x3 = new TH1F("Emax/E3x3","Rapporto energia pixel max ed energia matrice 3x3",250,0.,10.);
+  HistoE_CluAsy_fract_NpixClu = new TH1F("E(asy)/NpixClu","Rapporto energia cluster asimmetrico e numero di pixel nel cluster",500,0.,1000.);
  
   E_CluAsy_fract_NpixClu_vs_3x3 = new TH2F("E(asy)/NpixClu_vs_3x3","E(asy)/N Vs Energia del cluster 3x3",500,0.,1000.,2500,0.,3000.); 
   RMS_vs_3x3 = new TH2F ("RMS_vs_3x3","RMS Vs Segnale del cluster 3x3",1010,-10.,1000.,2500,0.,3000.);
@@ -131,12 +151,16 @@ Analisi::~Analisi()
   delete HistoV_single;
   delete HistoClusterAsy;
   delete HistoCluster3x3;
+  delete HistoCluster3x3keV;
   delete HistoCluster5x5;
   delete HistoCluster7x7;
+  delete HistoCluster9x9;
   delete HistoDelta_5x5_vs_3x3;
   delete HistoDelta_5x5_vs_3x3_norm;
   delete HistoDelta_7x7_vs_5x5;
   delete HistoDelta_7x7_vs_5x5_norm;
+  delete HistoDelta_9x9_vs_7x7;
+  delete HistoDelta_9x9_vs_7x7_norm;
   delete V_vs_NpixClu;
   delete NpixClu_vs_V;
   delete HistoNpixClu;
@@ -179,12 +203,16 @@ void Analisi::WriteOnFile()
   HistoV_single->Write();
   HistoClusterAsy->Write();
   HistoCluster3x3->Write();
+  HistoCluster3x3keV->Write();
   HistoCluster5x5->Write();
   HistoCluster7x7->Write();
+  HistoCluster9x9->Write();
   HistoDelta_5x5_vs_3x3->Write();
   HistoDelta_5x5_vs_3x3_norm->Write();
   HistoDelta_7x7_vs_5x5->Write();
   HistoDelta_7x7_vs_5x5_norm->Write();
+  HistoDelta_9x9_vs_7x7->Write();
+  HistoDelta_9x9_vs_7x7_norm->Write();
   V_vs_NpixClu->Write();
   NpixClu_vs_V->Write();
   HistoNpixClu->Write();
@@ -211,7 +239,7 @@ void Analisi::WriteOnFile()
   fOutFile->Close();	
 }
 
-int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow)
+int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, Double_t fcal)
 {
   int Row_seed=0;
   int Col_seed=0;
@@ -301,9 +329,9 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow)
       if(flagDistB==1)                                               
 	{
 	  map_seedDist10->Fill((Col_seed),(Row_seed));
-	  continue;
+	  continue;                                                  //tra i seed a dist<10 proseguono solo quelli più energetici
 	}
-
+      
       SeedOK +=1;                                                    //conto i seed buoni che ho avuto in questo frame
       
       ///////////////////////////////Riempimento istogrammi mappe dei seed////////////////////////////////////////
@@ -327,7 +355,7 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow)
       //////////////////////////////Costruzione dei Cluster Asimmetrici//////////////////////////////////     
 
       const int TOLERANCE_PIXELS = 2;                               //pixel di tolleranza nel calcolo del cluster asimmetrico: vengono annessi al cluster anche i pixel che superano la soglia secondaria (V_adja) e che distano fino a 2 pixel dal primo vicino
-      double V_adja=2.;                                            //soglia secondaria//fSecondaryThr prima era 4.0//prima era 2.6
+      double V_adja=2.;                                             //soglia secondaria //fSecondaryThr prima era 4.0//prima era 2.6
 
       std::vector<ACPoint> preCluster;                              //conterrà le coordinate dei pixel con valore > V_adja (della matrice centrata nel seed salvata da Riduzione.x)
       std::vector<ACPoint> cluster;                                 
@@ -337,9 +365,9 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow)
 
 
       //INIZIO ciclo sulla matrice centrata nel seed (salvata da Riduzione.x) a partire dal pixel in alto a sx
-      for (int k = ts.GetPixelMin(); k < ts.GetPixelMax(); k++)     //vedi Seed.h/Seed.C->p.e. per la matrice 7x7 sto scorrendo le RIGHE a partire dal pixel -3 rispetto al centro fino ad arrivare al pixel +3 rispetto al centro
+      for (int k = ts.GetPixelMin(); k < ts.GetPixelMax(); k++)     //vedi Seed.h/Seed.C->p.e. per la matrice 7x7 sto scorrendo le RIGHE a partire dal pixel -3 fino al pixel +3 (rispetto al centro)
 	{
-	  for (int l = ts.GetPixelMin(); l < ts.GetPixelMax(); l++) //idem sopra, ma per le COLONNE
+	  for (int l = ts.GetPixelMin(); l < ts.GetPixelMax(); l++) //COLONNE
 	    {
 	      float tsValue = ts(l,k);                              //valore registrato dal pixel alla posizione (l,k)
 	      if(tsValue>EPixMax)                                   //se il valore è maggiore di..
@@ -349,15 +377,15 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow)
 	   
 	      if (k == 0 && l == 0)                                  //se k=l=0 sono nel centro della matrice, quindi sono il seed..
 		{
-		  continue;                                          //..quindi appartengo sicuramente al cluster e vado a cercare altri possibili candidati
+		  continue;                                          //..quindi vado a cercare altri possibili candidati
 		}
 	       
 	      bool isOverThreshold = tsValue > V_adja;             
 	      
 	      if (isOverThreshold)                                   //se sono sopra soglia..
 		{
-		  ACPoint currentPoint = ACPoint(l,k);               //..salvo le coordinate del pixel che potrebbe appartenere al cluster
-		  preCluster.push_back(currentPoint);                //riempio il vettore con i pixel possibili candidati
+		  ACPoint currentPoint = ACPoint(l,k);               
+		  preCluster.push_back(currentPoint);                //..riempio il vettore con le coord dei pixel possibili candidati
 		  
 		}
 	    }
@@ -374,21 +402,21 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow)
 	    for (size_t j = 0; j < cluster.size(); j++)             //giro su tutti i pixel della matrice 
 	      {
 		ACPoint clusterPoint = cluster.at(j);
-		if (std::abs(preClusterPoint.x-clusterPoint.x) <= TOLERANCE_PIXELS && std::abs(preClusterPoint.y-clusterPoint.y) <= TOLERANCE_PIXELS)                                                  //se la distanza è minore di 2 sia su x che su y.. 
+		if (std::abs(preClusterPoint.x-clusterPoint.x) <= TOLERANCE_PIXELS && std::abs(preClusterPoint.y-clusterPoint.y) <= TOLERANCE_PIXELS)                                                            //se la distanza è minore di 2 sia su x che su y.. 
 		  {
 		    N++;                                            //..aggiungo il pixel al cluster
 		    found = true;
 		    cluster.push_back(preClusterPoint);             //riempio il vettore con i pixel "vincitori" 
 		    preCluster.erase(preCluster.begin()+i);         //rimuovo gli elementi del vettore dall'inizio fino all'i-esima posizione, in modo che quando arrivo alla fine il vettore sia completamente vuoto 
-		    break;                                          //esco dal ciclo j
+		    break;   //esco dal ciclo j (tutti i pixel)
 		  }
 	      }
 	    if (found)
 	      {
-		break;                                              //esco dal ciclo i
+		break;       //esco dal ciclo i (candidati)
 	      }
 	  }
-      } while (found);                                              //giro fintanto che ci sono possibili candidati 
+      } while (found);                                              
       
       
       ///////////////////////Calcolo Segnale Cluster Asimmetrico/////////////////////////
@@ -423,6 +451,7 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow)
       double V_clu_3x3 = 0.;
       double V_clu_5x5 = 0.;
       double V_clu_7x7 = 0.;
+      double V_clu_9x9 = 0.;
       
       //ciclo sulla matrice centrata nel seed (salvata da Riduzione.x) a partire dal pixel in alto a sx
       for(int j=ts.GetPixelMin(); j<ts.GetPixelMax(); j++)        //RIGHE
@@ -444,6 +473,11 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow)
 		{
 		  V_clu_7x7 += ts(i,j);
 		}
+	      
+	      if(j>=-4 && j<=4 && i>=-4 && i<=4)
+		{
+		  V_clu_9x9 += ts(i,j);
+		}
 	    }
 	}
       
@@ -455,18 +489,43 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow)
       double Delta_5x5_vs_3x3_norm = 0.;
       double Delta_7x7_vs_5x5 = 0.;
       double Delta_7x7_vs_5x5_norm = 0.;
+      double Delta_9x9_vs_7x7 = 0.;
+      double Delta_9x9_vs_7x7_norm = 0.;
       Delta_5x5_vs_3x3 = V_clu_5x5 - V_clu_3x3;
       Delta_5x5_vs_3x3_norm = (V_clu_5x5 - V_clu_3x3)/16;     //normalizzata al numero dei pixel contenuti nella cornice esterna: 25-9=16
       Delta_7x7_vs_5x5 = V_clu_7x7 -V_clu_5x5;
       Delta_7x7_vs_5x5_norm = (V_clu_7x7 - V_clu_5x5)/24;     //idem sopra
-
-      ///////////////////////////Altri calcoli/////////////////////////////
+      Delta_9x9_vs_7x7 = V_clu_9x9 -V_clu_7x7;
+      Delta_9x9_vs_7x7_norm = (V_clu_9x9 - V_clu_7x7)/32;
       
+      ///////////////////////////Altri calcoli/////////////////////////////
+
       Emax_fract_E3x3 =(float(EPixMax) / V_clu_3x3);
-      E_CluAsy_fract_NpixClu = (V_clu_Asy /float(N));         
+      E_CluAsy_fract_NpixClu = (V_clu_Asy /float(N));
+
+      ///////////////////////////Conversione in keV//////////////////////////
+      
+      double V_clu_3x3_keV = 0.;
+      V_clu_3x3_keV = V_clu_3x3/fcal;                         //fcal: fattore di calibrazione ADC/keV
+      HistoCluster3x3keV->Fill(V_clu_3x3_keV);
       
       ///////////////////////RIEMPIMENTO ISTOGRAMMI/////////////////////////
       
+      HistoClusterAsy->Fill(V_clu_Asy);
+      HistoCluster3x3->Fill(V_clu_3x3);
+      HistoCluster5x5->Fill(V_clu_5x5);
+      HistoCluster7x7->Fill(V_clu_7x7);
+      HistoCluster9x9->Fill(V_clu_9x9);
+      
+      HistoDelta_5x5_vs_3x3->Fill(Delta_5x5_vs_3x3);
+      HistoDelta_5x5_vs_3x3_norm->Fill(Delta_5x5_vs_3x3_norm);
+      HistoDelta_7x7_vs_5x5->Fill(Delta_7x7_vs_5x5);
+      HistoDelta_7x7_vs_5x5_norm->Fill(Delta_7x7_vs_5x5_norm);
+      HistoDelta_9x9_vs_7x7->Fill(Delta_9x9_vs_7x7);
+      HistoDelta_9x9_vs_7x7_norm->Fill(Delta_9x9_vs_7x7_norm);
+      HistoEmax_fract_E3x3->Fill(Emax_fract_E3x3);
+      HistoE_CluAsy_fract_NpixClu->Fill(E_CluAsy_fract_NpixClu);
+
       V_vs_NpixClu->Fill(float(V_clu_Asy),float(N));          //Nota: N è il numero di pixel nel cluster asimmetrico!
       NpixClu_vs_V->Fill(float(N),float(V_clu_Asy));
       HistoV_fract_NpixClu->Fill(float(V_clu_Asy_medio));
@@ -482,18 +541,6 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow)
       //**************************
       NpixClu_vs_RMS->Fill(float(RMSclu_Asy),float(N));
       RMS_vs_EPixMax->Fill(float(EPixMax),float(RMSclu_Asy));
-      
-      HistoClusterAsy->Fill(V_clu_Asy);
-      HistoCluster3x3->Fill(V_clu_3x3);
-      HistoCluster5x5->Fill(V_clu_5x5);
-      HistoCluster7x7->Fill(V_clu_7x7);
-      
-      HistoDelta_5x5_vs_3x3->Fill(Delta_5x5_vs_3x3);
-      HistoDelta_5x5_vs_3x3_norm->Fill(Delta_5x5_vs_3x3_norm);
-      HistoDelta_7x7_vs_5x5->Fill(Delta_7x7_vs_5x5);
-      HistoDelta_7x7_vs_5x5_norm->Fill(Delta_7x7_vs_5x5_norm);
-      HistoEmax_fract_E3x3->Fill(Emax_fract_E3x3);
-      HistoE_CluAsy_fract_NpixClu->Fill(E_CluAsy_fract_NpixClu);
       
       E_CluAsy_fract_NpixClu_vs_3x3->Fill(E_CluAsy_fract_NpixClu,V_clu_3x3);
       Emax_vs_3x3->Fill(float(EPixMax),V_clu_3x3);
