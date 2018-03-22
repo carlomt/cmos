@@ -339,7 +339,7 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Fram
       //////////////////////////////Costruzione dei Cluster Asimmetrici//////////////////////////////////     
 
       const int TOLERANCE_PIXELS = 2;                               //pixel di tolleranza nel calcolo del cluster asimmetrico: vengono annessi al cluster anche i pixel che superano la soglia secondaria (V_adja) e che distano fino a 2 pixel dal primo vicino
-      double sigma=FrameNoise->At(Col_seed,Row_seed);
+      double sigma;
       double V_adja=2;                                             //soglia secondaria //fSecondaryThr prima era 4.0//prima era 2.6
 
       std::vector<ACPoint> preCluster;                              //conterrà le coordinate dei pixel con valore > V_adja (della matrice centrata nel seed salvata da Riduzione.x)
@@ -364,7 +364,8 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Fram
 		{
 		  continue;                                          //..quindi vado a cercare altri possibili candidati
 		}
-	       
+
+	      sigma=FrameNoise->At(Col_seed+l,Row_seed+k);
 	      bool isOverThreshold = tsValue > V_adja*sigma;
 	      //cout<<"V_adja: "<<V_adja<<" sigma: "<<sigma<<" V_adja*sigma: "<<V_adja*sigma<<endl;
 	      
