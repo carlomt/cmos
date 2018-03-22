@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
   TBranch *bSeedList = ReducedDataTree->GetBranch("seed_list");
   bSeedList->SetAddress(&seed_list);
 	
-  //Frame *FramePed = (Frame*) f.Get("PedestalFrame");
+  Frame *FramePed = (Frame*) f.Get("PedestalFrame");
   Frame *FrameNoise = (Frame*) f.Get("NoiseFrame");
 
   Long64_t nentries = ReducedDataTree->GetEntries();
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
   int ErrorCounter=0;
 	
 	
-  Analisi analisi(outfname, badfname, FrameNCol, FrameNRow, fcal);
+  Analisi analisi(outfname, badfname, FrameNCol, FrameNRow, FramePed, FrameNoise, fcal);
   for (Long64_t jentry=0; jentry<nentries; jentry++)                //INIZIO ciclo sui FRAME
     {
       nb = ReducedDataTree->GetEntry(jentry);   nbytes += nb;
@@ -182,7 +182,7 @@ int main(int argc, char *argv[])
 	    }		
 	}//FINE ciclo sui SEED
 		
-      analisi.AnalisiData(mySeedList, FrameNCol, FrameNRow, fcal);
+      analisi.AnalisiData(mySeedList, FrameNCol, FrameNRow, FramePed, FrameNoise, fcal);
       
     }//FINE ciclo sui FRAME
   

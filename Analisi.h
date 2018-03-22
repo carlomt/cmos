@@ -29,11 +29,11 @@ class ACPoint
 class Analisi : public TObject
 {
 public:
-  Analisi(const std::string OutFileName, const std::string BadFileName, int FrameNCol, int FrameNRow, Double_t fcal); //costruttore con argomenti
+  Analisi(const std::string OutFileName, const std::string BadFileName, int FrameNCol, int FrameNRow,  const Frame *FramePed, const Frame *FrameNoise, Double_t fcal); //costruttore con argomenti
   virtual ~Analisi();  //distruttore: rilascia la memoria associata ai membri della classe
     
   void WriteOnFile();
-  int AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, Double_t fcal);
+  int AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Frame *FramePed, const Frame *FrameNoise, Double_t fcal);
     
   inline void SetSecondaryThr(double thr){fSecondaryThr=thr;};
   
@@ -51,6 +51,8 @@ public:
   TH1F *map_Row_seed;	
   TH1F *map_Col_seed;
   TH1F *HistoDistSeeds;
+  TH1F *HistoDistmin;
+  TH1F *HistoDistmin_thr;
   TH1F *HistoR_vs_Cluster;
   TH1F *HistoV_single;
   TH1F *HistoClusterAsy;
