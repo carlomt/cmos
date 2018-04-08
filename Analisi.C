@@ -227,8 +227,8 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Fram
 
   for(size_t i=0; i<sl->Size(); i++)               //INIZIO 1° CICLO SULLA LISTA SEED 
     {
-      //cout<<"############\nFRAME #"<<sl->GetIdFrame()<<" - SEED_tot = "<<sl->Size()<<endl;      //check: numero del frame e numero dei seed per ogni frame
-      Seed ts = sl->At(i);                                                          //accedo agli elementi appartenenti alla lista (vedi SeedList.h)
+      //cout<<"SEED_tot = "<<sl->Size()<<endl;                                      //check: numero dei seed per ogni frame
+      Seed ts = sl->At(i);                                                        //accedo agli elementi appartenenti alla lista (vedi SeedList.h)
       //cout<<"At(i="<<i<<") "<<ts<<endl;
       Row_seed = ts.GetRow();
       Col_seed = ts.GetCol();
@@ -340,13 +340,14 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Fram
 
       const int TOLERANCE_PIXELS = 2;                               //pixel di tolleranza nel calcolo del cluster asimmetrico: vengono annessi al cluster anche i pixel che superano la soglia secondaria (V_adja) e che distano fino a 2 pixel dal primo vicino
       double sigma;
-      double V_adja=2;                                             //soglia secondaria //fSecondaryThr prima era 4.0//prima era 2.6
+      double V_adja=2.;                                             //soglia secondaria //fSecondaryThr prima era 4.0//prima era 2.6
 
       std::vector<ACPoint> preCluster;                              //conterrà le coordinate dei pixel con valore > V_adja (della matrice centrata nel seed salvata da Riduzione.x)
       std::vector<ACPoint> cluster;                                 
       cluster.push_back(ACPoint(0,0));                              //inizializzo vettore che conterrà tutte le coord. del cluster asim.
       int N = 1;
       double EPixMax=0.;                                            //massimo valore registrato da un pixel all'interno della matrice: energia del seed
+      int pixOverVadja=0;
 
 
       //INIZIO ciclo sulla matrice centrata nel seed (salvata da Riduzione.x) a partire dal pixel in alto a sx
@@ -367,13 +368,14 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Fram
 
 	      sigma=FrameNoise->At(Col_seed+l,Row_seed+k);
 	      bool isOverThreshold = tsValue > V_adja*sigma;
-	      //cout<<"V_adja: "<<V_adja<<" sigma: "<<sigma<<" V_adja*sigma: "<<V_adja*sigma<<endl;
-	      
+	      //cout<<"tsValue: "<<tsValue<<" V_adja: "<<V_adja<<" sigma: "<<sigma<<" V_adja*sigma: "<<V_adja*sigma<<endl;
+
 	      if (isOverThreshold)                                   //se sono sopra soglia..
 		{
+		  pixOverVadja++;
+		  //cout<<"E' sopra soglia!!"<<" pixOverVadja="<<pixOverVadja<<endl;
 		  ACPoint currentPoint = ACPoint(l,k);               
 		  preCluster.push_back(currentPoint);                //..riempio il vettore con le coord dei pixel possibili candidati
-		  
 		}
 	    }
 	}//FINE ciclo sulla matrice centrata nel seed

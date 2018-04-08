@@ -181,7 +181,8 @@ int main(int argc, char *argv[])
 	      if (debug) FileAppoggio<<"Frame #"<<seed_list->GetIdFrame()<<" Seed #"<<SeedIndex<<"\n***ERRORE!!!!***\n"<<endl;
 	    }		
 	}//FINE ciclo sui SEED
-		
+
+      //cout<<"################\nSTART\n################\n"<<"Frame #"<<seed_list->GetIdFrame()<<endl;
       analisi.AnalisiData(mySeedList, FrameNCol, FrameNRow, FramePed, FrameNoise, fcal);
       
     }//FINE ciclo sui FRAME
