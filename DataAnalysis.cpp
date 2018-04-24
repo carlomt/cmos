@@ -44,6 +44,7 @@ int main(int argc, char *argv[])
   string badfname=Form("%s_badpixel.txt", sourcename.c_str());
 	
   int FrameNCol = 640, FrameNRow = 480;
+  Double_t fcal = 2.5;                                             //fattore di calibrazione ADC-keV
 	
   if(argc==1)
     {
@@ -105,7 +106,7 @@ int main(int argc, char *argv[])
   TBranch *bSeedList = ReducedDataTree->GetBranch("seed_list");
   bSeedList->SetAddress(&seed_list);
 	
-  //Frame *FramePed = (Frame*) f.Get("PedestalFrame");
+  Frame *FramePed = (Frame*) f.Get("PedestalFrame");
   Frame *FrameNoise = (Frame*) f.Get("NoiseFrame");
 
   Long64_t nentries = ReducedDataTree->GetEntries();
@@ -118,7 +119,7 @@ int main(int argc, char *argv[])
   int ErrorCounter=0;
 	
 	
-  Analisi analisi(outfname, badfname, FrameNCol, FrameNRow);
+  Analisi analisi(outfname, badfname, FrameNCol, FrameNRow, FramePed, FrameNoise, fcal);
   for (Long64_t jentry=0; jentry<nentries; jentry++)                //INIZIO ciclo sui FRAME
     {
       nb = ReducedDataTree->GetEntry(jentry);   nbytes += nb;
@@ -127,7 +128,7 @@ int main(int argc, char *argv[])
       mySeedList->Clear();
       if (debug) FileAppoggio<<"Svuoto la mia SeedList, ora ne contiene: "<<mySeedList->Size()<<endl;
 
-      for(size_t SeedIndex=0; SeedIndex<seed_list->Size(); SeedIndex++)                            //Dato un Frame, ciclo sui SEED della lista originale e mi copio il primo seed in un seed temporaneo che modificherò e inserirò poi nella mia nuova lista
+      for(size_t SeedIndex=0; SeedIndex<seed_list->Size(); SeedIndex++)            //Dato un Frame, ciclo sui SEED della lista originale e mi copio il primo seed in un seed temporaneo che modificherò e inserirò poi nella mia nuova lista
 	{
 	  temp=seed_list->At(SeedIndex);                                           //accedo agli elementi contenuti nella lista originale
 	  if (debug) FileAppoggio<<"#################################################################################### FRAME "<<seed_list->GetIdFrame()<<" Seed N "<<SeedIndex<<" \nLISTA originale:\n"<<temp<<endl;
@@ -163,8 +164,7 @@ int main(int argc, char *argv[])
 		    FileAppoggio<<", dopo: "<<temp.GetVal(index)<<endl;
 		  }
 		}
-	    }     
-	  //Fine ciclo sui PIXEL
+	    } //Fine ciclo sui PIXEL
 	  if (debug) {
 	    FileAppoggio<<endl;
 	    FileAppoggio<<"Bene, ho creato il seed temp: : "<<endl<<temp<<endl;
@@ -179,13 +179,14 @@ int main(int argc, char *argv[])
 	    {
 	      ErrorCounter++;
 	      if (debug) FileAppoggio<<"Frame #"<<seed_list->GetIdFrame()<<" Seed #"<<SeedIndex<<"\n***ERRORE!!!!***\n"<<endl;
-	    }
-			
-			
-	}                                                                 //FINE ciclo sui SEED
-		
-      analisi.AnalisiData(mySeedList, FrameNCol, FrameNRow);
-    }                                                                     //FINE ciclo sui FRAME
+	    }		
+	}//FINE ciclo sui SEED
+
+      //cout<<"################\nSTART\n################\n"<<"Frame #"<<seed_list->GetIdFrame()<<endl;
+      analisi.AnalisiData(mySeedList, FrameNCol, FrameNRow, FramePed, FrameNoise, fcal);
+      
+    }//FINE ciclo sui FRAME
+  
   cout<<"output file name: "<<outfname<<endl;
   analisi.WriteOnFile();
   cout<<"Numero di errori= "<<ErrorCounter<<endl;

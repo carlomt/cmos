@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
   int result=1;
   int mesglevel=0;
   int version=1;
-  int sensor=1; //variabile per la scelta del sensore: 1=MTV011, 2=MTV115 (default)
+  int sensor=1; //variabile per la scelta del sensore: 1=MTV011 (default), 2=MTV115
   string outfname="";
   vector<string> filenames;
 	
@@ -242,7 +242,7 @@ void print_help(string fname)
   cout<<"Usage  : "<<fname<<" (option) <evtfile>"<<endl;
   cout<<"Option : -verbose  (show debug output)"<<endl;
   cout<<"Option : -o  (set output filename, by default is the name of the first input)"<<endl;
-  //cout<<"Option : -s (set the sensor type: MT9V011(default) or MTV9115)"<<endl;
+  cout<<"Option : -s (set the sensor type: MT9V011(default) or MTV9115)"<<endl;
   cout<<"Option : -help     (show this help)"<<endl;
   //    printf("       : -log (Log filename)\n");
   cout<<endl;

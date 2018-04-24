@@ -49,7 +49,7 @@ class Frame : public TObject
 
   void Divide(const Frame &LFrame);
 
-  void Resize(const size_t nRow, const size_t nCol);
+  void Resize(const size_t nCol, const size_t nRow);
 
   Frame operator+(const Frame &LFrame) const;
   Frame operator+(const double val) const;

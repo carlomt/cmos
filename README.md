@@ -1,6 +1,6 @@
 # cmos Data Analysis Framework
 *Latest update to Readme:
-2017-01-25 by collamaf*
+2017-03-19 by collamaf+amorusor*
 Pacchetto software per l'analisi dei dati acquisiti dal sensore CMOS. Funziona sia con il sensore MTV011 che con il sensore MTV115.
 
 ## Come scaricare il codice:
@@ -27,11 +27,11 @@ Facendo `source setthis.sh` si aggiungono al path 'FileConverter', 'Riduzione' e
 Il pacchetto e' composto di 3 eseguibili:
 
 ### FileConverter.x
-Coverte i file di output dell'acquisizione CMOS (*NomeFileNNNN.txt/.raw*) in root files (*NomeFileNNNN.root*), contenenti istanze della classe Frame. Tramite la flag `-s` si può selezionare il tipo di sensore: 1 per MTV011 e 2 per MTV115 (default)
+Coverte i file di output dell'acquisizione CMOS (*NomeFileNNNN.txt/.raw*) in root files (*NomeFileNNNN.root*), contenenti istanze della classe Frame. Tramite la flag `-s` si può selezionare il tipo di sensore: 1 per MTV011 (default) e 2 per MTV115
 e.g.:
 
 ```
-FileConverter DatiVari/AcquisizioneGEN/sorgenti/2018-01-10_MT9V115_90Y_Decay05/*.raw
+FileConverter DatiVari/AcquisizioneGEN/sorgenti/2018-01-10_MT9V115_90Y_Decay05/*.raw -s 2
 
 ```
 ### PedAnalyzer.C
@@ -40,6 +40,7 @@ e.g.
 
 ```
 root -l
+.L libCMOS.so
 .L PedAnalyzer.C                                                                                                                                                     
 c=new PedAnalyzer("DatiVari/RootBuoni/2018-01-10_MT9V115_90Y_Decay23_0000",100)
 c->Loop() 
@@ -109,9 +110,9 @@ Per attivare gli output di debug ricompilare con la flag apposita:
 
 ## Tempi di esecuzione dei vari programmi
 ### FileConverter:
-   40 secondi per acquisizione di 2000frames
+   40 secondi per acquisizione di 2000 frames
 ### Riduzione
-   ordine 30 secondi per acquisizione di 2000frames (ma dipende da quanti cluster trova..)
+   ordine 30 secondi per acquisizione di 2000 frames (ma dipende da quanti cluster trova..)
 
 ## Dimensioni dei tipici file prodotti:
 ### *NomeFileNNNN.raw*

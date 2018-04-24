@@ -41,8 +41,10 @@ void PedAnalyzer::Loop()
 	//  - Fine ciclo sui pixel
 	
 	
-	//######### LAST MODIFIED ON 2018-01-23 by Collamaf
+	//######### MODIFIED ON 2018-01-23 by Collamaf
 	// now PedHisto have 1000 bins not 100
+        //######### LAST MODIFIED ON 2018-04-07 by amorusor
+        // now we can choose the group of frames to consider (before: only from 0 to fPedToConsider)
 	
 	//USAGE
 	/*
@@ -85,14 +87,18 @@ void PedAnalyzer::Loop()
 	out=new TFile(PostPedFileName,"RECREATE");
 	ofstream PedFile(PedFileName);
 	ofstream NoiseFile(NoiseFileName);
+
+	int startPed=0;  
+	cout<<"From which frame do you want to start?"<<endl;
+	cin>>startPed;    //utile se voglio considerare anche gruppi di "100" frames in mezzo al run
 	
-	cout<<"######################################## "<<endl<<"I will use the first "<<fPedToConsider<<" frames of file "<<endl<<InputFileName<<endl<<" to compute pedestals and noise. I will produce:"<<endl;
+	cout<<"######################################## "<<endl<<"I will use the frames from number "<<startPed<<" to number "<<(fPedToConsider-1)<<" of file "<<endl<<InputFileName<<endl<<" to compute pedestals and noise. I will produce:"<<endl;
 	cout<<PedFileName<<endl;
 	cout<<NoiseFileName<<endl;
 	cout<<PostPedFileName<<endl<<"######################################## "<<endl;
 	
 	Long64_t nbytes = 0, nb = 0;
-	for (Long64_t jentry=0; jentry<fPedToConsider;jentry++) {    //ciclo su tutti i frames
+	for (Long64_t jentry=startPed; jentry<fPedToConsider;jentry++) {    //ciclo su tutti i frames
 		cout<<"Sto analizzando il file (frame) num= "<<jentry<<", di "<<nentries<<endl;
 		Long64_t ientry = LoadTree(jentry);
 		if (ientry < 0) break;
@@ -154,7 +160,7 @@ void PedAnalyzer::Loop()
 	NoiseFile.close();
 	
 	
-	cout<<"######################################## "<<endl<<"I used the first "<<fPedToConsider<<" frames of file "<<endl<<InputFileName<<endl<<" to compute pedestals and noise. I produced:"<<endl;
+	cout<<"######################################## "<<endl<<"I used the frames from number "<<startPed<<" to number "<<(fPedToConsider-1)<<" of file "<<endl<<InputFileName<<endl<<" to compute pedestals and noise. I produced:"<<endl;
 	cout<<PedFileName<<endl;
 	cout<<NoiseFileName<<endl;
 	cout<<PostPedFileName<<endl<<"######################################## "<<endl;
