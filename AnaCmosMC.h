@@ -40,10 +40,7 @@ class AnaCmosMC {
 	vector<double>  *InCmosX;
 	vector<double>  *InCmosY;
 	vector<double>  *InCmosZ;
-	Double_t        InCmosEnSr;
-	Double_t        InCmosEnY;
 	vector<double>  *PixelID;
-	vector<double>  *EDepInPixel;
 	vector<double>  *PixXPos;
 	vector<double>  *PixYPos;
 	Double_t        SourceX;
@@ -67,10 +64,7 @@ class AnaCmosMC {
 	TBranch        *b_InCmosX;   //!
 	TBranch        *b_InCmosY;   //!
 	TBranch        *b_InCmosZ;   //!
-	TBranch        *b_InCmosEnSr;   //!
-	TBranch        *b_InCmosEnY;   //!
 	TBranch        *b_PixelID;   //!
-	TBranch        *b_EDepInPixel;   //!
 	TBranch        *b_PixXPos;   //!
 	TBranch        *b_PixYPos;   //!
 	TBranch        *b_SourceX;   //!
@@ -126,7 +120,6 @@ AnaCmosMC::~AnaCmosMC()
 
 Int_t AnaCmosMC::GetEntry(Long64_t entry)
 {
-	cout<<"MERDA"<<endl;
 	// Read contents of entry.
 	if (!fChain) return 0;
 	return fChain->GetEntry(entry);
@@ -163,7 +156,6 @@ void AnaCmosMC::Init(TTree *tree)
 	InCmosY = 0;
 	InCmosZ = 0;
 	PixelID = 0;
-	EDepInPixel = 0;
 	PixXPos = 0;
 	PixYPos = 0;
 	SourceCosX = 0;
@@ -188,10 +180,7 @@ void AnaCmosMC::Init(TTree *tree)
 	fChain->SetBranchAddress("InCmosX", &InCmosX, &b_InCmosX);
 	fChain->SetBranchAddress("InCmosY", &InCmosY, &b_InCmosY);
 	fChain->SetBranchAddress("InCmosZ", &InCmosZ, &b_InCmosZ);
-	fChain->SetBranchAddress("InCmosEnSr", &InCmosEnSr, &b_InCmosEnSr);
-	fChain->SetBranchAddress("InCmosEnY", &InCmosEnY, &b_InCmosEnY);
 	fChain->SetBranchAddress("PixelID", &PixelID, &b_PixelID);
-	fChain->SetBranchAddress("EDepInPixel", &EDepInPixel, &b_EDepInPixel);
 	fChain->SetBranchAddress("PixXPos", &PixXPos, &b_PixXPos);
 	fChain->SetBranchAddress("PixYPos", &PixYPos, &b_PixYPos);
 	fChain->SetBranchAddress("SourceX", &SourceX, &b_SourceX);

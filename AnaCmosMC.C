@@ -55,7 +55,7 @@ void AnaCmosMC::Loop()
 	}
 	int NPixTot=NPixX*NPixY;
 	int NPrimMC=Nev;
-	double AttSorg=26.33e3; //Total emissivity of source [Bq] (was 5.94e3 maybe for Sr PG source)
+	double AttSorg=2.54e3; //Total emissivity of source [Bq] (was 5.94e3 maybe for Sr PG source) 26.33e3 (??) - 2.53e3 Sr Roma
 	double DTacq=200e-3; //Data Acquisition Time [s]
 	int NFramesMC=0, NFramesMCLow=0;
 	int FrameCounter=0;
@@ -64,8 +64,8 @@ void AnaCmosMC::Loop()
 	bool debug=kTRUE;
 	int verbose=fVerbose;
 	double NumEvtPerFrame=0;
-	vector<double> VectTot(NPixTot,0.);
-	vector<double> VectTotConv(NPixTot,0.);
+	vector<double> VectTot(NPixTot,0.); //Vettore in cui appoggiare i valori di energia depositata nel dato pixel
+	vector<double> VectTotConv(NPixTot,0.); //Vettore in cui appoggiare i valori di energia depositata nel dato pixel convertita in ADC
 	double SmearingFactor=0;
 	TRandom *rand= new TRandom();
 	TRandom *randPoiss= new TRandom();
@@ -97,15 +97,16 @@ void AnaCmosMC::Loop()
 	if (nentries/NFramesMC == 0) {
 		LowFlag=kTRUE;
 		NFramesMCLow=(NPrimMC/AttSorg*NFramesMC/nentries/DTacq);
-		cout<<"ATTENTION! NUMBER OF EVENT TOO LOW FOR FRAME DIVISION, assuming 1 per frame and adding extra empty frames!"<<endl;
+		cout<<"WARNING! NUMBER OF EVENT TOO LOW FOR FRAME DIVISION, assuming 1 per frame and adding extra empty frames!"<<endl;
 	}
 	
 	ImageFile->cd();
 	TH2F* cluster =new TH2F("cluster","cluster", NPixX/RedFactor, 0, NPixX, NPixY/RedFactor, 0, NPixY);
 	//	double temp=0;
 	
-	int ContaPixel[NFramesMC];
+	int ContaPixel[NFramesMC]; //Contatore del numero di pixel presenti in ogni frame
 	
+	// Creo un Cluster grafico per frame
 	TH2F* ClusterVec[NFramesMC];
 	for (kk=0; kk<NFramesMC; kk++){
 		ClusterVec[kk]=new TH2F(Form("ClusterVec%d",kk),Form("Cluster for frame n%d", kk), NPixX/RedFactor, 0, NPixX, NPixY/RedFactor, 0, NPixY);
@@ -122,7 +123,7 @@ void AnaCmosMC::Loop()
 	int PoissonIncrement=0;
 	if (verbose>=1) cout<<"First Poisson trial: n= "<<PoissonVal<<endl;
 	
-	for (Long64_t jentry=0; jentry<nentries&&1;jentry++) { //Ciclo su tutti le entries MC (cioè Isotopo priario per Isotopo primario che ha rilasciato un segnale!)
+	for (Long64_t jentry=0; jentry<nentries&&1;jentry++) { //Ciclo su tutte le entries MC (cioè Isotopo priario per Isotopo primario che ha rilasciato un segnale!)
 		Long64_t ientry = LoadTree(jentry);
 		if (ientry < 0) break;
 		nb = fChain->GetEntry(jentry);   nbytes += nb;
@@ -132,40 +133,41 @@ void AnaCmosMC::Loop()
 		
 		
 		for (int ii=0; ii<PixelID->size(); ii++){  //loop su tutti i pixel accesi durante quell'evento
+			
 			//calcolo gli indici I e J per il pixel considerato: in questo modo vanno da 0 a NCol/NRow -1 come vuole Frame
 			int Ipix=((int)(PixelID->at(ii))-1)%NPixX;
 			int Jpix=((PixelID->at(ii)-1)/NPixX);
 			
-			// ###### Aggiungo al pixel nel dato frame il valore trovato
 			// Incremento l'elemento del vettore corrispondente a quel pixel aggiungendo l'energia depositata in [keV]
-			//			VectTot[(int)(PixelID->at(ii))]+=(int)(EDepInPixel->at(ii)*1000*ConvFactor);
-			VectTot[(int)(PixelID->at(ii))]+=(EDepInPixel->at(ii));
-			//			cout<< (int)(PixelID->at(ii)) <<" "<< (EDepInPixel->at(ii)) <<" "<<VectTot[(int)(PixelID->at(ii))] <<endl;
+			//			VectTot[(int)(PixelID->at(ii))]+=(int)(InCmosEn->at(ii)*1000*ConvFactor);
+			VectTot[(int)(PixelID->at(ii))]+=(InCmosEn->at(ii));
+			//			cout<< (int)(PixelID->at(ii)) <<" "<< (InCmosEn->at(ii)) <<" "<<VectTot[(int)(PixelID->at(ii))] <<endl;
 			// ##############################
 			
 			
-			if (verbose>=2) cout<<"evento: "<<jentry<<", px: "<<(int)PixelID->at(ii)<<", colonna= "<<Ipix<<", x= "<<PixXPos->at(ii)<<", riga= "<<Jpix<<", y= "<<PixYPos->at(ii)<<", ene= "<<EDepInPixel->at(ii)<<", eneConv= "<<(int)(EDepInPixel->at(ii)*ConvFactor)<<endl;
+			if (verbose>=2) cout<<"evento: "<<jentry<<", px: "<<(int)PixelID->at(ii)<<", colonna= "<<Ipix<<", x= "<<PixXPos->at(ii)<<", riga= "<<Jpix<<", y= "<<PixYPos->at(ii)<<", ene= "<<InCmosEn->at(ii)<<", eneConv= "<<(int)(InCmosEn->at(ii)*ConvFactor)<<endl;
 			
 			//Accendo il pixel nei relativi istogrammi
 			cluster->Fill(Ipix, Jpix);
 			ClusterVec[FrameCounter]->Fill(Ipix, Jpix);
 		}  //fine loop su tutti i pixel accesi in quell'evento
-		// Ora dentro ClusterVec ho salvato per ciascun pixel il rilascio di energia (ancora in keV!!) dovuto agli eventi appartenenti a questo frame!
+			 // Ora dentro ClusterVec ho salvato per ciascun pixel il rilascio di energia (ancora in keV!!) dovuto agli eventi appartenenti a questo frame!
 		
 		
-		
-		
+		// ########################################
+		// È il momento di chiudere il frame
 		if (LowFlag || ( jentry!=nentries&& ((jentry+1)%(PoissonVal)==0)) || jentry==nentries ) { //POISSON VERSION - se sono in regime di "ogni entry va in un frame" o se sono al cambio di frame salvo il frame e ne inizio un altro
-//			if (LowFlag || ((jentry+1)%((int)round((double)nentries/NFramesMC))==0) ) { //CONSTANT NUMBER VERSION - se sono in regime di "ogni entry va in un frame" o se sono al cambio di frame salvo il frame e ne inizio un altro
+			
+			//			if (LowFlag || ((jentry+1)%((int)round((double)nentries/NFramesMC))==0) ) { //CONSTANT NUMBER VERSION - se sono in regime di "ogni entry va in un frame" o se sono al cambio di frame salvo il frame e ne inizio un altro
 			for (jj=0; jj<NPixTot; jj++)
 			{ //prima di salvare il frame riciclo su tutti i pixel per aggiumgere l'eventuale rumore MC
 				if (verbose>=3&&VectTot[jj]>=0) cout<<"Fino a evento n= "<<jentry<<", Frame n= "<<FrameCounter<<", Px n= "<<jj<<", Before sm and conv was= " << VectTot[jj];
-//				SmearingFactor=(rand->Gaus(0,1));
+				//				SmearingFactor=(rand->Gaus(0,1));
 				if(NoiseFlag) {
 					NoiseFactor=fVectorNoise[0][jj];
 					SmearingFactor=(rand->Gaus(0,NoiseFactor));
 				}
-
+				
 				VectTotConv[jj]=(int)(ConvFactor*VectTot[jj]); //converte keV -> ADC
 				if (verbose>=3&&VectTot[jj]>=0) cout<<", Before smearing after conv was= " << VectTotConv[jj]<<", noise was= "<<NoiseFactor<<", adding smearing of= "<<(int)SmearingFactor;
 				VectTotConv[jj]+=(int)SmearingFactor;
@@ -175,7 +177,7 @@ void AnaCmosMC::Loop()
 				int JpixBis=((jj)/NPixX);
 				frame->Set(IpixBis, JpixBis, VectTotConv[jj]); //aggiungo al frame il valore di quel pixel
 				
-
+			/*
 #if 0
 				//				SmearingFactor=0;
 				if (1) cout<<"Evt n= "<<jentry<<", Frame n= "<<FrameCounter<<", Pixel n= "<<jj<<", Before smearing and conv was= " << VectTot[jj];
@@ -189,11 +191,12 @@ void AnaCmosMC::Loop()
 				int JpixBis=((jj)/NPixX);
 				frame->Set(IpixBis, JpixBis, VectTot[jj]); //aggiungo al frame il valore di quel pixel
 #endif
+			 */
 			}
 			
 			VectTot.clear(); //svuoto il vettore di appoggio di tutti i pixel per prepararmi al nuovo frame
 			VectTotConv.clear();
-
+			
 			if (verbose==0) {
 				if (FrameCounter%100==0) cout<<endl<<"Saving Frame Number: "<<FrameCounter<<endl;
 			}
@@ -207,13 +210,13 @@ void AnaCmosMC::Loop()
 			MCTree->Fill();
 			frame->Clear();
 			kk++; //contatore dei frame
-
+			
 			if (verbose>=1) cout<<"New Poisson trial: was= "<<PoissonVal;
 			PoissonIncrement= randPoiss->Poisson(NumEvtPerFrame);
 			CheckPoisson->Fill(PoissonIncrement);
 			PoissonVal+=PoissonIncrement;
 			if (verbose>=1)cout<<" now is: n= "<<PoissonVal<<", increment= "<<PoissonIncrement<<", media= "<<(double)PoissonVal/FrameCounter<<endl;
-
+			
 			if(PoissonIncrement==0) {
 				if (verbose>=1)cout<<"It happened poisson=0!!! Adding an empty frame and going on!"<<endl;
 				frame->SetId(FrameCounter);
@@ -228,11 +231,12 @@ void AnaCmosMC::Loop()
 				PoissonVal+=PoissonIncrement;
 				if (verbose>=1)cout<<"new Poisson val = "<<PoissonIncrement<<", media= "<<(double)PoissonVal/FrameCounter<<endl;
 			}
-
+			
 			
 		} //fine ciclo scrittura frame
-		
+			// ########################################
 
+		
 		
 	} //fine ciclo sulle entries MC
 	
@@ -242,6 +246,9 @@ void AnaCmosMC::Loop()
 	
 	//	for (kk=0; kk<NPixTot;kk++) cout<<"pixel num "<<kk<<", valore= "<<VectTot[kk]<<endl;
 	
+	
+	// ########################################
+	// Aggiungo frame vuoti se devo far tornare il numero totale
 #if 1
 	if (FrameCounter<NFramesMC && !LowFlag) {
 		cout<<"Now I have to add some empty frames since NFramesMC= "<<NFramesMC<<" while  FrameCounter= "<<FrameCounter<<endl;
@@ -268,12 +275,12 @@ void AnaCmosMC::Loop()
 	for (kk=0; kk<NFramesMC; kk++){
 		if (0) cout<<"k= "<<kk<<", Counter "<<ContaPixel[kk]<<endl;;
 	}
-
+	
 	FrameFile->Write();
 	ImageFile->cd();
 	cluster->Write();
 	CheckPoisson->Write();
-
+	
 	FrameFile->Close();
 	ImageFile->Close();
 }
