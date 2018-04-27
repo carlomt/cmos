@@ -40,9 +40,10 @@ class PedAnalyzer {
 	TBranch        *b_frame_fData;   //!
 	
 	//	PedAnalyzer(TTree *tree=0);
-	PedAnalyzer(TString filename, int);
+	PedAnalyzer(TString filename, int, int);
 	TString nomefile;
 	int fPedToConsider;
+	int fStartPed;
 	virtual ~PedAnalyzer();
 	virtual Int_t    Cut(Long64_t entry);
 	virtual Int_t    GetEntry(Long64_t entry);
@@ -56,10 +57,11 @@ class PedAnalyzer {
 #endif
 
 #ifdef PedAnalyzer_cxx
-PedAnalyzer::PedAnalyzer(TString filename, int PedToConsider=-1)
+PedAnalyzer::PedAnalyzer(TString filename, int PedToConsider=-1, int StartPed=0)
 {
 	nomefile=filename;
 	fPedToConsider=PedToConsider;
+	fStartPed=StartPed;
 
 	TFile *f = new TFile(Form("%s.root",filename.Data()));
 	TTree* tree = (TTree*)gDirectory->Get("CMOSDataTree");

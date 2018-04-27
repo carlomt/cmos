@@ -33,8 +33,9 @@ public:
   virtual ~Analisi();  //distruttore: rilascia la memoria associata ai membri della classe
     
   void WriteOnFile();
-  int AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Frame *FramePed, const Frame *FrameNoise, Double_t fcal);
-    
+//	int AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Frame *FramePed, const Frame *FrameNoise, Double_t fcal);
+	int AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Frame *FramePed, const Frame *FrameNoise, Double_t fcal, SeedList *slPrimEn=NULL);
+
   inline void SetSecondaryThr(double thr){fSecondaryThr=thr;};
   
  private:
@@ -56,11 +57,13 @@ public:
   TH1F *HistoR_vs_Cluster;
   TH1F *HistoV_single;
   TH1F *HistoClusterAsy;
+	TH1F *HistoClusterAsy_keV;
   TH1F *HistoCluster3x3;
   TH1F *HistoCluster3x3keV;
   TH1F *HistoCluster5x5;
   TH1F *HistoCluster7x7;
   TH1F *HistoCluster9x9;
+	TH1F* HistoClusterPrimEne;
   TH1F *HistoDelta_5x5_vs_3x3;
   TH1F *HistoDelta_5x5_vs_3x3_norm;
   TH1F *HistoDelta_7x7_vs_5x5;

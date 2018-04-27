@@ -18,3 +18,9 @@ c=new PedAnalyzer("$varD", 100);
 EOF
     done
 done
+[code]#!/bin/bash
+
+root -l file.root << EOF
+ntuple->Draw(“whatever”)
+c1->SaveAs(“whatever.eps”)
+EOF[/code]

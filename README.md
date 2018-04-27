@@ -1,6 +1,6 @@
 # cmos Data Analysis Framework
 *Latest update to Readme:
-2017-03-19 by collamaf+amorusor*
+2018-03-19 by collamaf+amorusor*
 Pacchetto software per l'analisi dei dati acquisiti dal sensore CMOS. Funziona sia con il sensore MTV011 che con il sensore MTV115.
 
 ## Come scaricare il codice:
@@ -120,7 +120,10 @@ Per attivare gli output di debug ricompilare con la flag apposita:
 ### *NomeFileNNNN.root*
    Circa 550MB per 2000 frame
    
-
+   
+   ##Latest update to Readme:
+   *2018-04-27 by collamaf*
+Ora è possibile far arrivare dalla simulazione Geant l'informazione sull'energia del primario che aveva generato il dato cluster attraverso Riduzione e DataAnalysis. In entrambi i casi c'è una flag ("-mc") in fase di esecuzione che va a cercare e riempire questa info, altrimenti funziona come prima
 
 
 
