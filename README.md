@@ -120,8 +120,7 @@ Per attivare gli output di debug ricompilare con la flag apposita:
 ### *NomeFileNNNN.root*
    Circa 550MB per 2000 frame
    
-   
-   ##Latest update to Readme:
+   ## Latest update to ReadMe:
    *2018-04-27 by collamaf*
 Ora è possibile far arrivare dalla simulazione Geant l'informazione sull'energia del primario che aveva generato il dato cluster attraverso Riduzione e DataAnalysis. In entrambi i casi c'è una flag ("-mc") in fase di esecuzione che va a cercare e riempire questa info, altrimenti funziona come prima
 
