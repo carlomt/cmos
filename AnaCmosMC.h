@@ -22,7 +22,8 @@ class AnaCmosMC {
 	
 	TTree          *fChain;   //!pointer to the analyzed TTree or TChain
 	Int_t           fCurrent; //!current Tree number in a TChain
-	Double_t ConvFactor=10*1e3;
+//	Double_t ConvFactor=10*1e3;
+	Double_t ConvFactor=15;
 	TVectorT<double> *fVectorNoise;
 	int fVerbose;
 	bool NoiseFlag=kTRUE;
@@ -37,6 +38,7 @@ class AnaCmosMC {
 	Double_t        InCmosTrackN;
 	vector<double>  *InCmosPart;
 	vector<double>  *InCmosEn;
+	vector<double>  *InCmosEnPrim;
 	vector<double>  *InCmosX;
 	vector<double>  *InCmosY;
 	vector<double>  *InCmosZ;
@@ -61,6 +63,7 @@ class AnaCmosMC {
 	TBranch        *b_InCmosTrackN;   //!
 	TBranch        *b_InCmosPart;   //!
 	TBranch        *b_InCmosEn;   //!
+	TBranch        *b_InCmosEnPrim;   //!
 	TBranch        *b_InCmosX;   //!
 	TBranch        *b_InCmosY;   //!
 	TBranch        *b_InCmosZ;   //!
@@ -177,6 +180,7 @@ void AnaCmosMC::Init(TTree *tree)
 	fChain->SetBranchAddress("InCmosTrackN", &InCmosTrackN, &b_InCmosTrackN);
 	fChain->SetBranchAddress("InCmosPart", &InCmosPart, &b_InCmosPart);
 	fChain->SetBranchAddress("InCmosEn", &InCmosEn, &b_InCmosEn);
+	fChain->SetBranchAddress("InCmosEnPrim", &InCmosEnPrim, &b_InCmosEnPrim);
 	fChain->SetBranchAddress("InCmosX", &InCmosX, &b_InCmosX);
 	fChain->SetBranchAddress("InCmosY", &InCmosY, &b_InCmosY);
 	fChain->SetBranchAddress("InCmosZ", &InCmosZ, &b_InCmosZ);
