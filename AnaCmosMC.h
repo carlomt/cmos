@@ -25,13 +25,14 @@ class AnaCmosMC {
 //	Double_t ConvFactor=10*1e3;
 	Double_t ConvFactor=15;
 	TVectorT<double> *fVectorNoise;
-	int fVerbose;
+
 	bool NoiseFlag=kTRUE;
 	
 //	TH2F* cluster;	
 	// Fixed size dimensions of array or collections stored in the TTree if any.
 	// Declaration of leaf types
 	Double_t        Eabs;
+	vector<double>  *EabsComp;
 	Double_t        PreCmosTrackN;
 	vector<double>  *PreCmosPart;
 	vector<double>  *PreCmosEn;
@@ -39,6 +40,7 @@ class AnaCmosMC {
 	vector<double>  *InCmosPart;
 	vector<double>  *InCmosEn;
 	vector<double>  *InCmosEnPrim;
+	vector<float>   *InCmosTime;
 	vector<double>  *InCmosX;
 	vector<double>  *InCmosY;
 	vector<double>  *InCmosZ;
@@ -48,15 +50,16 @@ class AnaCmosMC {
 	Double_t        SourceX;
 	Double_t        SourceY;
 	Double_t        SourceZ;
-	Int_t           Nev;
 	vector<double>  *SourceCosX;
 	vector<double>  *SourceCosY;
 	vector<double>  *SourceCosZ;
 	vector<double>  *SourceEne;
 	vector<double>  *SourceIsotope;
+	Int_t           Nev;
 	
 	// List of branches
 	TBranch        *b_Eabs;   //!
+	TBranch        *b_EabsComp;   //!
 	TBranch        *b_PreCmosTrackN;   //!
 	TBranch        *b_PreCmosPart;   //!
 	TBranch        *b_PreCmosEn;   //!
@@ -64,6 +67,7 @@ class AnaCmosMC {
 	TBranch        *b_InCmosPart;   //!
 	TBranch        *b_InCmosEn;   //!
 	TBranch        *b_InCmosEnPrim;   //!
+	TBranch        *b_InCmosTime;   //!
 	TBranch        *b_InCmosX;   //!
 	TBranch        *b_InCmosY;   //!
 	TBranch        *b_InCmosZ;   //!
@@ -73,13 +77,12 @@ class AnaCmosMC {
 	TBranch        *b_SourceX;   //!
 	TBranch        *b_SourceY;   //!
 	TBranch        *b_SourceZ;   //!
-	TBranch        *b_Nev;   //!
 	TBranch        *b_SourceCosX;   //!
 	TBranch        *b_SourceCosY;   //!
 	TBranch        *b_SourceCosZ;   //!
 	TBranch        *b_SourceEne;   //!
 	TBranch        *b_SourceIsotope;   //!
-	
+	TBranch        *b_Nev;   //!
 	
 	AnaCmosMC(TString filenameMC, TString filenameNoise="", int verbose=0);
 	virtual ~AnaCmosMC();
@@ -90,12 +93,13 @@ class AnaCmosMC {
 	virtual void     Loop();
 	virtual Bool_t   Notify();
 	virtual void     Show(Long64_t entry = -1);
+	int fVerbose;
 };
 
 #endif
 
 #ifdef AnaCmosMC_cxx
-AnaCmosMC::AnaCmosMC(TString filenameMC, TString filenameNoise="", int verbose=0) : fChain(0)
+AnaCmosMC::AnaCmosMC(TString filenameMC, TString filenameNoise, int verbose) : fChain(0)
 {
 	TFile *fileMC = new TFile(Form("%s.root",filenameMC.Data()));
 	TTree *treeMC = (TTree*)gDirectory->Get("B1");
@@ -151,10 +155,13 @@ void AnaCmosMC::Init(TTree *tree)
 	// (once per file to be processed).
 	
 	// Set object pointer
+	EabsComp = 0;
 	PreCmosPart = 0;
 	PreCmosEn = 0;
 	InCmosPart = 0;
 	InCmosEn = 0;
+	InCmosEnPrim = 0;
+	InCmosTime = 0;
 	InCmosX = 0;
 	InCmosY = 0;
 	InCmosZ = 0;
@@ -172,8 +179,8 @@ void AnaCmosMC::Init(TTree *tree)
 	fCurrent = -1;
 	fChain->SetMakeClass(1);
 	
-	
 	fChain->SetBranchAddress("Eabs", &Eabs, &b_Eabs);
+	fChain->SetBranchAddress("EabsComp", &EabsComp, &b_EabsComp);
 	fChain->SetBranchAddress("PreCmosTrackN", &PreCmosTrackN, &b_PreCmosTrackN);
 	fChain->SetBranchAddress("PreCmosPart", &PreCmosPart, &b_PreCmosPart);
 	fChain->SetBranchAddress("PreCmosEn", &PreCmosEn, &b_PreCmosEn);
@@ -181,6 +188,7 @@ void AnaCmosMC::Init(TTree *tree)
 	fChain->SetBranchAddress("InCmosPart", &InCmosPart, &b_InCmosPart);
 	fChain->SetBranchAddress("InCmosEn", &InCmosEn, &b_InCmosEn);
 	fChain->SetBranchAddress("InCmosEnPrim", &InCmosEnPrim, &b_InCmosEnPrim);
+	fChain->SetBranchAddress("InCmosTime", &InCmosTime, &b_InCmosTime);
 	fChain->SetBranchAddress("InCmosX", &InCmosX, &b_InCmosX);
 	fChain->SetBranchAddress("InCmosY", &InCmosY, &b_InCmosY);
 	fChain->SetBranchAddress("InCmosZ", &InCmosZ, &b_InCmosZ);
@@ -190,12 +198,12 @@ void AnaCmosMC::Init(TTree *tree)
 	fChain->SetBranchAddress("SourceX", &SourceX, &b_SourceX);
 	fChain->SetBranchAddress("SourceY", &SourceY, &b_SourceY);
 	fChain->SetBranchAddress("SourceZ", &SourceZ, &b_SourceZ);
-	fChain->SetBranchAddress("Nev", &Nev, &b_Nev);
 	fChain->SetBranchAddress("SourceCosX", &SourceCosX, &b_SourceCosX);
 	fChain->SetBranchAddress("SourceCosY", &SourceCosY, &b_SourceCosY);
 	fChain->SetBranchAddress("SourceCosZ", &SourceCosZ, &b_SourceCosZ);
 	fChain->SetBranchAddress("SourceEne", &SourceEne, &b_SourceEne);
 	fChain->SetBranchAddress("SourceIsotope", &SourceIsotope, &b_SourceIsotope);
+	fChain->SetBranchAddress("Nev", &Nev, &b_Nev);
 	Notify();
 }
 
