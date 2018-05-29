@@ -2,7 +2,7 @@
 //###############################################
 //################## Macro to analyze .root files
 //################## produced by GEANT4
-//################## simulation of CMOS
+//################## simulation of Cmos
 //################## version 2.0 - 2018-01-18 for Y90 campaign
 //################## Collamaf
 //###############################################
@@ -21,7 +21,7 @@
 // USE:
 /*
  .L AnaCmosMC.C
- c=new AnaCmosMC("/Users/francesco/MonteCarlo/Sonda/SimCMOS/build/CMOSmcX0_Z2_NOCuD_Fil0_TBR10_DOTA_115", "XXX_PostPed", int verbose=0)
+ c=new AnaCmosMC("/Users/francesco/MonteCarlo/Sonda/SimCmos/build/CmosmcX0_Z2_NOCuD_Fil0_TBR10_DOTA_115", "XXX_PostPed", int verbose=0)
  c->Loop()
  */
 
@@ -55,7 +55,7 @@ void AnaCmosMC::Loop()
 	}
 	int NPixTot=NPixX*NPixY;
 	int NPrimMC=Nev;
-	double AttSorg=2.54e3; //Total emissivity of source [Bq] (was 5.94e3 maybe for Sr PG source) 26.33e3 (??) - 2.53e3 Sr Roma
+	double AttSorg=2.338e3; //Total emissivity of source [Bq] (was 5.94e3 maybe for Sr PG source) 26.33e3 (??) - 2.53e3 Sr Roma (2.338e3 if accounting for decay)
 	double DTacq=200e-3; //Data Acquisition Time [s]
 	int NFramesMC=0, NFramesMCLow=0;
 	int FrameCounter=0;
@@ -72,6 +72,7 @@ void AnaCmosMC::Loop()
 	TRandom *rand= new TRandom();
 	TRandom *randPoiss= new TRandom();
 	TStopwatch sw;
+	randPoiss->SetSeed(time(0));
 	double NoiseFactor=0;
 	
 	TH1F* CheckPoisson=new TH1F("CheckPoisson","CheckPoisson", 100, 0, 100);
@@ -79,7 +80,7 @@ void AnaCmosMC::Loop()
 	Long64_t nbytes = 0, nb = 0;
 	
 	FrameFile->cd();
-	TTree *MCTree = new TTree("CMOSDataTree","CMOS Monte Carlo sim");
+	TTree *MCTree = new TTree("CMOSDataTree","Cmos Monte Carlo sim");
 	Frame *frameData = new Frame(NPixX,NPixY); //~480x640
 	MCTree->Branch("frame",&frameData);
 	
@@ -174,9 +175,10 @@ void AnaCmosMC::Loop()
 		
 		// ########################################
 		// È il momento di chiudere il frame
-		if (LowFlag || ( jentry!=nentries&& ((jentry+1)%(PoissonVal)==0)) || jentry==nentries ) { //POISSON VERSION - se sono in regime di "ogni entry va in un frame" o se sono al cambio di frame salvo il frame e ne inizio un altro
+		if (LowFlag || (jentry!=nentries&& ((jentry+1)%(PoissonVal)==0)) || jentry==nentries ) { //POISSON VERSION - se sono in regime di "ogni entry va in un frame" o se sono al cambio di frame salvo il frame e ne inizio un altro
 			
 			//			if (LowFlag || ((jentry+1)%((int)round((double)nentries/NFramesMC))==0) ) { //CONSTANT NUMBER VERSION - se sono in regime di "ogni entry va in un frame" o se sono al cambio di frame salvo il frame e ne inizio un altro
+		
 			for (jj=0; jj<NPixTot; jj++) {
 				//prima di salvare il frame riciclo su tutti i pixel per aggiumgere l'eventuale rumore MC
 				if (verbose>=3&&VectTot[jj]>=0) cout<<endl<<"Fino a evento n= "<<jentry<<", Frame n= "<<FrameCounter<<", Px n= "<<jj<<", Before sm and conv was= " << VectTot[jj];
@@ -197,7 +199,7 @@ void AnaCmosMC::Loop()
 				framePrimEn->Set(IpixBis, JpixBis, VectTotPrimEn[jj]); //aggiungo al frame il valore di quel pixel
 
 			}
-			//			some_vector.assign(some_vector.size(), 0);
+			
 			VectTot.assign(VectTot.size(),0);
 			VectTotConv.assign(VectTotConv.size(),0);
 			VectTotPrimEn.assign(VectTotPrimEn.size(),-10);
@@ -226,7 +228,8 @@ void AnaCmosMC::Loop()
 			PoissonVal+=PoissonIncrement;
 			if (verbose>=1)cout<<" now is: n= "<<PoissonVal<<", increment= "<<PoissonIncrement<<", media= "<<(double)PoissonVal/FrameCounter<<endl;
 			
-			while(PoissonIncrement==0) {
+//			while( NumEvtPerFrame>=1 &&  PoissonIncrement==0) { //meglio mettere !LowFlag?
+			while( !LowFlag &&  PoissonIncrement==0) { //meglio mettere !LowFlag?
 				if (verbose>=1)cout<<"It happened poisson=0!!! Adding an empty frame and going on!"<<endl;
 				frameData->SetId(FrameCounter);
 				framePrimEn->SetId(FrameCounter);
@@ -246,7 +249,7 @@ void AnaCmosMC::Loop()
 			
 		} //fine ciclo scrittura frame
 			// ########################################
-		
+		if (FrameCounter==NFramesMC) break;
 		
 		
 	} //fine ciclo sulle entries MC

@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 	string badfname=Form("%s_badpixel.txt", sourcename.c_str());
 	
 	int FrameNCol = 640, FrameNRow = 480;
-	Double_t fcal = 150;                                             //fattore di calibrazione ADC-keV
+	Double_t fcal = 80;                                             //fattore di calibrazione ADC-keV
 	bool MCflag=kFALSE;
 	
 	if(argc==1)

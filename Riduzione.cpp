@@ -261,7 +261,7 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 		cout<<"Debug:  CMOSDataTree->GetEntry(jentry): "<<nb <<endl;
 		cout<<"jentry: "<<jentry<<endl;
 		cout.flush();
-		cout<<"frame id "<<frame->GetId()<<endl;
+		cout<<"frame id "<<frameData->GetId()<<endl;
 #endif
 		
 		// Frame per frame sottraggo il piedistallo e dividio per noise

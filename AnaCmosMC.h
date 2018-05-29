@@ -23,7 +23,7 @@ class AnaCmosMC {
 	TTree          *fChain;   //!pointer to the analyzed TTree or TChain
 	Int_t           fCurrent; //!current Tree number in a TChain
 //	Double_t ConvFactor=10*1e3;
-	Double_t ConvFactor=15;
+	
 	TVectorT<double> *fVectorNoise;
 
 	bool NoiseFlag=kTRUE;
@@ -84,7 +84,7 @@ class AnaCmosMC {
 	TBranch        *b_SourceIsotope;   //!
 	TBranch        *b_Nev;   //!
 	
-	AnaCmosMC(TString filenameMC, TString filenameNoise="", int verbose=0);
+	AnaCmosMC(TString filenameMC, TString filenameNoise="", double Conversione=15, int verbose=0);
 	virtual ~AnaCmosMC();
 	virtual Int_t    Cut(Long64_t entry);
 	virtual Int_t    GetEntry(Long64_t entry);
@@ -94,17 +94,20 @@ class AnaCmosMC {
 	virtual Bool_t   Notify();
 	virtual void     Show(Long64_t entry = -1);
 	int fVerbose;
+	Double_t ConvFactor;
 };
 
 #endif
 
 #ifdef AnaCmosMC_cxx
-AnaCmosMC::AnaCmosMC(TString filenameMC, TString filenameNoise, int verbose) : fChain(0)
+AnaCmosMC::AnaCmosMC(TString filenameMC, TString filenameNoise, double Conversione, int verbose) : fChain(0)
 {
 	TFile *fileMC = new TFile(Form("%s.root",filenameMC.Data()));
 	TTree *treeMC = (TTree*)gDirectory->Get("B1");
 	
 	fVerbose=verbose;
+	ConvFactor=Conversione;
+	cout<<"############### Conversion Factor is ="<<ConvFactor<<endl;
 	//	f->ls();
 	FrameFile = new TFile(Form("%s_Frame%d.root",filenameMC.Data(), (int)(ConvFactor*10)),"RECREATE");
 	ImageFile = new TFile(Form("%s_Image.root",filenameMC.Data()),"RECREATE");
