@@ -105,7 +105,8 @@ int main(int argc, char *argv[])
 	if (debug) FileAppoggio<<"Creo la mia SeedList, ora ne contiene: "<<mySeedList->Size()<<endl;
 	
 	SeedList *seed_listPrimEn=new SeedList();    //seed list for MC Primary particle energy
-
+	SeedList *seed_listPrimN=new SeedList();    //seed list for MC Primary particle number
+	
 	
 	
 	const string fname(inputfname);
@@ -120,6 +121,9 @@ int main(int argc, char *argv[])
 	if (MCflag) {
 		TBranch *bSeedListPrimEn = ReducedDataTree->GetBranch("seed_listPrimEn");
 		bSeedListPrimEn->SetAddress(&seed_listPrimEn);
+		
+		TBranch *bSeedListPrimN = ReducedDataTree->GetBranch("seed_listPrimN");
+		bSeedListPrimN->SetAddress(&seed_listPrimN);
 	}
 	Long64_t nentries = ReducedDataTree->GetEntries();
 	cout<<"nentries: "<<nentries<<endl;
@@ -132,8 +136,8 @@ int main(int argc, char *argv[])
 	
 	//Inizializzo la classe (Histo...)
 	Analisi analisi(outfname, badfname, FrameNCol, FrameNRow, FramePed, FrameNoise, fcal);
-
-
+	
+	
 	//Rimoltiplico per la sigma ogni pixel (la divisione era stata fatta in Riduzione), cosi ho di nuovo ADC!
 	for (Long64_t jentry=0; jentry<nentries; jentry++)                //INIZIO ciclo sui FRAME
 	{
@@ -201,7 +205,7 @@ int main(int argc, char *argv[])
 		
 		//cout<<"################\nSTART\n################\n"<<"Frame #"<<seed_list->GetIdFrame()<<endl;
 		if (MCflag)
-		analisi.AnalisiData(mySeedList, FrameNCol, FrameNRow, FramePed, FrameNoise, fcal, seed_listPrimEn);
+			analisi.AnalisiData(mySeedList, FrameNCol, FrameNRow, FramePed, FrameNoise, fcal, seed_listPrimEn, seed_listPrimN);
 		else analisi.AnalisiData(mySeedList, FrameNCol, FrameNRow, FramePed, FrameNoise, fcal);
 	}//FINE ciclo sui FRAME
 	

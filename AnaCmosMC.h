@@ -33,6 +33,9 @@ class AnaCmosMC {
 	// Declaration of leaf types
 	Double_t        Eabs;
 	vector<double>  *EabsComp;
+	Double_t        PreFilterTrackN;
+	vector<double>  *PreFilterPart;
+	vector<double>  *PreFilterEn;
 	Double_t        PreCmosTrackN;
 	vector<double>  *PreCmosPart;
 	vector<double>  *PreCmosEn;
@@ -60,6 +63,9 @@ class AnaCmosMC {
 	// List of branches
 	TBranch        *b_Eabs;   //!
 	TBranch        *b_EabsComp;   //!
+	TBranch        *b_PreFilterTrackN;   //!
+	TBranch        *b_PreFilterPart;   //!
+	TBranch        *b_PreFilterEn;   //!
 	TBranch        *b_PreCmosTrackN;   //!
 	TBranch        *b_PreCmosPart;   //!
 	TBranch        *b_PreCmosEn;   //!
@@ -117,7 +123,7 @@ AnaCmosMC::AnaCmosMC(TString filenameMC, TString filenameNoise, double Conversio
 	if (filenameNoise!=""){
 		TFile *fileNoise = new TFile(Form("%s.root",filenameNoise.Data()));
 		fVectorNoise=(TVectorT<double>*)gDirectory->Get("VectorNoise");
-		fVectorNoise->Draw();
+//		fVectorNoise->Draw();
 	} else NoiseFlag=kFALSE;
 //	fVectorNoise->Dump();
 }
@@ -159,6 +165,9 @@ void AnaCmosMC::Init(TTree *tree)
 	
 	// Set object pointer
 	EabsComp = 0;
+	PreFilterPart = 0;
+	PreFilterEn = 0;
+	PreCmosPart = 0;
 	PreCmosPart = 0;
 	PreCmosEn = 0;
 	InCmosPart = 0;
@@ -184,6 +193,9 @@ void AnaCmosMC::Init(TTree *tree)
 	
 	fChain->SetBranchAddress("Eabs", &Eabs, &b_Eabs);
 	fChain->SetBranchAddress("EabsComp", &EabsComp, &b_EabsComp);
+	fChain->SetBranchAddress("PreFilterTrackN", &PreFilterTrackN, &b_PreFilterTrackN);
+	fChain->SetBranchAddress("PreFilterPart", &PreFilterPart, &b_PreFilterPart);
+	fChain->SetBranchAddress("PreFilterEn", &PreFilterEn, &b_PreFilterEn);
 	fChain->SetBranchAddress("PreCmosTrackN", &PreCmosTrackN, &b_PreCmosTrackN);
 	fChain->SetBranchAddress("PreCmosPart", &PreCmosPart, &b_PreCmosPart);
 	fChain->SetBranchAddress("PreCmosEn", &PreCmosEn, &b_PreCmosEn);

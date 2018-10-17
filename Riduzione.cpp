@@ -31,7 +31,7 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 int main(int argc, char *argv[])
 {
 	cout<<argv[0]<< " 2.0"<<endl;
-	cout<<"Last edit:   Apr 27 2018, by collamaf"<<endl;
+	cout<<"Last edit:   Ott 16 2018, by collamaf"<<endl;
 	cout<<"Compiled at: "<< __DATE__ <<", "<< __TIME__<<"."<<endl;
 	
 	string execname=argv[1];                                         //Salvo il nome del file che voglio ridurre
@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
 				else if(option.compare("-mc")==0)
 				{
 					MCflag=kTRUE;
-//					cout<<"Chiesto caso MC"<<endl;
+					//					cout<<"Chiesto caso MC"<<endl;
 				}
 				else if(option.compare("-o")==0)
 				{
@@ -213,11 +213,15 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 	bFrame->SetAddress(&frameData);
 	
 	Frame *framePrimEn = new Frame(FrameNCol, FrameNRow);           //Creo l'oggetto frame per mettere l'info MC con l'energia del primario
+	Frame *framePrimN = new Frame(FrameNCol, FrameNRow);           //Creo l'oggetto frame per mettere l'info MC con il numero del primario
 	if (MCflag) {
 		TBranch *bFramePrimEn = CMOSDataTree->GetBranch("framePrimEn");
 		bFramePrimEn->SetAddress(&framePrimEn);
+		
+		TBranch *bFramePrimN = CMOSDataTree->GetBranch("framePrimN");
+		bFramePrimN->SetAddress(&framePrimN);
 	}
-
+	
 	
 #ifdef DEBUG
 	cout<<"Debug: CMOSDataTree->SetBranchAddress(\"frame\",&frame);"<<endl;
@@ -225,11 +229,16 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 	
 	TFile* outfile=new TFile(outfname.c_str(),"RECREATE");
 	TTree *ReducedDataTree=new TTree("CMOSReducedData","CMOS exp reduced data");
+	
+	//creo i contenitori in cui salvare la lista seed del segnale e del primario (se MC)
 	SeedList seed_list;
 	ReducedDataTree->Branch("seed_list",&seed_list);
 	
 	SeedList seed_listPrimEn;
 	ReducedDataTree->Branch("seed_listPrimEn",&seed_listPrimEn);
+	
+	SeedList seed_listPrimN;
+	ReducedDataTree->Branch("seed_listPrimN",&seed_listPrimN);
 	
 	//Long64_t nentries = CMOSDataTree->GetEntriesFast();
 	Long64_t nentries = CMOSDataTree->GetEntries();
@@ -279,7 +288,7 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 		// Alla fine di questa procedura la mia matrice non e' piu espressa in ADC, ma in numero di sigma di differenza rispetto al piedistallo
 		
 		seed_list = frameData->FindSeeds(thres,fiducialSideDim,seedSide,localMaximumCheckSide);     // Ho creato la lista dei seeds sopra soglia
-
+		
 		int Row_seed = 0;
 		int Col_seed = 0;
 		//Creo una mappa delle volte che ciascun pixel si è acceso, girando su tutti i seed della lista
@@ -292,12 +301,17 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 			//cout<<"i= "<<i<<endl;
 			if (MCflag) {
 				Seed SeedPrimEne=seed_list.At(i);
+				Seed SeedPrimN=seed_list.At(i);
 				double EnPrimVal=framePrimEn->At(Col_seed,Row_seed);
+				int NPrimVal=framePrimN->At(Col_seed,Row_seed);
 				//			double EnPrimVal=17;
 				//			SeedPrimEne.AddPixel();
-				for (int qq=0; qq<SeedPrimEne.GetSeedSize(); qq++)
+				for (int qq=0; qq<SeedPrimEne.GetSeedSize(); qq++) {
 					SeedPrimEne.SetVal(qq,EnPrimVal );
+					SeedPrimN.SetVal(qq,NPrimVal );
+				}
 				seed_listPrimEn.Add(SeedPrimEne);
+				seed_listPrimN.Add(SeedPrimN);
 			}
 		}
 		NClusterTot += seed_list.Size();                //Conto i cluster totali in tutta l'acquisizione (sono nel ciclo sui vari frame)
@@ -308,11 +322,12 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 		ReducedDataTree->Fill();
 		seed_list.Clear();
 		seed_listPrimEn.Clear();
+		seed_listPrimN.Clear();
 		//seed_listP = NULL;
 	}                                                // FINE CICLO PRINCIPALE SUI FRAME
 	cout<<"FINITO ciclo principale sui frame!"<<endl;
 	cout<<"PRIMA di controllare i bad pixels ho trovato"<<endl<<"# cluster: " <<NClusterTot<<endl;
-
+	
 	
 	////////////////////////////////////////////////VADO A CERCARE I BADPIXEL/////////////////////////////////////////////////////
 	

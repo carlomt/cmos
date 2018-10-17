@@ -50,8 +50,8 @@ Analisi::Analisi(const std::string OutFileName, const std::string BadFileName, i
 	HistoCluster7x7 = new TH1F("Cluster_7x7","Cluster signal 7x7;Cluster Energy (ADC);Counts",200,-50.,3950.);
 	HistoCluster9x9 = new TH1F("Cluster_9x9","Cluster signal 9x9;Cluster Energy (ADC);Counts",200,-50.,3950.);
 	
-	HistoClusterPrimEne = new TH1F("PrimEne","Energy of primary electron;E (keV);Counts",230,0,2300.);
-
+	HistoClusterPrimEne = new TH1F("PrimEne","Energy of primary electron;E (keV);Counts",150,0,3000);
+	
 	
 	HistoDelta_5x5_vs_3x3 = new TH1F("Delta_5x5vs3x3","",250,-50.,950.);                                  //"Delta"=verifica sull'isolamento topologico*
 	HistoDelta_5x5_vs_3x3_norm = new TH1F("Delta_5x5vs3x3_norm","",100,-30.,70.);
@@ -224,26 +224,33 @@ void Analisi::WriteOnFile()
 	fOutFile->Close();
 }
 
-int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Frame *FramePed, const Frame *FrameNoise, Double_t fcal, SeedList *slPrimEn)
-{ 
+int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Frame *FramePed, const Frame *FrameNoise, Double_t fcal, SeedList *slPrimEn, SeedList *slPrimN)
+{
 	int Row_seed=0;
 	int Col_seed=0;
 	double distSeed=0;
 	double sogliaMinSeed=10;                         //distanza minima che devono avere i seed per appartenere allo stesso evento
 	int SeedOK=0;
+	bool debug = false;
+	int PreviousPrimary = -1; // added on 16-10-2018 by collamaf+amorusor to avoid double counting primaries and having 120% eff
 	
 	for(size_t i=0; i<sl->Size(); i++)               //INIZIO 1° CICLO SULLA LISTA SEED
 	{
 		//cout<<"SEED_tot = "<<sl->Size()<<endl;                                      //check: numero dei seed per ogni frame
 		Seed ts = sl->At(i);                                                        //accedo agli elementi appartenenti alla lista (vedi SeedList.h)
-	
+		
 		double PrimEneVal=0;
 		if (slPrimEn!=NULL)
 			PrimEneVal=slPrimEn->At(i).GetVal(0);
-																																								//cout<<"At(i="<<i<<") "<<ts<<endl;
+
+		double PrimNVal=0;
+		if (slPrimN!=NULL)
+			PrimNVal=slPrimN->At(i).GetVal(0);
+		
+//		if(debug) cout<<"At(i="<<i<<") "<<ts<<endl;
 		Row_seed = ts.GetRow();
 		Col_seed = ts.GetCol();
-		//cout<<"Seed_i #"<<i<<": "<<"Col_i "<<Col_seed<<" Row_i "<<Row_seed<<endl;
+//		if(debug) cout<<"Seed_i #"<<i<<": "<<"Col_i "<<Col_seed<<" Row_i "<<Row_seed<<endl;
 		
 		
 		//////////////////////////////////////ELIMINO BAD PIXEL//////////////////////////////////
@@ -264,7 +271,7 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Fram
 		}
 		
 		////////////////////////////////////////////////////////////////////////////////////////
-
+		
 		
 		/////////////////////////////////ELIMINAZIONE SEED VICINI///////////////////////////////
 		
@@ -277,11 +284,11 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Fram
 			Seed ts2 = sl->At(j);
 			Row_seed2 = ts2.GetRow();
 			Col_seed2 = ts2.GetCol();
-			//cout<<"Seed_j #"<<j<<": "<<"Col_j "<<Col_seed2<<" Row_j "<<Row_seed2<<endl;
+//			if(debug) cout<<"Seed_j #"<<j<<": "<<"Col_j "<<Col_seed2<<" Row_j "<<Row_seed2<<endl;
 			
 			if((Row_seed == Row_seed2) && (Col_seed == Col_seed2))
 			{
-				//cout<<"..è lo STESSO PIXEL!"<<endl;
+//				if(debug) cout<<"..è lo STESSO PIXEL!"<<endl;
 				continue;
 			}
 			
@@ -303,7 +310,7 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Fram
 			int distX = Col_seed - Col_seed2;
 			int distY = Row_seed - Row_seed2;
 			distSeed = sqrt( pow(distX,2) + pow(distY,2) );
-			//cout<<"Distanza = "<<distSeed<<" Segnale_i = "<<ts(0,0)<<" Segnale_j = "<<ts2(0,0)<<endl;
+//			if(debug) cout<<"Distanza = "<<distSeed<<" Segnale_i = "<<ts(0,0)<<" Segnale_j = "<<ts2(0,0)<<endl;
 			
 			if(ts(0,0) < ts2(0,0))                                     //se il valore registrato dal seed 1 è minore di quello del seed 2..//questa condizione serve per non contare due volte la distanza tra due stessi seed
 			{
@@ -332,7 +339,7 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Fram
 		HistoDistmin_thr->Fill(distmin_thr);
 		
 		////////////////////////////////////////////////////////////////////////////////////////
-
+		
 		
 		///////////////////////////////Riempimento istogrammi mappe dei seed////////////////////////////////////////
 		
@@ -347,7 +354,7 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Fram
 		map_seed4_4->Fill((Col_seed),(Row_seed));
 		
 		////////////////////////////////////////////////////////////////////////////////////////
-
+		
 		
 		////////////////////////Calcolo la distanza tra il centro del sensore e i seed////////////////////////
 		
@@ -356,7 +363,7 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Fram
 		HistoR_vs_Cluster->Fill(R_center_vs_cluster);
 		
 		////////////////////////////////////////////////////////////////////////////////////////
-
+		
 		
 		
 		//////////////////////////////Costruzione dei Cluster Asimmetrici//////////////////////////////////
@@ -431,7 +438,7 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Fram
 		} while (found);
 		
 		////////////////////////////////////////////////////////////////////////////////////////
-
+		
 		
 		///////////////////////Calcolo Segnale Cluster Asimmetrico/////////////////////////
 		
@@ -445,7 +452,7 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Fram
 		V_clu_Asy_medio = (V_clu_Asy)/cluster.size();               //calcolo segnale medio del cluster
 		
 		////////////////////////////////////////////////////////////////////////////////////////
-
+		
 		
 		/////////////////////////Calcolo RMS Cluster Asimmetrico////////////////////////
 		
@@ -462,7 +469,7 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Fram
 		RMSclu_Asy = sqrt(RMS_2);
 		
 		////////////////////////////////////////////////////////////////////////////////////////
-
+		
 		
 		////////////////////////////Calcolo Cluster Simmetrici///////////////////////////
 		
@@ -498,7 +505,7 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Fram
 				}
 			}
 		}
-
+		
 		////////////////////////////////////////////////////////////////////////////////////////
 		
 		///////////////////////////Calcolo del Delta//////////////////////////
@@ -519,7 +526,7 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Fram
 		Delta_9x9_vs_7x7_norm = (V_clu_9x9 - V_clu_7x7)/32;
 		
 		////////////////////////////////////////////////////////////////////////////////////////
-
+		
 		
 		///////////////////////////Altri calcoli/////////////////////////////
 		
@@ -532,7 +539,7 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Fram
 		V_clu_3x3_keV = V_clu_3x3/fcal;                         //fcal: fattore di calibrazione ADC/keV
 																														//      HistoCluster3x3keV->Fill(V_clu_3x3_keV);
 																														////////////////////////////////////////////////////////////////////////////////////////
-
+		
 		///////////////////////RIEMPIMENTO ISTOGRAMMI/////////////////////////
 		
 		HistoClusterAsy->Fill(V_clu_Asy);
@@ -541,8 +548,18 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Fram
 		HistoCluster5x5->Fill(V_clu_5x5);
 		HistoCluster7x7->Fill(V_clu_7x7);
 		HistoCluster9x9->Fill(V_clu_9x9);
-		HistoClusterPrimEne->Fill(PrimEneVal);
-
+		
+		if(debug) cout<<"i = "<<i<<" PreviousPrimary= "<<PreviousPrimary<<endl;
+		if (PrimNVal!=PreviousPrimary) {
+			if(debug) cout<<"Primario nuovo!!"<<endl;
+			HistoClusterPrimEne->Fill(PrimEneVal); //se è un nuovo primario riempio l'istogramma (numeratore efficienza)
+			PreviousPrimary=PrimNVal; //Mi segno che ho gia considerato le tracce derivanti da questo primario
+		}
+		else {
+			if(debug) cout<<"Primario già considerato!"<<endl;
+			
+		}
+		
 		
 		HistoDelta_5x5_vs_3x3->Fill(Delta_5x5_vs_3x3);
 		HistoDelta_5x5_vs_3x3_norm->Fill(Delta_5x5_vs_3x3_norm);
@@ -578,7 +595,7 @@ int Analisi::AnalisiData (SeedList *sl, int FrameNCol, int FrameNRow, const Fram
 		E_CluAsy_fract_NpixClu_vs_NpixClu->Fill(E_CluAsy_fract_NpixClu,float(N));
 		
 	}                                            //FINE 1° CICLO SULLA LISTA DEI SEED
-	
+//	cout<<endl;
 	HistoNSeeds->Fill(SeedOK);
 	
 	return(0);
