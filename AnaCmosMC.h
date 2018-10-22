@@ -90,7 +90,7 @@ class AnaCmosMC {
 	TBranch        *b_SourceIsotope;   //!
 	TBranch        *b_Nev;   //!
 	
-	AnaCmosMC(TString filenameMC, TString filenameNoise="", double Conversione=15, int verbose=0);
+	AnaCmosMC(TString filenameMC, TString filenameNoise="", double Conversione=15, int CaseSelect=2, int verbose=0);
 	virtual ~AnaCmosMC();
 	virtual Int_t    Cut(Long64_t entry);
 	virtual Int_t    GetEntry(Long64_t entry);
@@ -101,19 +101,22 @@ class AnaCmosMC {
 	virtual void     Show(Long64_t entry = -1);
 	int fVerbose;
 	Double_t ConvFactor;
+	int fCaseSelect;
 };
 
 #endif
 
 #ifdef AnaCmosMC_cxx
-AnaCmosMC::AnaCmosMC(TString filenameMC, TString filenameNoise, double Conversione, int verbose) : fChain(0)
+AnaCmosMC::AnaCmosMC(TString filenameMC, TString filenameNoise, double Conversione, int CaseSelect, int verbose) : fChain(0)
 {
 	TFile *fileMC = new TFile(Form("%s.root",filenameMC.Data()));
 	TTree *treeMC = (TTree*)gDirectory->Get("B1");
 	
+	fCaseSelect=CaseSelect;
 	fVerbose=verbose;
 	ConvFactor=Conversione;
 	cout<<"############### Conversion Factor is ="<<ConvFactor<<endl;
+	cout<<"############### Selected case is is ="<<fCaseSelect<<endl;
 	//	f->ls();
 	FrameFile = new TFile(Form("%s_Frame%d.root",filenameMC.Data(), (int)(ConvFactor*10)),"RECREATE");
 	ImageFile = new TFile(Form("%s_Image.root",filenameMC.Data()),"RECREATE");
