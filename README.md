@@ -1,6 +1,6 @@
 # cmos Data Analysis Framework
 *Latest update to Readme:
-2018-04-26 by collamaf*
+2019-09-20 by collamaf*
 
 Pacchetto software per l'analisi dei dati acquisiti dal sensore CMOS. Funziona sia con il sensore MTV011 che con il sensore MTV115.
 
@@ -28,7 +28,7 @@ Facendo `source setthis.sh` si aggiungono al path 'FileConverter', 'Riduzione' e
 Il pacchetto e' composto di 3 eseguibili:
 
 ### FileConverter.x
-Coverte i file di output dell'acquisizione CMOS (*NomeFileNNNN.txt/.raw*) in root files (*NomeFileNNNN.root*), contenenti istanze della classe Frame. Tramite la flag `-s` si può selezionare il tipo di sensore: 1 per MTV011 (default) e 2 per MTV115
+Coverte i file di output dell'acquisizione CMOS (*NomeFileNNNN.txt/.raw*) in root files (*NomeFileNNNN.root*), contenenti istanze della classe Frame. Tramite la flag `-s` si può selezionare il tipo di sensore: 1 per MT9V011 (default) e 2 per MT9V115
 e.g.:
 
 ```
@@ -47,11 +47,11 @@ c=new PedAnalyzer("DatiVari/RootBuoni/2018-01-10_MT9V115_90Y_Decay23_0000",100)
 c->Loop() 
 
 ```
-Poi per convertire i .txt in .root:
+Poi per convertire i .txt in .root (ricordarsi di dare le giuste dimensioni del sensore anche nel caso dei file di noise/ped:
 
 ```
 FileConverter DatiVari/PostRic/2018-01-10_MT9V115_90Y_Decay05_0000_buio_100.txt
-
+FileConverter Good_noise_100_0.txt -s 3
 ```
 ### PedCompare.C
 Confronta due run di piedistallo facendo la distribuzione della differenza pixel a pixel. Prende in input da linea di comando i due file (*NomeFileNNNN_PostPed?.root*) e produce un file .root con l'istogramma (*NomeFileNNNN_CheckDiff.root*). Questa macro ha senso solo con il sensore MTV115.
@@ -121,10 +121,15 @@ Per attivare gli output di debug ricompilare con la flag apposita:
 ### *NomeFileNNNN.root*
    Circa 550MB per 2000 frame
    
-   ## Latest update to ReadMe:
+   ## Change log:
+   
    *2018-04-27 by collamaf*
    
    Ora è possibile far arrivare dalla simulazione Geant l'informazione sull'energia del primario che aveva generato il dato cluster attraverso Riduzione e DataAnalysis. In entrambi i casi c'è una flag ("-mc") in fase di esecuzione che va a cercare e riempire questa info, altrimenti funziona come prima
+
+*2019-09-20 by collamaf*
+- Add "sensor 3" option for File Converter
+- Add time countings to PedAnalyzer in view of optimisation..
 
 
 

@@ -286,9 +286,8 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 			frameData->Divide(*noise);
 		}
 		// Alla fine di questa procedura la mia matrice non e' piu espressa in ADC, ma in numero di sigma di differenza rispetto al piedistallo
-		
 		seed_list = frameData->FindSeeds(thres,fiducialSideDim,seedSide,localMaximumCheckSide);     // Ho creato la lista dei seeds sopra soglia
-		
+
 		int Row_seed = 0;
 		int Col_seed = 0;
 		//Creo una mappa delle volte che ciascun pixel si è acceso, girando su tutti i seed della lista

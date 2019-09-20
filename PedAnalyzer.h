@@ -52,6 +52,8 @@ class PedAnalyzer {
 	virtual void     Loop();
 	virtual Bool_t   Notify();
 	virtual void     Show(Long64_t entry = -1);
+	TStopwatch timer;
+
 };
 
 #endif
@@ -62,7 +64,8 @@ PedAnalyzer::PedAnalyzer(TString filename, int PedToConsider=-1, int StartPed=0)
 	nomefile=filename;
 	fPedToConsider=PedToConsider;
 	fStartPed=StartPed;
-
+	timer.Start();
+	
 	TFile *f = new TFile(Form("%s.root",filename.Data()));
 	TTree* tree = (TTree*)gDirectory->Get("CMOSDataTree");
 	Init(tree);

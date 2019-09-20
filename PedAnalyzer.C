@@ -4,6 +4,7 @@
 #include <TStyle.h>
 #include <iostream>
 #include <TCanvas.h>
+#include "TStopwatch.h"
 
 void PedAnalyzer::Loop()
 {
@@ -55,6 +56,10 @@ void PedAnalyzer::Loop()
 	
 	if (fChain == 0) return;
 	
+
+	cout<<"Time Check Point: Inizio Loop:  "<<timer.RealTime()<<endl;
+	timer.Start();
+	
 	Long64_t nentries = fChain->GetEntriesFast();
 	//	int PedToConsider=100;
 	if (fPedToConsider==-1) fPedToConsider=nentries;
@@ -79,7 +84,9 @@ void PedAnalyzer::Loop()
 		//		VectValQuad.at(kk)=0;
 		DumpIstoPed[kk]=new TH1F(Form("Histo%d",kk),Form("Histo%d",kk),1024, 0,1024);
 	}
-	
+	cout<<"Time Check Point: Inizializzati vettori e istogrammi: "<<timer.RealTime()<<endl;
+	timer.Start();
+
 	TString InputFileName=Form("%s.root",nomefile.Data());
 	TString PedFileName=Form("%s_buio_%d_%d.txt",nomefile.Data(),fPedToConsider, fStartPed);
 	TString NoiseFileName=Form("%s_noise_%d_%d.txt",nomefile.Data(),fPedToConsider, fStartPed);
@@ -93,6 +100,9 @@ void PedAnalyzer::Loop()
 	cout<<NoiseFileName<<endl;
 	cout<<PostPedFileName<<endl<<"######################################## "<<endl;
 	
+	cout<<"Time Check Point: Inizio ciclo sui frame: "<<timer.RealTime()<<endl;
+	timer.Start();
+
 	Long64_t nbytes = 0, nb = 0;
 	for (Long64_t jentry=fStartPed; jentry<fPedToConsider+fStartPed;jentry++) {    //ciclo su tutti i frames
 		cout<<"Sto analizzando il file (frame) num= "<<jentry<<", di "<<nentries<<endl;
@@ -105,7 +115,9 @@ void PedAnalyzer::Loop()
 			VectVal.at(kk)+=fData[kk];
 		}
 	} //chiude ciclo sui frames
-	
+	cout<<"Time Check Point: Fine ciclo sui frame: "<<timer.RealTime()<<endl;
+	timer.Start();
+
 	double STDDev=0;
 	double PedEstimator=0;
 	double MediaCut=0;
@@ -113,6 +125,9 @@ void PedAnalyzer::Loop()
 	int CounterMediaCut=0;
 	int rr=0;
 	
+	cout<<"Time Check Point: Ri ciclo su tutti i pixel: "<<timer.RealTime()<<endl;
+	timer.Start();
+
 	for (kk=0; kk<VectVal.size(); kk++) {  //ri ciclo su tutti i pixel per scrivere la media
 		MediaCut=0;
 		MediaCutSquare=0;
@@ -160,4 +175,9 @@ void PedAnalyzer::Loop()
 	cout<<PedFileName<<endl;
 	cout<<NoiseFileName<<endl;
 	cout<<PostPedFileName<<endl<<"######################################## "<<endl;
+	
+	timer.Print();
+	cout<<"Time Check Point: fine: "<<timer.RealTime()<<endl;
+
+
 }
