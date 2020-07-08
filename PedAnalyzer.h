@@ -40,10 +40,12 @@ class PedAnalyzer {
 	TBranch        *b_frame_fData;   //!
 	
 	//	PedAnalyzer(TTree *tree=0);
-	PedAnalyzer(TString filename, int, int);
+	PedAnalyzer(TString filename, int, int, bool);
 	TString nomefile;
 	int fPedToConsider;
 	int fStartPed;
+	bool fLightFlag;
+
 	virtual ~PedAnalyzer();
 	virtual Int_t    Cut(Long64_t entry);
 	virtual Int_t    GetEntry(Long64_t entry);
@@ -59,11 +61,12 @@ class PedAnalyzer {
 #endif
 
 #ifdef PedAnalyzer_cxx
-PedAnalyzer::PedAnalyzer(TString filename, int PedToConsider=-1, int StartPed=0)
+PedAnalyzer::PedAnalyzer(TString filename, int PedToConsider=-1, int StartPed=0, bool lightFlag=false)
 {
 	nomefile=filename;
 	fPedToConsider=PedToConsider;
 	fStartPed=StartPed;
+	fLightFlag=lightFlag;
 	timer.Start();
 	
 	TFile *f = new TFile(Form("%s.root",filename.Data()));

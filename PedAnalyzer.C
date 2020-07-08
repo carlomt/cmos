@@ -16,7 +16,7 @@ void PedAnalyzer::Loop()
 	// Produce in output:
 	// - due file di testo .txt, da passare poi ancora a FileConverter
 	// - un file "XXX_PostPed.root" in cui sono salvati:
-	//    - Un istogramma ("HistoXXXXXX") per pixel con il valore scelto come piedistallo per il dato pixel (Nframes entries)
+	//    - [NON PIU!!] Un istogramma ("HistoXXXXXX") per pixel con il valore scelto come piedistallo per il dato pixel (Nframes entries)
 	//    - Un istogramma ("DumpIstoTot") con tutti i valori rozzi letti in tutti i pixel (Npixel*Nframes entries)
 	//    - Due istogrammi ("DumpIstoAllPed" e "DumpIstoAllNoise") con tutti i valori dei
 	//      piedistalli e dei noise per ogni pixel (Npixel entries)
@@ -29,7 +29,7 @@ void PedAnalyzer::Loop()
 	//	  - Inizio ciclo sui pixel: per ogni pixel: (kk->Size)
 	//	    - Salvo il valore del k-esimo pixel al j-esimo frame nell’istogramma HistoKK;
 	//	    - Salvo il valore del k-esimo pixel nell’istogramma totale DumpIstoTot;
-	//	    - Aggiungo il valore del k-esimo pixel al vettoreVectVal di NPixel elementi che rappresenterà quindi la somma di tutte i conteggi di quel pixel in tutti i frame considerati
+	//	    - Aggiungo il valore del k-esimo pixel al vettore VectVal di NPixel elementi che rappresenterà quindi la somma di tutte i conteggi di quel pixel in tutti i frame considerati
 	//	  - Fine ciclo sui pixel
 	//	- Fine ciclo sui frame
 	//	- Secondo ciclo sui pixel: per ogni pixel: (kk->Size)
@@ -44,8 +44,12 @@ void PedAnalyzer::Loop()
 	
 	//######### MODIFIED ON 2018-01-23 by Collamaf
 	// now PedHisto have 1000 bins not 100
-        //######### LAST MODIFIED ON 2018-04-07 by amorusor
-        // now we can choose the group of frames to consider (before: only from 0 to fPedToConsider)
+	//######### MODIFIED ON 2018-04-07 by amorusor
+  // now we can choose the group of frames to consider (before: only from 0 to fPedToConsider)
+	
+	//######### LAST MODIFIED ON 2020-07-08 by collamaf
+	// much more efficient way to compute each pixel's pedestal, no more huge array of useless TH1F, but std::vectors
+	// new approach to (right) outlier management.. should work..
 	
 	//USAGE
 	/*
@@ -71,8 +75,25 @@ void PedAnalyzer::Loop()
 	cout<<"Total number of pixels = "<<Size<<endl;
 	
 	TVectorD VectorPed(Size), VectorNoise(Size);
-	TH1F* DumpIstoPed[Size];
+	cout<<"DEBUG 0"<<endl;
+	
+	vector<vector<int> > allPixelsDump( Size , vector<int> (fPedToConsider, 0));
+  
+//    for (int i = 0; i < fNRow; i++) {
+//        for (int j = 0; j < fNCol; j++){
+//            cout<< vec[i][j]<< " ";
+//        }
+//        cout<< "\n";
+//    }
+	
+	
+	
+//	Size=1000000;
+//	TH1F* DumpIstoPed[Size];
+	cout<<"DEBUG 1"<<endl;
+
 	VectVal.resize(Size);
+	cout<<"DEBUG 2"<<endl;
 	//	VectValQuad.resize(Size);
 	
 	TH1F* DumpIstoTot=new TH1F("DumpIstoTot","Tutti i valori di tutti i pixel per tutti i frame",10240, 0,1024);
@@ -82,7 +103,7 @@ void PedAnalyzer::Loop()
 	for (kk=0; kk<Size; kk++) { //inizializzo i vettori e gli istogrammi per ciascun pixel
 		VectVal[kk]=0;
 		//		VectValQuad.at(kk)=0;
-		DumpIstoPed[kk]=new TH1F(Form("Histo%d",kk),Form("Histo%d",kk),1024, 0,1024);
+//		DumpIstoPed[kk]=new TH1F(Form("Histo%d",kk),Form("Histo%d",kk),1024, 0,1024);
 	}
 	cout<<"Time Check Point: Inizializzati vettori e istogrammi: "<<timer.RealTime()<<endl;
 	timer.Start();
@@ -110,7 +131,8 @@ void PedAnalyzer::Loop()
 		if (ientry < 0) break;
 		nb = fChain->GetEntry(jentry);   nbytes += nb;
 		for (kk=0; kk<VectVal.size(); kk++) {      //giro su tutti i pixel per leggerne e salvarne il valore
-			DumpIstoPed[kk]->Fill(fData[kk]);  //lo metto nell'istogramma del k-esimo pixel
+//			DumpIstoPed[kk]->Fill(fData[kk]);  //lo metto nell'istogramma del k-esimo pixel
+			allPixelsDump[kk][jentry]=fData[kk];
 			DumpIstoTot->Fill(fData[kk]);      //metto il valore letto nell'istogramma "calderone", contenente i valori di tutti i pixel in tutti i frame
 			VectVal.at(kk)+=fData[kk];
 		}
@@ -132,30 +154,52 @@ void PedAnalyzer::Loop()
 		MediaCut=0;
 		MediaCutSquare=0;
 		CounterMediaCut=0;
+		std::sort(allPixelsDump[kk].begin(), allPixelsDump[kk].end()); //Ordino il vettore in modo che l'elemento più grande (eventuale outiler) sia l'ultimo
 		
-		for (rr=1; rr<=1024; rr++) {          //ciclo sui 1024 bin degli istogrammi per fare la media dei soli bin con piu di una entry evitando quindi quelli (eventuali) di segnale
-			double yval=DumpIstoPed[kk]->GetBinContent(rr);
-			if (yval>1) {
-				int xbin=DumpIstoPed[kk]->GetBinCenter(rr);
-				MediaCut+= xbin*yval;
-				MediaCutSquare+=xbin*xbin*yval;
-				CounterMediaCut+=yval;
-			}
+		int cutLastElement=0; //di default non effettuo nessun taglio nel calcolo della media
+		
+		double tempMeanForCut=1.0*std::accumulate( allPixelsDump[kk].begin(), allPixelsDump[kk].end()-1, 0 )/(allPixelsDump[kk].size()-1);
+		if (allPixelsDump[kk].back()>tempMeanForCut*5) { //se l'elemento piu grande del vettore è piu di 5 volte piu grande della media di tutti gli altri è probabilmente un outiler
+			cutLastElement=1;
+			cout<<"###########\nPresente outlier, taglio il valore piu alto dalla media\n###########"<<endl;
 		}
-		PedEstimator= MediaCut/CounterMediaCut;
-		if (CounterMediaCut==0) cout<<"ATTENZIONE DIVIDO PER 0!!! pixel num "<<kk<<endl;
-		MediaCutSquare/=CounterMediaCut;
-		STDDev=sqrt(MediaCutSquare-(PedEstimator*PedEstimator));
+		
+		double MediaUnCut=1.0*std::accumulate( allPixelsDump[kk].begin(), allPixelsDump[kk].end()-cutLastElement, 0 )/(allPixelsDump[kk].size()-cutLastElement); //per calcolare la media escludo (in caso) l'elemento piu grande, dove si troverebbe l'eventuale bin dovuto al segnale della particella
+		MediaCut=MediaUnCut;
+		
+		//Calcolo della deviazione standard
+		std::vector<double> diff(allPixelsDump[kk].size()-cutLastElement);
+		std::transform(allPixelsDump[kk].begin(), allPixelsDump[kk].end()-cutLastElement, diff.begin(), [MediaCut](double x) { return x - MediaCut; });
+		double sq_sum = std::inner_product(diff.begin(), diff.end()-cutLastElement, diff.begin(), 0.0);
+		STDDev = std::sqrt(sq_sum / allPixelsDump[kk].size());
+		
+
+		
+//		for (rr=1; rr<=1024; rr++) {          //ciclo sui 1024 bin degli istogrammi per fare la media dei soli bin con piu di una entry evitando quindi quelli (eventuali) di segnale
+////			double yval=DumpIstoPed[kk]->GetBinContent(rr);
+//			double yval=17;
+//			if (yval>1) {
+////				int xbin=DumpIstoPed[kk]->GetBinCenter(rr);
+//				int xbin=13;
+//				MediaCut+= xbin*yval;
+//				MediaCutSquare+=xbin*xbin*yval;
+//				CounterMediaCut+=yval;
+//			}
+//		}
+//		PedEstimator= MediaCut/CounterMediaCut;
+		PedEstimator=MediaCut;
+//		if (CounterMediaCut==0) cout<<"ATTENZIONE DIVIDO PER 0!!! pixel num "<<kk<<endl;
+//		MediaCutSquare/=CounterMediaCut;
+//		MediaCutSquare=1;
+//		STDDev=sqrt(MediaCutSquare-(PedEstimator*PedEstimator));
+//		STDDev=stdev;
 		if (STDDev<1) STDDev=1;  //mettiamo il noise peggiore fra quello calcolato e 1
-		if (0&&CounterMediaCut==0) {
-//			cout<<"ERRORE!!!!!! pixel numero: "<<kk<<endl;
-			PedEstimator=0;
-		}
+
 		VectorPed[kk]=PedEstimator;
 		VectorNoise[kk]=STDDev;
 		PedFile<<PedEstimator<<" ";
 		NoiseFile<<STDDev<<" ";
-		DumpIstoPed[kk]->Write();
+//		DumpIstoPed[kk]->Write();
 		
 		DumpIstoAllPed->Fill(PedEstimator);
 		DumpIstoAllNoise->Fill(STDDev);
