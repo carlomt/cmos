@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 	int result=1;
 	int mesglevel=0;
 	int version=1;
-	int sensor=1; //variabile per la scelta del sensore: 1=MTV011 (default), 2=MTV115, 3=MT9V114
+	int sensor=1; //variabile per la scelta del sensore: 1=MTV011 (default), 2=MTV115, 3=MT9V114, 4=MT9M114
 	string outfname="";
 	vector<string> filenames;
 	
@@ -138,6 +138,10 @@ int FileConverter(vector<string> filenames, int mesglevel,int version,string out
 	if (sensorI==3) {
 		NCol=1288;
 		NRow=728;
+	}
+	if (sensorI==4) {
+		NCol=976;
+		NRow=1296;
 	}
 	Frame *frame = new Frame(NCol,NRow);
 	DataTree->Branch("frame",&frame);

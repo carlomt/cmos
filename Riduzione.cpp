@@ -248,13 +248,13 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 #endif
 	
 	double NClusterTot=0;                                   //numero totale di cluster ottenuti in tutti i frame
-	double pixel[FrameNCol][FrameNRow];                     //matrice che contiene le volte che ogni pixel ha superato la soglia
-	int ww,qq;
-	//Dynamic arrays cannot be initialized in declaration, so we do it explicitly
+//	double pixel[FrameNCol][FrameNRow];                     //matrice che contiene le volte che ogni pixel ha superato la soglia
+	std::vector<std::vector<double>> pixel;
+	int ww;
 	for ( ww=0; ww<FrameNCol; ww++ ) {
-		for (qq=0; qq<FrameNRow;qq++) {
-			pixel[ww][qq]=0;
-		}
+		std::vector<double> temp;
+		temp.resize(FrameNRow);
+		pixel.push_back(temp);
 	}
 	
 	Long64_t nbytes = 0, nb = 0;
@@ -296,7 +296,8 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 			Col_seed = ts.GetCol();
 			Row_seed = ts.GetRow();
 			//cout<<"############ col" <<Col_seed<<" "<<Row_seed<<endl;
-			pixel[Col_seed][Row_seed] += 1;
+//			pixel[Col_seed][Row_seed] += 1;
+			pixel.at(Col_seed).at(Row_seed) += 1;
 			//cout<<"i= "<<i<<endl;
 			if (MCflag) {
 				Seed SeedPrimEne=seed_list.At(i);
@@ -353,10 +354,11 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 				if(j<FrameNCol && k<FrameNRow){
 					IDpixel= j+k*FrameNCol;
 				}
-				if(pixel[j][k] > MediaPixelTotAcq+GaussStatThr*sqrt(MediaPixelTotAcq)){   //se il pixel ha suonato molto piu della media lo scrivo nel file e aggiorno il contatore di badpixel e riduco il contatore di cluster del numero di volte che il badpixel aveva suonato
-					BadPixelFile<<IDpixel<<" "<<j<<" "<<k<<" "<<pixel[j][k]<<endl;
+//				if(pixel[j][k] > MediaPixelTotAcq+GaussStatThr*sqrt(MediaPixelTotAcq)){   //se il pixel ha suonato molto piu della media lo scrivo nel file e aggiorno il contatore di badpixel e riduco il contatore di cluster del numero di volte che il badpixel aveva suonato
+					if(pixel.at(j).at(k) > MediaPixelTotAcq+GaussStatThr*sqrt(MediaPixelTotAcq)){   //se il pixel ha suonato molto piu della media lo scrivo nel file e aggiorno il contatore di badpixel e riduco il contatore di cluster del numero di volte che il badpixel aveva suonato
+					BadPixelFile<<IDpixel<<" "<<j<<" "<<k<<" "<<pixel.at(j).at(k)<<endl;
 					TotBadPixel += 1;
-					NClusterTot -= pixel[j][k];
+					NClusterTot -= pixel.at(j).at(k);
 				}
 			}
 		}
@@ -378,7 +380,7 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 				if(j<FrameNCol && k<FrameNRow){                                   //ad ogni pixel (j,k) associo un numero riga per riga, che va da 0 a 316223
 					IDpixel= j+k*FrameNCol;
 				}
-				for(n=0;n<pixel[j][k];n++){
+				for(n=0;n<pixel.at(j).at(k);n++){
 					fattoriale = 1;
 					for(int i=n;i>1;i--){
 						fattoriale *= i;
@@ -386,10 +388,10 @@ int Riduzione(string fname,double thres, string pedfname, string noisefname, siz
 					prob += pow(MediaPixelTotAcq,n)*exp(-MediaPixelTotAcq)/fattoriale;
 				}
 				if ((1-prob) < epsilon){
-					BadPixelFile<<IDpixel<<" "<<j<<" "<<k<<" "<<prob<<" "<<pixel[j][k]<<endl;
+					BadPixelFile<<IDpixel<<" "<<j<<" "<<k<<" "<<prob<<" "<<pixel.at(j).at(k)<<endl;
 					//cout<<IDpixel<<" "<<j<<" "<<k<<" "<<prob<<" "<<pixel[j][k]<<endl;
 					TotBadPixel += 1;
-					NClusterTot -= pixel[j][k];
+					NClusterTot -= pixel.at(j).at(k);
 				}
 				prob=0;
 			}
