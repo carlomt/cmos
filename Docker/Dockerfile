@@ -18,7 +18,8 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     rm -rf /var/cache/apt/archives/* && \
     rm -rf /var/lib/apt/lists/*
 
-RUN git clone https://github.com/carlomt/cmos.git /workspace
+RUN git clone https://github.com/carlomt/cmos.git /workspace && \
+    make
 
 ENTRYPOINT  ["/usr/bin/bash", "-l"]
     
