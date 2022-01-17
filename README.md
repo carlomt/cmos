@@ -4,6 +4,16 @@
 
 Pacchetto software per l'analisi dei dati acquisiti dal sensore CMOS. Funziona sia con il sensore MTV011 che con il sensore MTV115.
 
+## Docker
+Questo codice e' stato testato fino a ROOT 6.20.08
+per usare una docker image con questa versione di ROOT:
+`docker pull carlomt/cmos`
+e per eseguirla:
+`docker run -it --rm --volume=PATH_LOCALE:/workdir/output  carlomt/cmos`
+avendo cura di sostituire PATH_LOCALE con il percorso di una directory sull'host in cui si vuole salvare l'output dell'analisi
+e di copiare da dentro la docker machine i file di output nella cartella /workdir/output
+il codice e' gia' presente in /workdir
+
 ## Come scaricare il codice:
 Per scaricare il codice andare nella cartella desiderata e lanciare il comando:
 
